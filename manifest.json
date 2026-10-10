@@ -1,0 +1,16 @@
+{
+  "name": "Sylhet Net Breakers",
+  "short_name": "Net Breakers",
+  "description": "Sylhet Net Breakers ক্লাবের জয় ও গোলের স্কোরবোর্ড",
+  "lang": "bn",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F151C",
+  "theme_color": "#0F151C",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
