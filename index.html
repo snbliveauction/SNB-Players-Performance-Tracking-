@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sylhet Net Breakers</title>
+<meta name="description" content="Sylhet Net Breakers ক্লাবের জয় ও গোলের স্কোরবোর্ড। সপ্তাহ ও মাসের সেরা প্লেয়ার।">
+<meta name="theme-color" content="#0F151C">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sylhet Net Breakers">
+<meta property="og:description" content="জয় ও গোলের স্কোরবোর্ড। সপ্তাহ ও মাসের সেরা প্লেয়ার।">
+<meta property="og:image" content="https://netbreakers.pages.dev/og.png">
+<meta property="og:url" content="https://netbreakers.pages.dev/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;700;800&family=Barlow+Condensed:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap">
+<style>
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+
+/* Layout: one column scoreboard, 760px max, dark single look taken from the club crest
+   (ink navy, aqua, lime, cream). Header carries the crest. The leaderboard opens on a
+   striped-pitch hero for the period's best player with a social card button, then a ranked
+   list (wins first, goals break ties). Weeks run Saturday to Friday. */
+:root {
+  color-scheme: dark;
+  --bg: #0F151C;
+  --bg-deep: #0B1117;
+  --surface: #161E27;
+  --surface-2: #1C2631;
+  --line: #2A3644;
+  --line-2: #3A4A5C;
+  --ink: #ECE8D3;
+  --muted: #94A4B1;
+  --aqua: #7CC8CF;
+  --aqua-ink: #08262A;
+  --aqua-soft: #15323A;
+  --lime: #A8CB45;
+  --lime-soft: #232E17;
+  --danger: #FF8F85;
+  --danger-soft: #3A1F1F;
+  --scrim: rgba(4, 8, 12, 0.74);
+  --av-bg-l: 24%;
+  --av-fg-l: 78%;
+  --f-display: 'Anek Bangla', 'Hind Siliguri', system-ui, sans-serif;
+  --f-body: 'Hind Siliguri', 'Anek Bangla', system-ui, sans-serif;
+  --f-num: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding-inline: 16px;
+  padding-block: 20px 56px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+h1, h2, h3, p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--aqua); outline-offset: 2px; }
+.wrap { max-width: 760px; margin-inline: auto; display: flex; flex-direction: column; gap: 18px; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.muted { color: var(--muted); }
+.full { width: 100%; }
+.small { font-size: 14px; }
+.ic { display: inline-flex; }
+.ic svg { width: 20px; height: 20px; }
+
+/* header */
+.top { display: flex; flex-direction: column; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.logo { flex: none; width: 68px; height: 68px; display: block; }
+.brand-text { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.city { font-family: var(--f-num); font-weight: 700; font-size: 15px; letter-spacing: 0.32em; color: var(--lime); line-height: 1.1; }
+.brand h1 { font-family: var(--f-num); font-weight: 800; font-size: 36px; line-height: 1; letter-spacing: 0.02em; color: var(--ink); text-transform: uppercase; }
+.eyebrow { font-size: 13px; letter-spacing: 0.03em; color: var(--muted); margin-top: 3px; }
+.role { flex: none; align-self: flex-start; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 13px; color: var(--muted); }
+.role .who { color: var(--aqua); }
+.link-btn { background: none; border: 0; padding: 4px 2px; color: var(--muted); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+
+.tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+.tab { background: none; border: 0; border-bottom: 3px solid transparent; padding: 10px 4px 9px; font-family: var(--f-display); font-weight: 700; font-size: 16px; color: var(--muted); margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--aqua); }
+
+/* controls */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 18px; border-radius: 10px; border: 1px solid transparent; background: var(--aqua); color: var(--aqua-ink); font-family: var(--f-display); font-weight: 700; font-size: 16px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.ghost { background: transparent; border-color: var(--line-2); color: var(--ink); }
+.btn.danger { background: var(--danger-soft); color: var(--danger); }
+.btn.danger-solid { background: var(--danger); color: var(--bg-deep); }
+.btn.lime { background: var(--lime); color: #1A2406; }
+.btn.sm { min-height: 36px; padding: 4px 12px; font-size: 14px; }
+.btn.block { width: 100%; }
+input[type="text"], input[type="date"] {
+  width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line-2);
+  background: var(--surface-2); color: var(--ink); font: inherit; font-size: 16px;
+}
+label.field { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+label.btn:focus-within { outline: 2px solid var(--aqua); outline-offset: 2px; }
+
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.seg button { background: none; border: 0; padding: 8px 16px; min-height: 40px; font-family: var(--f-display); font-weight: 700; font-size: 15px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg-deep); }
+.periodbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.stepper { display: inline-flex; align-items: center; gap: 4px; }
+.iconbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--surface); display: grid; place-items: center; }
+.iconbtn:disabled { opacity: 0.3; cursor: not-allowed; }
+.steplabel { min-width: 110px; text-align: center; font-size: 14px; color: var(--muted); }
+
+/* avatar */
+.av { --s: 44px; --h: 185; flex: none; width: var(--s); height: var(--s); border-radius: calc(var(--s) * 0.26); overflow: hidden; display: grid; place-items: center;
+  background: hsl(var(--h) 30% var(--av-bg-l)); color: hsl(var(--h) 45% var(--av-fg-l)); font-family: var(--f-display); font-weight: 800; font-size: calc(var(--s) * 0.42); line-height: 1; }
+.av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* hero */
+.hero { position: relative; overflow: hidden; border-radius: 18px; padding: 18px; border: 1px solid var(--line-2); border-top: 3px solid var(--lime); display: flex; flex-direction: column; gap: 14px;
+  background: radial-gradient(120% 90% at 100% 0%, rgba(124, 200, 207, 0.16), transparent 55%), repeating-linear-gradient(90deg, #141C26 0 44px, #111821 44px 88px); }
+.kicker { font-family: var(--f-display); font-size: 14px; letter-spacing: 0.04em; font-weight: 700; color: var(--lime); }
+.hero-main { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.faces { display: flex; }
+.faces .av { box-shadow: 0 0 0 3px var(--lime); }
+.faces .av + .av { margin-left: -18px; }
+.hero-info { min-width: 0; flex: 1 1 180px; display: flex; flex-direction: column; gap: 2px; }
+.hero h2 { font-family: var(--f-display); font-weight: 800; font-size: 30px; line-height: 1.2; overflow-wrap: anywhere; text-wrap: balance; }
+.hero .range { font-size: 14px; color: var(--muted); }
+.hero-stats { display: flex; gap: 32px; }
+.hero-stats div { display: flex; align-items: baseline; gap: 8px; }
+.hero-stats b { font-family: var(--f-num); font-weight: 800; font-size: 60px; line-height: 0.9; font-variant-numeric: tabular-nums; }
+.hero-stats div:first-child b { color: var(--lime); }
+.hero-stats div:last-child b { color: var(--aqua); }
+.hero-stats span { font-size: 15px; color: var(--muted); }
+.hero-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero.empty { gap: 10px; }
+.hero.empty h2 { font-size: 22px; }
+
+/* ranked list */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.list { overflow: hidden; }
+.lhead, .row { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) 42px 42px; gap: 12px; align-items: center; padding: 10px 14px; }
+.lhead { font-size: 12px; letter-spacing: 0.05em; color: var(--muted); background: var(--surface-2); border-bottom: 1px solid var(--line); }
+.lhead span:nth-child(n+4) { text-align: right; }
+.row { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); }
+.row:last-child { border-bottom: 0; }
+.row:hover { background: var(--surface-2); }
+.rank { font-family: var(--f-num); font-weight: 700; font-size: 24px; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row.first .rank { color: var(--lime); background: var(--lime-soft); border-radius: 8px; line-height: 30px; }
+.nm { min-width: 0; }
+.nm strong { display: block; font-family: var(--f-display); font-weight: 700; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+.nm .bar { height: 4px; border-radius: 2px; background: var(--line); margin-top: 6px; }
+.nm .bar i { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--aqua), var(--lime)); }
+.num { font-family: var(--f-num); font-weight: 700; font-size: 26px; text-align: right; line-height: 1; font-variant-numeric: tabular-nums; }
+.num.dim { color: var(--muted); }
+
+/* forms */
+.panel { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.panel h2, .sheet h2 { font-family: var(--f-display); font-weight: 800; font-size: 20px; line-height: 1.3; }
+.chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.chip { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); text-align: left; min-width: 0; }
+.chip span.t { min-width: 0; overflow-wrap: anywhere; font-weight: 500; line-height: 1.3; }
+.chip[aria-pressed="true"] { border-color: var(--aqua); background: var(--aqua-soft); box-shadow: inset 0 0 0 1px var(--aqua); }
+.goalrow { display: flex; align-items: center; gap: 14px; }
+.goalnum { font-family: var(--f-num); font-weight: 800; font-size: 56px; line-height: 1; min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; color: var(--lime); }
+.goalrow .iconbtn { width: 48px; height: 48px; }
+.fieldlbl { font-size: 14px; color: var(--muted); display: block; margin-bottom: 8px; }
+
+.recent { display: flex; flex-direction: column; }
+.item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item .grow { flex: 1; min-width: 0; }
+.item .grow strong { font-family: var(--f-display); font-weight: 700; overflow-wrap: anywhere; display: block; line-height: 1.3; }
+.item .grow span { font-size: 14px; color: var(--muted); }
+.goalpill { font-size: 14px; font-weight: 600; padding: 2px 10px; white-space: nowrap; border-radius: 8px; background: var(--aqua-soft); color: var(--aqua); }
+.h3 { font-family: var(--f-display); font-weight: 700; font-size: 17px; }
+.cardhead { padding: 14px 14px 4px; }
+
+/* players grid */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.pcard { padding: 0; overflow: hidden; text-align: left; display: flex; flex-direction: column; min-width: 0; }
+.pcard .av { --s: 100%; width: 100%; height: auto; aspect-ratio: 1; border-radius: 0; font-size: 56px; }
+.pinfo { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pinfo strong { font-family: var(--f-display); font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.pinfo span { font-size: 14px; color: var(--muted); }
+.pcard.add { border-style: dashed; border-color: var(--line-2); align-items: center; justify-content: center; gap: 8px; min-height: 190px; padding: 16px; text-align: center; background: transparent; color: var(--aqua); font-family: var(--f-display); font-weight: 700; }
+.pcard.add .plus { width: 44px; height: 44px; border-radius: 50%; background: var(--aqua); color: var(--aqua-ink); display: grid; place-items: center; }
+
+/* sheet */
+.scrim { position: fixed; inset: 0; background: var(--scrim); display: flex; align-items: flex-end; justify-content: center; z-index: 20; }
+.sheet { background: var(--surface); color: var(--ink); border: 1px solid var(--line-2); width: min(560px, 100%); max-height: 92%; overflow: auto; border-radius: 18px 18px 0 0; padding: 18px 16px calc(24px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 640px) { .scrim { align-items: center; padding: 16px; } .sheet { border-radius: 18px; max-height: 90%; } }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.pro { display: flex; gap: 16px; align-items: center; }
+.pro .av { --s: 104px; }
+.pro h2 { font-size: 24px; overflow-wrap: anywhere; }
+.pro .no { font-family: var(--f-num); font-weight: 700; font-size: 22px; color: var(--muted); }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th, .tbl td { padding: 8px 6px; border-bottom: 1px solid var(--line); text-align: right; }
+.tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-size: 12px; letter-spacing: 0.05em; color: var(--muted); font-weight: 600; }
+.tbl td.n { font-family: var(--f-num); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.photorow { display: flex; align-items: center; gap: 14px; }
+.photorow .av { --s: 88px; }
+.form { display: flex; flex-direction: column; gap: 14px; }
+.preview { display: grid; place-items: center; min-height: 160px; background: var(--bg-deep); border-radius: 12px; padding: 12px; }
+.preview img { display: block; max-width: 100%; max-height: 62vh; width: auto; height: auto; border-radius: 8px; }
+
+.notice { padding: 14px 16px; border-radius: 12px; background: var(--lime-soft); color: var(--lime); font-size: 15px; }
+.emptybox { padding: 28px 18px; text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.emptybox h2 { font-family: var(--f-display); font-weight: 800; font-size: 20px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 10px; background: var(--ink); color: var(--bg-deep); font-size: 15px; z-index: 30; }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: pop 0.18s ease-out; }
+  @keyframes pop { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+}
+@media (max-width: 420px) {
+  .lhead, .row { gap: 10px; padding-inline: 10px; grid-template-columns: 26px 40px minmax(0, 1fr) 36px 36px; }
+  .row .av { --s: 40px; }
+  .hero h2 { font-size: 25px; }
+  .hero-stats b { font-size: 50px; }
+  .brand h1 { font-size: 30px; }
+  .logo { width: 58px; height: 58px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img class="logo" id="logo" alt="Sylhet Net Breakers লোগো" width="68" height="68">
+      <div class="brand-text">
+        <p class="city">SYLHET</p>
+        <h1>Net Breakers</h1>
+        <p class="eyebrow">জয় ও গোলের হিসাব</p>
+      </div>
+      <span class="role" id="role"></span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="বিভাগ" id="tabs"></nav>
+  </header>
+  <main id="view" aria-live="polite"></main>
+</div>
+<div class="scrim" id="scrim" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" tabindex="-1"></div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  'use strict';
+  var LOGO = 'logo.webp';
+  var fmtDay = new Intl.DateTimeFormat('bn-BD', { day: 'numeric', month: 'short' });
+  var fmtDayW = new Intl.DateTimeFormat('bn-BD', { weekday: 'short', day: 'numeric', month: 'short' });
+  var fmtMonth = new Intl.DateTimeFormat('bn-BD', { month: 'long', year: 'numeric' });
+
+  var ICONS = {
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+    right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"/></svg>',
+    camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>'
+  };
+
+  function h(tag, attrs) {
+    var e = document.createElement(tag);
+    var a = attrs || {};
+    Object.keys(a).forEach(function (k) {
+      var v = a[k];
+      if (v == null || v === false) return;
+      if (k === 'class') e.className = v;
+      else if (k.indexOf('on') === 0) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? '' : v);
+    });
+    for (var i = 2; i < arguments.length; i++) add(e, arguments[i]);
+    return e;
+  }
+  function add(e, k) {
+    if (k == null || k === false) return;
+    if (Array.isArray(k)) { k.forEach(function (x) { add(e, x); }); return; }
+    e.append(k.nodeType ? k : document.createTextNode(String(k)));
+  }
+  function icon(n) {
+    var s = document.createElement('span');
+    s.className = 'ic';
+    s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = ICONS[n];
+    return s;
+  }
+  function $(s) { return document.querySelector(s); }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function dateStr(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function dateToTs(s) {
+    var p = s.split('-').map(Number);
+    return new Date(p[0], p[1] - 1, p[2], 12).getTime();
+  }
+
+  var S = {
+    tab: 'board', period: 'week', offset: 0,
+    players: new Map(), wins: [],
+    db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
+    pick: null, goals: 0, date: dateStr(new Date()), busy: false,
+    sheet: null, confirm: null, card: null,
+    draft: { name: '', number: '', photo: null, busy: false }
+  };
+
+  /* ---------- helpers ---------- */
+  function hue(name) {
+    var x = 0, s = name || '';
+    for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) % 360;
+    return x;
+  }
+  function initial(n) {
+    n = (n || '?').trim();
+    try {
+      var seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+      var it = seg.segment(n)[Symbol.iterator]().next();
+      if (!it.done) return it.value.segment.toUpperCase();
+    } catch (e) { /* fall through */ }
+    return Array.from(n)[0] || '?';
+  }
+  function avatar(p, size) {
+    var el = h('span', { class: 'av' });
+    el.style.setProperty('--h', hue(p.name));
+    if (size) el.style.setProperty('--s', size + 'px');
+    if (p.photo) el.append(h('img', { src: p.photo, alt: '' }));
+    else el.textContent = initial(p.name);
+    return el;
+  }
+  function range(period, offset) {
+    var now = new Date();
+    var start, end;
+    if (period === 'week') {
+      var d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var since = (d.getDay() + 1) % 7; /* Saturday = week start */
+      start = new Date(d); start.setDate(d.getDate() - since + offset * 7);
+      end = new Date(start); end.setDate(start.getDate() + 7);
+    } else if (period === 'month') {
+      start = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+      end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 1);
+    } else {
+      return { start: -Infinity, end: Infinity };
+    }
+    return { start: +start, end: +end };
+  }
+  function rangeLabel(period, offset) {
+    var r = range(period, offset);
+    if (period === 'week') return fmtDay.format(r.start) + ' – ' + fmtDay.format(r.end - 1) + ' (শনি–শুক্র)';
+    if (period === 'month') return fmtMonth.format(r.start);
+    return 'শুরু থেকে এখন পর্যন্ত';
+  }
+  function rangeLabelEn(period, offset) {
+    var r = range(period, offset);
+    if (period === 'all') return 'ALL TIME';
+    var a = new Date(r.start), b = new Date(r.end - 1);
+    var mon = function (d) { return d.toLocaleString('en-GB', { month: 'short' }).toUpperCase(); };
+    if (period === 'month') return d2(a.toLocaleString('en-GB', { month: 'long' }).toUpperCase()) + ' ' + a.getFullYear();
+    if (a.getMonth() === b.getMonth()) return a.getDate() + ' – ' + b.getDate() + ' ' + mon(b) + ' ' + b.getFullYear();
+    return a.getDate() + ' ' + mon(a) + ' – ' + b.getDate() + ' ' + mon(b) + ' ' + b.getFullYear();
+  }
+  function d2(s) { return s; }
+  function kicker(period, offset) {
+    var rel = offset === 0 ? 'এই ' : offset === -1 ? 'গত ' : '';
+    if (period === 'week') return rel + 'সপ্তাহের সেরা';
+    if (period === 'month') return rel + 'মাসের সেরা';
+    return 'সর্বকালের সেরা';
+  }
+  function ranking(start, end) {
+    var m = new Map();
+    S.wins.forEach(function (w) {
+      if (w.ts >= start && w.ts < end) {
+        var a = m.get(w.playerId) || { wins: 0, goals: 0 };
+        a.wins++; a.goals += (w.goals || 0);
+        m.set(w.playerId, a);
+      }
+    });
+    var rows = [];
+    S.players.forEach(function (p, id) {
+      var a = m.get(id) || { wins: 0, goals: 0 };
+      rows.push({ id: id, p: p, wins: a.wins, goals: a.goals });
+    });
+    rows.sort(function (a, b) {
+      return b.wins - a.wins || b.goals - a.goals || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
+    });
+    rows.forEach(function (r, i) {
+      var prev = rows[i - 1];
+      r.rank = prev && prev.wins === r.wins && prev.goals === r.goals ? prev.rank : i + 1;
+    });
+    return rows;
+  }
+  function toast(msg) {
+    var t = $('#toast');
+    t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.t);
+    toast.t = setTimeout(function () { t.hidden = true; }, 3000);
+  }
+  function writeFail(e) {
+    console.error(e);
+    var c = e && e.code;
+    if (c === 'permission-denied') { S.canWrite = false; toast('সেভ হয়নি। অ্যাডমিন হিসেবে লগইন করুন।'); }
+    else if (c === 'resource-exhausted') toast('আজকের ফ্রি সীমা শেষ। কিছুক্ষণ পরে চেষ্টা করুন।');
+    else toast('সেভ হয়নি, আবার চেষ্টা করুন।');
+    refresh();
+  }
+
+  /* ---------- header + tabs ---------- */
+  function renderHeader() {
+    var r = $('#role');
+    r.textContent = '';
+    r.className = 'role';
+    if (S.noDb) return;
+    if (S.user) {
+      r.append(h('span', { class: 'who' }, S.canWrite ? 'অ্যাডমিন' : 'অ্যাডমিন নন'),
+        h('button', { class: 'link-btn', onclick: logout }, 'লগআউট'));
+    } else {
+      r.append(h('button', { class: 'link-btn', onclick: login }, 'অ্যাডমিন লগইন'));
+    }
+  }
+  function renderTabs() {
+    var t = $('#tabs');
+    t.textContent = '';
+    var tabs = [['board', 'লিডারবোর্ড']];
+    if (S.canWrite) tabs.push(['add', 'জয় যোগ']);
+    tabs.push(['players', 'প্লেয়ার']);
+    tabs.forEach(function (x) {
+      t.append(h('button', {
+        class: 'tab', role: 'tab', 'aria-selected': S.tab === x[0] ? 'true' : 'false',
+        onclick: function () { S.tab = x[0]; S.confirm = null; renderTabs(); renderView(); }
+      }, x[1]));
+    });
+  }
+
+  /* ---------- leaderboard ---------- */
+  function periodBar() {
+    var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'সময়' });
+    [['week', 'সপ্তাহ'], ['month', 'মাস'], ['all', 'সব সময়']].forEach(function (x) {
+      seg.append(h('button', {
+        'aria-pressed': S.period === x[0] ? 'true' : 'false',
+        onclick: function () { S.period = x[0]; S.offset = 0; renderView(); }
+      }, x[1]));
+    });
+    var bar = h('div', { class: 'periodbar' }, seg);
+    if (S.period !== 'all') {
+      var prev = h('button', { class: 'iconbtn', 'aria-label': 'আগের সময়', onclick: function () { S.offset--; renderView(); } }, icon('left'));
+      var next = h('button', { class: 'iconbtn', 'aria-label': 'পরের সময়', disabled: S.offset >= 0, onclick: function () { S.offset++; renderView(); } }, icon('right'));
+      var lbl = S.period === 'week' ? (S.offset === 0 ? 'চলতি সপ্তাহ' : S.offset === -1 ? 'গত সপ্তাহ' : -S.offset + ' সপ্তাহ আগে')
+        : (S.offset === 0 ? 'চলতি মাস' : S.offset === -1 ? 'গত মাস' : -S.offset + ' মাস আগে');
+      bar.append(h('div', { class: 'stepper' }, prev, h('span', { class: 'steplabel' }, lbl), next));
+    }
+    return bar;
+  }
+  function hero(active) {
+    if (!S.players.size) {
+      var e = h('section', { class: 'hero empty' },
+        h('p', { class: 'kicker' }, 'শুরু করুন'),
+        h('h2', null, S.canWrite ? 'আগে ক্লাবের প্লেয়ারদের যোগ করুন' : 'এখনো কোনো প্লেয়ার যোগ হয়নি'));
+      if (S.canWrite) e.append(h('div', { class: 'hero-actions' }, h('button', { class: 'btn', onclick: function () { openSheet('new'); } }, 'প্লেয়ার যোগ করুন')));
+      return e;
+    }
+    if (!active.length) {
+      var e2 = h('section', { class: 'hero empty' },
+        h('p', { class: 'kicker' }, kicker(S.period, S.offset)),
+        h('h2', null, 'এই সময়ে এখনো কোনো জয় লেখা হয়নি'),
+        h('p', { class: 'range' }, rangeLabel(S.period, S.offset)));
+      if (S.canWrite) e2.append(h('div', { class: 'hero-actions' }, h('button', { class: 'btn', onclick: function () { S.tab = 'add'; renderTabs(); renderView(); } }, 'জয় যোগ করুন')));
+      return e2;
+    }
+    var top = active[0];
+    var leaders = active.filter(function (r) { return r.wins === top.wins && r.goals === top.goals; });
+    var faces = h('div', { class: 'faces' });
+    leaders.slice(0, 4).forEach(function (r) { faces.append(avatar(r.p, leaders.length === 1 ? 112 : 72)); });
+    var names = leaders.map(function (r) { return r.p.name; }).join(' ও ');
+    return h('section', { class: 'hero' },
+      h('p', { class: 'kicker' }, (leaders.length > 1 ? 'যুগ্ম ' : '') + kicker(S.period, S.offset)),
+      h('div', { class: 'hero-main' }, faces,
+        h('div', { class: 'hero-info' }, h('h2', null, names), h('p', { class: 'range' }, rangeLabel(S.period, S.offset)))),
+      h('div', { class: 'hero-stats' },
+        h('div', null, h('b', null, String(top.wins)), h('span', null, 'জয়')),
+        h('div', null, h('b', null, String(top.goals)), h('span', null, 'গোল'))),
+      h('div', { class: 'hero-actions' },
+        h('button', { class: 'btn', onclick: function () { openCard(leaders); } }, icon('down'), 'সোশ্যাল মিডিয়া কার্ড')));
+  }
+  function viewBoard() {
+    var r = range(S.period, S.offset);
+    var rows = ranking(r.start, r.end);
+    var active = rows.filter(function (x) { return x.wins > 0; });
+    var root = h('div', { class: 'stack' }, periodBar(), hero(active));
+    if (active.length) {
+      var max = active[0].wins;
+      var list = h('div', { class: 'card list' },
+        h('div', { class: 'lhead', 'aria-hidden': 'true' }, h('span', null, '#'), h('span'), h('span', null, 'প্লেয়ার'), h('span', null, 'জয়'), h('span', null, 'গোল')));
+      active.forEach(function (x) {
+        var bar = h('div', { class: 'bar' }, h('i'));
+        bar.firstChild.style.width = Math.round(x.wins / max * 100) + '%';
+        list.append(h('button', { class: 'row' + (x.rank === 1 ? ' first' : ''), onclick: function () { openSheet('profile', x.id); } },
+          h('span', { class: 'rank' }, String(x.rank)), avatar(x.p),
+          h('div', { class: 'nm' }, h('strong', null, x.p.name), bar),
+          h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num dim' }, String(x.goals))));
+      });
+      root.append(list);
+      var idle = rows.length - active.length;
+      if (idle > 0) root.append(h('p', { class: 'muted small' }, 'আরও ' + idle + ' জন প্লেয়ারের এই সময়ে কোনো জয় নেই।'));
+    }
+    return root;
+  }
+
+  /* ---------- add win (admins) ---------- */
+  function winItem(w, showPlayer) {
+    var p = S.players.get(w.playerId);
+    if (!p) return null;
+    var key = 'win:' + w.id;
+    var right;
+    if (!S.canWrite) right = null;
+    else if (S.confirm === key) {
+      right = h('div', { class: 'actions' },
+        h('button', { class: 'btn sm danger-solid', onclick: function () { removeWin(w.id); } }, 'মুছুন'),
+        h('button', { class: 'btn sm ghost', onclick: function () { S.confirm = null; refresh(); } }, 'থাক'));
+    } else {
+      right = h('button', { class: 'iconbtn', 'aria-label': 'এই জয় মুছুন', onclick: function () { S.confirm = key; refresh(); } }, icon('trash'));
+    }
+    return h('div', { class: 'item' },
+      showPlayer ? avatar(p, 40) : null,
+      h('div', { class: 'grow' }, showPlayer ? h('strong', null, p.name) : null, h('span', null, fmtDayW.format(w.ts))),
+      h('span', { class: 'goalpill', title: 'গোল' }, w.goals + ' গোল'),
+      right);
+  }
+  function viewAdd() {
+    if (!S.canWrite) return h('div', { class: 'notice' }, 'জয় যোগ করতে পারে শুধু অ্যাডমিনরা।');
+    if (!S.players.size) {
+      return h('div', { class: 'card emptybox' }, h('h2', null, 'জয় লেখার আগে প্লেয়ার লাগবে'),
+        h('button', { class: 'btn', onclick: function () { openSheet('new'); } }, 'প্লেয়ার যোগ করুন'));
+    }
+    var chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'প্লেয়ার বাছুন' });
+    sortedPlayers().forEach(function (e) {
+      chips.append(h('button', { class: 'chip', 'aria-pressed': S.pick === e[0] ? 'true' : 'false', onclick: function () { S.pick = e[0]; renderView(); } },
+        avatar(e[1], 44), h('span', { class: 't' }, e[1].name)));
+    });
+    var dateIn = h('input', { type: 'date', id: 'winDate', value: S.date, max: dateStr(new Date()), 'aria-label': 'তারিখ',
+      onchange: function (ev) { if (ev.target.value) S.date = ev.target.value; } });
+    var form = h('section', { class: 'card panel' },
+      h('h2', null, 'কে জিতল?'), chips,
+      h('div', null, h('span', { class: 'fieldlbl' }, 'গোল'),
+        h('div', { class: 'goalrow' },
+          h('button', { class: 'iconbtn', 'aria-label': 'গোল কমান', disabled: S.goals <= 0, onclick: function () { S.goals = Math.max(0, S.goals - 1); renderView(); } }, icon('minus')),
+          h('span', { class: 'goalnum', 'aria-live': 'polite' }, String(S.goals)),
+          h('button', { class: 'iconbtn', 'aria-label': 'গোল বাড়ান', disabled: S.goals >= 30, onclick: function () { S.goals = Math.min(30, S.goals + 1); renderView(); } }, icon('plus')))),
+      h('label', { class: 'field' }, 'তারিখ', dateIn),
+      h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : 'জয় যোগ করুন'));
+    var root = h('div', { class: 'stack' }, form);
+    var recent = S.wins.slice().sort(function (a, b) { return b.ts - a.ts || b.createdAt - a.createdAt; }).slice(0, 8);
+    if (recent.length) {
+      root.append(h('div', { class: 'card' }, h('div', { class: 'cardhead' }, h('h3', { class: 'h3' }, 'সাম্প্রতিক জয়')),
+        h('div', { class: 'recent' }, recent.map(function (w) { return winItem(w, true); }))));
+    }
+    return root;
+  }
+  function monthKey(ts) { var d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth() + 1); }
+  async function addWin() {
+    if (!S.pick || S.busy || !S.db) return;
+    S.busy = true; renderView();
+    try {
+      var ts = dateToTs(S.date);
+      var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      var entry = { id: id, playerId: S.pick, goals: S.goals, ts: ts, createdAt: Date.now() };
+      await S.db.doc('months/' + monthKey(ts)).set({ entries: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
+      var p = S.players.get(S.pick);
+      toast((p ? p.name : 'প্লেয়ার') + '-এর জয় যোগ হয়েছে' + (S.goals ? ' · ' + S.goals + ' গোল' : ''));
+      S.pick = null; S.goals = 0;
+    } catch (e) { writeFail(e); }
+    S.busy = false; renderView();
+  }
+  async function removeWin(id) {
+    S.confirm = null;
+    var w = S.wins.filter(function (x) { return x.id === id; })[0];
+    if (!w) return;
+    try {
+      await S.db.doc('months/' + w.month).update({ entries: firebase.firestore.FieldValue.arrayRemove(w.raw) });
+      toast('জয়টি মুছে ফেলা হয়েছে');
+    } catch (e) { writeFail(e); }
+  }
+
+  /* ---------- players ---------- */
+  function sortedPlayers() {
+    return Array.from(S.players.entries()).sort(function (a, b) { return (a[1].name || '').localeCompare(b[1].name || '', 'bn'); });
+  }
+  function viewPlayers() {
+    var all = ranking(-Infinity, Infinity);
+    var byId = {}; all.forEach(function (r) { byId[r.id] = r; });
+    var grid = h('div', { class: 'pgrid' });
+    if (S.canWrite) {
+      var plus = h('span', { class: 'plus' }); plus.append(icon('plus'));
+      grid.append(h('button', { class: 'card pcard add', onclick: function () { openSheet('new'); } }, plus, 'নতুন প্লেয়ার'));
+    }
+    sortedPlayers().forEach(function (e) {
+      var st = byId[e[0]] || { wins: 0, goals: 0 };
+      grid.append(h('button', { class: 'card pcard', onclick: function () { openSheet('profile', e[0]); } },
+        avatar(e[1]),
+        h('div', { class: 'pinfo' },
+          h('strong', null, e[1].name),
+          h('span', null, (e[1].number ? '#' + e[1].number + ' · ' : '') + st.wins + ' জয় · ' + st.goals + ' গোল'))));
+    });
+    return h('div', { class: 'stack' }, grid,
+      !S.players.size && !S.canWrite ? h('p', { class: 'muted' }, 'এখনো কোনো প্লেয়ার যোগ হয়নি।') : null);
+  }
+
+  /* ---------- sheet ---------- */
+  function openSheet(mode, id) {
+    S.sheet = { mode: mode, id: id || null };
+    S.confirm = null;
+    if (mode === 'new') S.draft = { name: '', number: '', photo: null, busy: false };
+    renderSheet();
+    $('#scrim').hidden = false;
+    setTimeout(function () { var s = $('#sheet'); s.scrollTop = 0; s.focus(); }, 0);
+  }
+  function closeSheet() {
+    if (S.card && S.card.url) { try { URL.revokeObjectURL(S.card.url); } catch (e) { /* ignore */ } }
+    S.card = null; S.sheet = null; S.confirm = null; $('#scrim').hidden = true;
+  }
+  function statsFor(id, period) {
+    var r = range(period, 0), wins = 0, goals = 0;
+    S.wins.forEach(function (w) { if (w.playerId === id && w.ts >= r.start && w.ts < r.end) { wins++; goals += w.goals || 0; } });
+    return { wins: wins, goals: goals };
+  }
+  function renderSheet() {
+    var sh = $('#sheet');
+    sh.textContent = '';
+    if (!S.sheet) return;
+    var m = S.sheet.mode;
+    var closeBtn = h('button', { class: 'iconbtn', 'aria-label': 'বন্ধ করুন', onclick: closeSheet }, icon('close'));
+    if (m === 'card') { sh.append(cardSheet(closeBtn)); return; }
+    if (m === 'new' || m === 'edit') { sh.append(formSheet(m, closeBtn)); return; }
+    var id = S.sheet.id, p = S.players.get(id);
+    if (!p) { closeSheet(); return; }
+    var head = h('div', { class: 'sheet-head' }, h('p', { class: 'eyebrow' }, 'প্লেয়ার প্রোফাইল'), closeBtn);
+    var pro = h('div', { class: 'pro' }, avatar(p, 104),
+      h('div', null, h('h2', null, p.name), p.number ? h('p', { class: 'no' }, '#' + p.number) : null));
+    var tbl = h('table', { class: 'tbl' },
+      h('thead', null, h('tr', null, h('th', null, 'সময়'), h('th', null, 'জয়'), h('th', null, 'গোল'))),
+      h('tbody', null, [['এই সপ্তাহ', 'week'], ['এই মাস', 'month'], ['সব সময়', 'all']].map(function (x) {
+        var s = statsFor(id, x[1]);
+        return h('tr', null, h('td', null, x[0]), h('td', { class: 'n' }, String(s.wins)), h('td', { class: 'n' }, String(s.goals)));
+      })));
+    var wins = S.wins.filter(function (w) { return w.playerId === id; }).sort(function (a, b) { return b.ts - a.ts; }).slice(0, 15);
+    var hist = h('div', null, h('h3', { class: 'h3' }, 'জয়ের তালিকা'));
+    if (wins.length) hist.append(h('div', { class: 'recent' }, wins.map(function (w) { return winItem(w, false); })));
+    else hist.append(h('p', { class: 'muted small' }, 'এখনো কোনো জয় লেখা হয়নি।'));
+    sh.append(head, pro, tbl, hist);
+    if (S.canWrite) {
+      var key = 'player:' + id, act = h('div', { class: 'actions' });
+      if (S.confirm === key) {
+        act.append(h('p', { class: 'small full' }, 'এই প্লেয়ার ও তার সব জয়ের হিসাব মুছে যাবে।'),
+          h('button', { class: 'btn danger-solid', onclick: function () { deletePlayer(id); } }, 'হ্যাঁ, মুছুন'),
+          h('button', { class: 'btn ghost', onclick: function () { S.confirm = null; renderSheet(); } }, 'থাক'));
+      } else {
+        act.append(h('button', { class: 'btn', onclick: function () { S.draft = { name: p.name || '', number: p.number || '', photo: p.photo || null, busy: false }; S.sheet = { mode: 'edit', id: id }; renderSheet(); } }, 'এডিট'),
+          h('button', { class: 'btn danger', onclick: function () { S.confirm = key; renderSheet(); } }, 'প্লেয়ার মুছুন'));
+      }
+      sh.append(act);
+    }
+  }
+  function formSheet(mode, closeBtn) {
+    var d = S.draft;
+    var wrap = h('div', { class: 'form' });
+    wrap.append(h('div', { class: 'sheet-head' }, h('h2', null, mode === 'new' ? 'নতুন প্লেয়ার' : 'প্লেয়ার এডিট'), closeBtn));
+    var prev = avatar({ name: d.name || '?', photo: d.photo }, 88);
+    var file = h('input', { type: 'file', accept: 'image/*', id: 'photoIn', class: 'vh', onchange: onPhoto });
+    wrap.append(h('div', { class: 'photorow' }, prev,
+      h('label', { class: 'btn ghost' }, icon('camera'), d.photo ? 'ছবি বদলান' : 'ছবি বাছুন', file)));
+    wrap.append(h('label', { class: 'field' }, 'নাম',
+      h('input', { type: 'text', id: 'pName', maxlength: '40', value: d.name, autocomplete: 'off', oninput: function (e) { S.draft.name = e.target.value; } })));
+    wrap.append(h('label', { class: 'field' }, 'জার্সি নম্বর (ঐচ্ছিক)',
+      h('input', { type: 'text', id: 'pNum', inputmode: 'numeric', maxlength: '3', value: d.number, autocomplete: 'off', oninput: function (e) { S.draft.number = e.target.value.replace(/\D/g, ''); } })));
+    wrap.append(h('div', { class: 'actions' },
+      h('button', { class: 'btn', disabled: d.busy, onclick: savePlayer }, d.busy ? 'সেভ হচ্ছে…' : 'সেভ করুন'),
+      h('button', { class: 'btn ghost', onclick: function () { if (mode === 'edit') { S.sheet = { mode: 'profile', id: S.sheet.id }; renderSheet(); } else closeSheet(); } }, 'বাতিল')));
+    return wrap;
+  }
+  function thumb(file, size) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onerror = function () { rej(new Error('read')); };
+      fr.onload = function () {
+        var img = new Image();
+        img.onerror = function () { rej(new Error('image')); };
+        img.onload = function () {
+          var c = document.createElement('canvas'); c.width = c.height = size;
+          var s = Math.min(img.width, img.height);
+          var sx = (img.width - s) / 2, sy = (img.height - s) * 0.3;
+          c.getContext('2d').drawImage(img, sx, sy, s, s, 0, 0, size, size);
+          res(c.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  async function onPhoto(ev) {
+    var f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    try { S.draft.photo = await thumb(f, 400); renderSheet(); }
+    catch (e) { toast('ছবিটি পড়া যায়নি, অন্য ছবি বাছুন।'); }
+  }
+  async function savePlayer() {
+    var d = S.draft, name = d.name.trim();
+    if (!name) { toast('নাম লিখুন'); var n = $('#pName'); if (n) n.focus(); return; }
+    if (!S.db) return;
+    d.busy = true; renderSheet();
+    try {
+      var data = { name: name, number: d.number.trim(), photo: d.photo || null };
+      if (S.sheet.mode === 'new') {
+        data.createdAt = Date.now();
+        await S.db.collection('players').add(data);
+        toast(name + ' যোগ হয়েছে');
+        closeSheet();
+      } else {
+        var id = S.sheet.id;
+        await S.db.doc('players/' + id).update(data);
+        S.sheet = { mode: 'profile', id: id };
+        renderSheet();
+      }
+    } catch (e) { d.busy = false; if (S.sheet) renderSheet(); writeFail(e); }
+  }
+  async function deletePlayer(id) {
+    try {
+      var months = {};
+      S.wins.forEach(function (w) { if (w.playerId === id) months[w.month] = true; });
+      var batch = S.db.batch();
+      Object.keys(months).forEach(function (m) {
+        var keep = S.wins.filter(function (w) { return w.month === m && w.playerId !== id; }).map(function (w) { return w.raw; });
+        batch.set(S.db.doc('months/' + m), { entries: keep });
+      });
+      batch.delete(S.db.doc('players/' + id));
+      await batch.commit();
+      toast('প্লেয়ার মুছে ফেলা হয়েছে');
+      closeSheet();
+    } catch (e) { writeFail(e); }
+  }
+
+  /* ---------- social card ---------- */
+  function loadImg(src) {
+    return new Promise(function (res, rej) {
+      var i = new Image();
+      i.onload = function () { res(i); };
+      i.onerror = function () { rej(new Error('img')); };
+      i.src = src;
+    });
+  }
+  function ensureFonts() {
+    var f = ['800 80px "Barlow Condensed"', '700 40px "Barlow Condensed"', '800 60px "Anek Bangla"', '500 40px "Hind Siliguri"'];
+    return Promise.all(f.map(function (x) { return document.fonts.load(x, 'Aa অআ'); })).catch(function () { /* fallback fonts */ });
+  }
+  function rr(x, px, py, w, hh, r) {
+    x.beginPath();
+    x.moveTo(px + r, py);
+    x.arcTo(px + w, py, px + w, py + hh, r);
+    x.arcTo(px + w, py + hh, px, py + hh, r);
+    x.arcTo(px, py + hh, px, py, r);
+    x.arcTo(px, py, px + w, py, r);
+    x.closePath();
+  }
+  function bolt(x, cx, cy, sc, rot, alpha) {
+    x.save();
+    x.translate(cx, cy); x.rotate(rot); x.scale(sc, sc);
+    x.beginPath();
+    x.moveTo(60, 0); x.lineTo(10, 110); x.lineTo(45, 110); x.lineTo(25, 200); x.lineTo(90, 80); x.lineTo(52, 80); x.lineTo(80, 0);
+    x.closePath();
+    x.fillStyle = 'rgba(168,203,69,' + alpha + ')';
+    x.fill();
+    x.restore();
+  }
+  function fitFont(x, txt, maxW, start, weight, family) {
+    var px = start;
+    x.font = weight + ' ' + px + 'px ' + family;
+    while (x.measureText(txt).width > maxW && px > 30) { px -= 2; x.font = weight + ' ' + px + 'px ' + family; }
+    return px;
+  }
+  async function drawCard(card) {
+    var story = card.fmt === 'story';
+    var W = 1080, H = story ? 1920 : 1350;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var x = cv.getContext('2d');
+    var L = card.leaders[card.idx];
+    var NUM = '"Barlow Condensed","Arial Narrow",sans-serif';
+    var BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
+
+    var g = x.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#0B1117'); g.addColorStop(0.5, '#111A23'); g.addColorStop(1, '#0B1117');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    for (var i = 0; i < W; i += 88) { x.fillStyle = 'rgba(255,255,255,0.02)'; x.fillRect(i, 0, 44, H); }
+    var rg = x.createRadialGradient(W / 2, H * 0.45, 40, W / 2, H * 0.45, W * 0.8);
+    rg.addColorStop(0, 'rgba(124,200,207,0.20)'); rg.addColorStop(1, 'rgba(124,200,207,0)');
+    x.fillStyle = rg; x.fillRect(0, 0, W, H);
+    bolt(x, 40, H * 0.46, 1.9, -0.25, 0.16);
+    bolt(x, W - 40, H * 0.30, 1.6, 0.3, 0.12);
+    x.fillStyle = '#A8CB45'; x.fillRect(0, 0, W, 10);
+
+    var logoSize = story ? 420 : 300, logoY = story ? 100 : 36;
+    try { var logo = await loadImg(LOGO); x.drawImage(logo, (W - logoSize) / 2, logoY, logoSize, logoSize); } catch (e) { /* skip logo */ }
+
+    var kY = story ? 660 : 436, rY = story ? 728 : 492;
+    var P = story ? 620 : 450, pY = story ? 800 : 536;
+    var nY = story ? 1520 : 1066, sY = story ? 1708 : 1214, lY = story ? 1766 : 1264;
+    x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+    if ('letterSpacing' in x) x.letterSpacing = '4px';
+    x.fillStyle = '#7CC8CF';
+    fitFont(x, card.title, 940, story ? 108 : 96, 800, NUM);
+    x.fillText(card.title, W / 2, kY);
+    x.fillStyle = '#ECE8D3';
+    fitFont(x, card.rangeTxt, 900, story ? 44 : 40, 600, NUM);
+    x.fillText(card.rangeTxt, W / 2, rY);
+    if ('letterSpacing' in x) x.letterSpacing = '0px';
+
+    var px0 = (W - P) / 2;
+    x.save(); rr(x, px0, pY, P, P, 44); x.clip();
+    if (L.photo) {
+      try { var im = await loadImg(L.photo); x.drawImage(im, px0, pY, P, P); }
+      catch (e) { x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P); }
+    } else {
+      x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P);
+      x.fillStyle = '#7CC8CF'; x.font = '800 ' + Math.round(P * 0.5) + 'px ' + BN;
+      x.textBaseline = 'middle'; x.fillText(initial(L.name), W / 2, pY + P / 2 + 8); x.textBaseline = 'alphabetic';
+    }
+    x.restore();
+    rr(x, px0, pY, P, P, 44); x.lineWidth = 10; x.strokeStyle = '#A8CB45'; x.stroke();
+
+    x.fillStyle = '#ECE8D3';
+    fitFont(x, L.name, 900, story ? 96 : 84, 800, BN);
+    x.fillText(L.name, W / 2, nY);
+
+    var cx1 = W * 0.3, cx2 = W * 0.7;
+    x.fillStyle = '#A8CB45'; x.font = '800 ' + (story ? 170 : 140) + 'px ' + NUM; x.fillText(String(L.wins), cx1, sY);
+    x.fillStyle = '#7CC8CF'; x.fillText(String(L.goals), cx2, sY);
+    x.fillStyle = '#94A4B1'; x.font = '700 ' + (story ? 44 : 38) + 'px ' + NUM;
+    if ('letterSpacing' in x) x.letterSpacing = '6px';
+    x.fillText(L.wins === 1 ? 'WIN' : 'WINS', cx1, lY);
+    x.fillText(L.goals === 1 ? 'GOAL' : 'GOALS', cx2, lY);
+    if ('letterSpacing' in x) x.letterSpacing = '0px';
+    x.fillStyle = '#3A4A5C'; x.fillRect(W / 2 - 1.5, sY - (story ? 120 : 100), 3, story ? 160 : 140);
+
+    return new Promise(function (res, rej) {
+      cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png');
+    });
+  }
+  function openCard(leaders) {
+    var title = S.period === 'week' ? 'PLAYER OF THE WEEK' : S.period === 'month' ? 'PLAYER OF THE MONTH' : 'ALL-TIME BEST';
+    var rs = range(S.period, S.offset);
+    var key = S.period === 'all' ? 'all-time' : S.period + '-' + dateStr(new Date(rs.start));
+    S.card = {
+      leaders: leaders.map(function (r) { return { id: r.id, name: r.p.name, photo: r.p.photo || null, wins: r.wins, goals: r.goals }; }),
+      idx: 0, fmt: 'post', title: title, rangeTxt: rangeLabelEn(S.period, S.offset), key: key,
+      blob: null, url: null, loading: false, err: false
+    };
+    S.sheet = { mode: 'card', id: null };
+    renderSheet();
+    $('#scrim').hidden = false;
+    buildCard();
+  }
+  async function buildCard() {
+    var c = S.card; if (!c) return;
+    c.loading = true; c.err = false; renderSheet();
+    try {
+      await ensureFonts();
+      var blob = await drawCard(c);
+      if (S.card !== c) return;
+      if (c.url) { try { URL.revokeObjectURL(c.url); } catch (e) { /* ignore */ } }
+      c.blob = blob; c.url = URL.createObjectURL(blob);
+    } catch (e) { console.error(e); c.err = true; }
+    c.loading = false;
+    if (S.card === c && S.sheet && S.sheet.mode === 'card') renderSheet();
+  }
+  function cardSheet(closeBtn) {
+    var c = S.card, wrap = h('div', { class: 'form' });
+    wrap.append(h('div', { class: 'sheet-head' }, h('h2', null, 'সোশ্যাল মিডিয়া কার্ড'), closeBtn));
+    if (c.leaders.length > 1) {
+      var chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'কার কার্ড' });
+      c.leaders.forEach(function (l, i) {
+        chips.append(h('button', { class: 'chip', 'aria-pressed': c.idx === i ? 'true' : 'false', onclick: function () { c.idx = i; buildCard(); } },
+          avatar(l, 40), h('span', { class: 't' }, l.name)));
+      });
+      wrap.append(chips);
+    }
+    wrap.append(h('div', null, h('div', { class: 'seg', role: 'group', 'aria-label': 'কার্ডের মাপ' },
+      h('button', { 'aria-pressed': c.fmt === 'post' ? 'true' : 'false', onclick: function () { if (c.fmt !== 'post') { c.fmt = 'post'; buildCard(); } } }, 'পোস্ট 4:5'),
+      h('button', { 'aria-pressed': c.fmt === 'story' ? 'true' : 'false', onclick: function () { if (c.fmt !== 'story') { c.fmt = 'story'; buildCard(); } } }, 'স্টোরি 9:16'))));
+    var pv = h('div', { class: 'preview' });
+    if (c.loading) pv.append(h('p', { class: 'muted' }, 'কার্ড তৈরি হচ্ছে…'));
+    else if (c.err) pv.append(h('p', { class: 'muted' }, 'কার্ড বানানো যায়নি, আবার চেষ্টা করুন।'));
+    else if (c.url) pv.append(h('img', { src: c.url, alt: c.title + ': ' + c.leaders[c.idx].name }));
+    wrap.append(pv);
+    wrap.append(h('div', { class: 'actions' },
+      h('button', { class: 'btn', disabled: !c.blob || c.loading, onclick: saveCard }, icon('down'), 'PNG ডাউনলোড'),
+      canShareFiles() ? h('button', { class: 'btn ghost', disabled: !c.blob || c.loading, onclick: shareCard }, 'শেয়ার করুন') : null));
+    wrap.append(h('p', { class: 'muted small' }, 'ডাউনলোড না হলে ছবিটি চেপে ধরে ফোনে সেভ করুন, তারপর ফেসবুক বা ইনস্টাগ্রামে পোস্ট করুন।'));
+    return wrap;
+  }
+  function cardName() { var c = S.card; return 'net-breakers-' + c.key + '-' + c.fmt + '.png'; }
+  function saveCard() {
+    var c = S.card; if (!c || !c.url) return;
+    var a = document.createElement('a');
+    a.href = c.url; a.download = cardName();
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('ডাউনলোড শুরু হয়েছে');
+  }
+  async function shareCard() {
+    var c = S.card; if (!c || !c.blob) return;
+    try { await navigator.share({ files: [new File([c.blob], cardName(), { type: 'image/png' })] }); }
+    catch (e) { /* cancelled */ }
+  }
+  function canShareFiles() {
+    try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'a.png', { type: 'image/png' })] })); } catch (e) { return false; }
+  }
+
+  /* ---------- render ---------- */
+  function renderView() {
+    var v = $('#view');
+    v.textContent = '';
+    if (S.noDb) {
+      v.append(h('div', { class: 'notice' }, 'সাইটের সেটআপ শেষ হয়নি। public/config.js ফাইলে Firebase এর তথ্য বসিয়ে আবার deploy করুন।'));
+      return;
+    }
+    if (!(S.loaded.p && S.loaded.w)) { v.append(h('p', { class: 'muted' }, 'লোড হচ্ছে…')); return; }
+    v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : viewPlayers());
+  }
+  function refresh() {
+    if (!S.canWrite && S.tab === 'add') S.tab = 'board';
+    renderHeader();
+    renderTabs();
+    renderView();
+    if (S.sheet && S.sheet.mode === 'profile') renderSheet();
+  }
+
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.sheet) closeSheet(); });
+  $('#scrim').addEventListener('click', function (e) { if (e.target === e.currentTarget) closeSheet(); });
+
+  /* ---------- data ---------- */
+  function listen() {
+    var db = S.db;
+    db.collection('players').onSnapshot(function (snap) {
+      S.players = new Map(snap.docs.map(function (d) { return [d.id, d.data()]; }));
+      S.loaded.p = true; refresh();
+    }, function (e) { console.error(e); S.loaded.p = true; refresh(); });
+    db.collection('months').onSnapshot(function (snap) {
+      var out = [];
+      snap.docs.forEach(function (d) {
+        (d.data().entries || []).forEach(function (x) {
+          out.push({ id: x.id, playerId: x.playerId, goals: Number(x.goals) || 0, ts: Number(x.ts) || 0, createdAt: Number(x.createdAt) || 0, month: d.id, raw: x });
+        });
+      });
+      S.wins = out;
+      S.loaded.w = true; refresh();
+    }, function (e) { console.error(e); S.loaded.w = true; refresh(); });
+  }
+  async function login() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    try { await S.auth.signInWithPopup(provider); }
+    catch (e) {
+      var c = e && e.code;
+      if (c === 'auth/popup-blocked' || c === 'auth/operation-not-supported-in-this-environment') { S.auth.signInWithRedirect(provider); return; }
+      if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') return;
+      console.error(e); toast('লগইন হয়নি, আবার চেষ্টা করুন।');
+    }
+  }
+  function logout() { S.auth.signOut(); }
+  async function init() {
+    $('#logo').src = LOGO;
+    renderHeader(); renderTabs(); renderView();
+    var cfg = window.NB_CONFIG && window.NB_CONFIG.firebase;
+    if (!window.firebase || !cfg || !cfg.apiKey || String(cfg.apiKey).indexOf('PASTE') === 0) {
+      S.noDb = true; S.setup = true; renderHeader(); renderView(); return;
+    }
+    firebase.initializeApp(cfg);
+    S.db = firebase.firestore();
+    try { await S.db.enablePersistence({ synchronizeTabs: true }); } catch (e) { /* cache unavailable, fine */ }
+    S.auth = firebase.auth();
+    listen();
+    S.auth.onAuthStateChanged(async function (u) {
+      S.user = u; S.canWrite = false;
+      if (u && u.email) {
+        try { var a = await S.db.doc('admins/' + u.email).get(); S.canWrite = a.exists; } catch (e) { S.canWrite = false; }
+        if (!S.canWrite) toast('এই ইমেইল অ্যাডমিন তালিকায় নেই।');
+      }
+      refresh();
+    });
+  }
+  init();
+})();
+</script>
+</body>
+</html>
