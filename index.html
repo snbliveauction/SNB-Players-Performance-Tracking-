@@ -392,6 +392,38 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   .hero-stats b { font-size: 44px; }
   .top { padding: 12px 12px 0; }
 }
+
+/* fun */
+.ttl { display: inline-block; font-size: 12.5px; font-weight: 600; color: var(--gold); line-height: 1.3; margin-top: 1px; }
+.pro .ttl { font-size: 15px; margin-top: 4px; }
+.nm .ttl { display: block; margin-top: 0; }
+.tabs .tab { font-size: 14px; }
+.chips2 { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.chip2 { flex: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.04); font-size: 14px; white-space: nowrap; }
+.chip2[aria-pressed="true"] { background: var(--grad-gold); color: #2A1E05; border-color: transparent; font-weight: 700; }
+.wheelwrap { display: grid; place-items: center; }
+.wheel { width: min(100%, 360px); height: auto; aspect-ratio: 1; }
+.winrow { display: flex; align-items: center; gap: 14px; }
+.winrow h2 { font-size: 24px; }
+.sel { width: 100%; min-height: 40px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line-2); background: rgba(0,0,0,0.3); color: var(--ink); font: inherit; font-size: 15px; }
+.cmphead { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: start; }
+.cmpside { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
+.vs { align-self: center; font-family: var(--f-num); font-weight: 800; font-size: 26px; color: var(--gold); }
+.cmp { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.cmprow { display: grid; grid-template-columns: 1fr 1.6fr 1fr; align-items: center; text-align: center; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+.cmprow:last-child { border-bottom: 0; }
+.cmprow span { font-size: 13px; color: var(--muted); }
+.cmprow b { font-family: var(--f-num); font-size: 26px; font-weight: 800; color: var(--muted); }
+.cmprow b.win { color: var(--lime); }
+.verdict { text-align: center; font-family: var(--f-display); font-weight: 800; font-size: 18px; color: var(--gold); }
+.vres { display: flex; flex-direction: column; }
+.vrow { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line); }
+.vrow:last-child { border-bottom: 0; }
+.vrow.mine { background: rgba(124,200,207,0.1); border-radius: 10px; }
+.vrow .grow { flex: 1; min-width: 0; }
+.vrow strong { font-family: var(--f-display); display: block; line-height: 1.3; }
+.vrow .bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); margin-top: 4px; }
+.vrow .bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--aqua), var(--gold)); }
 </style>
 </head>
 <body>
@@ -477,7 +509,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', spin: { mode: 0, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
@@ -698,6 +730,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (S.canWrite) tabs.push(['add', 'জয় যোগ']);
     tabs.push(['players', 'প্লেয়ার']);
     tabs.push(['hall', 'হল অফ ফেম']);
+    tabs.push(['fun', '🎉 মজা']);
     tabs.forEach(function (x) {
       t.append(h('button', {
         class: 'tab', role: 'tab', 'aria-selected': S.tab === x[0] ? 'true' : 'false',
@@ -772,7 +805,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         bar.firstChild.style.width = Math.round(x.wins / max * 100) + '%';
         list.append(h('button', { class: 'row' + (x.rank === 1 ? ' first' : '') + (x.rank <= 3 ? ' m' + x.rank : ''), onclick: function () { openSheet('profile', x.id); } },
           h('span', { class: 'rank' }, String(x.rank)), avatar(x.p),
-          h('div', { class: 'nm' }, h('strong', null, x.p.name), bar),
+          h('div', { class: 'nm' }, h('strong', null, x.p.name), ttlChip(x.id), bar),
           h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num mid' }, String(x.draws)), h('span', { class: 'num dim' }, String(x.goals))));
       });
       root.append(list);
@@ -982,6 +1015,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
           avatar(e[1]),
           h('div', { class: 'pinfo' },
             h('strong', null, e[1].name),
+            ttlChip(e[0]),
             h('span', null, (e[1].number ? '#' + e[1].number + ' · ' : '') + st.wins + ' জয় · ' + st.goals + ' গোল'),
             h('span', { class: 'mini', 'aria-hidden': 'true' }, badgesFor(e[0]).filter(function (x) { return x.on; }).slice(0, 5).map(function (x) { return x.b.e; }).join(' ')))));
       });
@@ -994,6 +1028,235 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     kids.push(grid);
     if (!S.players.size && !S.canWrite) kids.push(h('p', { class: 'muted' }, 'এখনো কোনো প্লেয়ার যোগ হয়নি।'));
     return h('div', { class: 'stack' }, kids);
+  }
+
+  /* ---------- titles ---------- */
+  function titleFor(id) {
+    var f = buildFacts()[id];
+    if (!f) return { e: '⚽', n: 'মাঠের যোদ্ধা' };
+    var m = f.wins + f.draws;
+    if (!m) return { e: '😴', n: 'ঘুমন্ত সিংহ' };
+    if (f.top) return { e: '👟', n: 'গোলের রাজা' };
+    if (f.wChamp > 0) return { e: '🏆', n: 'সপ্তাহের চ্যাম্পিয়ন' };
+    if (f.streak >= 3) return { e: '🔥', n: 'টানা জয়ের ঝড়' };
+    if (f.hat > 0) return { e: '🎩', n: 'হ্যাটট্রিক হিরো' };
+    if (f.draws >= 2 && f.draws >= f.wins) return { e: '🤝', n: 'ড্রয়ের রাজা' };
+    if (m >= 2 && f.goals / m >= 3) return { e: '⚡', n: 'গোল মেশিন' };
+    if (f.wins >= 5) return { e: '💪', n: 'জয়ের কারিগর' };
+    if (f.wins >= 1) return { e: '⭐', n: 'উঠতি তারকা' };
+    return { e: '🛡️', n: 'শান্ত যোদ্ধা' };
+  }
+  function ttlChip(id) { var t = titleFor(id); return h('span', { class: 'ttl' }, t.e + ' ' + t.n); }
+  function ratingFor(id) {
+    var f = buildFacts()[id]; if (!f) return 55;
+    var v = 55 + f.wins * 3 + f.draws + f.goals * 1.2 + f.hat * 3 + (f.wChamp + f.mChamp) * 4 + Math.min(f.streak, 6);
+    return Math.max(55, Math.min(99, Math.round(v)));
+  }
+  function allStats(id) {
+    var r = ranking(-Infinity, Infinity), x = null;
+    r.forEach(function (e) { if (e.id === id) x = e; });
+    var f = buildFacts()[id] || { hat: 0, streak: 0, wChamp: 0, mChamp: 0 };
+    var wins = x ? x.wins : 0, draws = x ? x.draws : 0, goals = x ? x.goals : 0, m = wins + draws;
+    return { wins: wins, draws: draws, goals: goals, matches: m, avg: m ? goals / m : 0, hat: f.hat, streak: f.streak, champs: f.wChamp + f.mChamp };
+  }
+  function rand(n) { try { var a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; } catch (e) { return Math.floor(Math.random() * n); } }
+
+  /* ---------- fun tab ---------- */
+  var SPINS = [
+    { e: '☕', q: 'আজ চা কে খাওয়াবে?', r: 'আজ চা খাওয়াবে!' },
+    { e: '⚽', q: 'আজকের পেনাল্টি টেকার কে?', r: 'পেনাল্টি নেবে!' },
+    { e: '🧢', q: 'আজকের ক্যাপ্টেন কে?', r: 'আজকের ক্যাপ্টেন!' },
+    { e: '🧤', q: 'আজকের গোলকিপার কে?', r: 'আজ গোলপোস্টে!' },
+    { e: '🍔', q: 'আজ খাবারের বিল কার?', r: 'আজ বিল দেবে!' }
+  ];
+  var WHEEL_COL = ['#2F8FA3', '#E7C26A', '#7FB04A', '#D9805F', '#6C7FD1', '#4BB3A0', '#C9669A', '#E0A63C'];
+  function drawWheel(cv, names, rot) {
+    var x = cv.getContext('2d'), s = cv.width, c = s / 2, r = c - 16, n = names.length, seg = Math.PI * 2 / n;
+    x.clearRect(0, 0, s, s);
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.45)'; x.shadowBlur = 24;
+    x.beginPath(); x.arc(c, c, r + 8, 0, 7); x.fillStyle = '#E7C26A'; x.fill(); x.restore();
+    for (var i = 0; i < n; i++) {
+      var a0 = rot + i * seg - Math.PI / 2;
+      x.beginPath(); x.moveTo(c, c); x.arc(c, c, r, a0, a0 + seg); x.closePath();
+      x.fillStyle = WHEEL_COL[i % WHEEL_COL.length]; x.fill();
+      x.lineWidth = 2; x.strokeStyle = 'rgba(255,255,255,0.55)'; x.stroke();
+      x.save(); x.translate(c, c); x.rotate(a0 + seg / 2); x.textAlign = 'right'; x.textBaseline = 'middle';
+      x.fillStyle = '#10222B'; var fs = Math.max(12, Math.min(26, 330 / n)); x.font = '800 ' + fs + 'px "Anek Bangla","Hind Siliguri",system-ui,sans-serif';
+      var nm = String(names[i]).split(/\s+/)[0]; if (nm.length > 9) nm = nm.slice(0, 8) + '…';
+      x.fillText(nm, r - 16, 0); x.restore();
+    }
+    x.beginPath(); x.arc(c, c, 34, 0, 7); x.fillStyle = '#0F1A22'; x.fill(); x.lineWidth = 6; x.strokeStyle = '#E7C26A'; x.stroke();
+    x.beginPath(); x.moveTo(c - 18, 6); x.lineTo(c + 18, 6); x.lineTo(c, 46); x.closePath();
+    x.fillStyle = '#FF5A4F'; x.fill(); x.lineWidth = 3; x.strokeStyle = '#fff'; x.stroke();
+  }
+  function spinNow(ids) {
+    var sp = S.spin; if (sp.busy || !ids.length) return;
+    var cv = $('#wheel'); if (!cv) return;
+    var n = ids.length, seg = Math.PI * 2 / n, win = rand(n);
+    var from = sp.rot % (Math.PI * 2), to = -(win + 0.5) * seg + Math.PI * 2 * (6 + rand(3));
+    if (to < from) to += Math.PI * 2 * 6;
+    var names = ids.map(function (id) { return S.players.get(id).name; });
+    sp.busy = true; sp.winner = null;
+    var t0 = performance.now(), dur = 4800;
+    var btn = $('#spinBtn'); if (btn) btn.disabled = true;
+    (function step(now) {
+      var k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4);
+      sp.rot = from + (to - from) * e;
+      drawWheel(cv, names, sp.rot);
+      if (k < 1) requestAnimationFrame(step);
+      else { sp.rot = to; sp.busy = false; sp.winner = ids[win]; sp.ids = ids; renderView(); }
+    })(t0);
+  }
+  function funSeg() {
+    var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'মজা' });
+    [['spin', '🎡 স্পিন'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
+      seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.funTab = x[0]; renderView(); } }, x[1]));
+    });
+    return h('div', { class: 'periodbar' }, seg);
+  }
+  function viewFun() {
+    var root = h('div', { class: 'stack' }, funSeg());
+    if (S.players.size < 2) { root.append(h('div', { class: 'card emptybox' }, h('h2', null, 'আরও প্লেয়ার লাগবে'), h('p', { class: 'muted' }, 'মজার সেকশন চালাতে অন্তত ২ জন প্লেয়ার যোগ করুন।'))); return root; }
+    if (S.funTab === 'cmp') root.append(viewCompare());
+    else if (S.funTab === 'vote') root.append(viewVote());
+    else root.append(viewSpin());
+    return root;
+  }
+  function viewSpin() {
+    var sp = S.spin, mode = SPINS[sp.mode] || SPINS[0];
+    var ids = sortedPlayers().map(function (e) { return e[0]; });
+    var names = ids.map(function (id) { return S.players.get(id).name; });
+    var chips = h('div', { class: 'chips2' });
+    SPINS.forEach(function (m, i) {
+      chips.append(h('button', { class: 'chip2', 'aria-pressed': sp.mode === i ? 'true' : 'false', onclick: function () { if (sp.busy) return; sp.mode = i; sp.winner = null; renderView(); } }, m.e + ' ' + m.q));
+    });
+    var cv = h('canvas', { id: 'wheel', width: 640, height: 640, class: 'wheel', 'aria-label': 'লাকি স্পিন চাকা' });
+    var box = h('section', { class: 'card panel spinbox' },
+      h('h2', null, mode.e + ' ' + mode.q), chips,
+      h('div', { class: 'wheelwrap' }, cv),
+      h('button', { class: 'btn block', id: 'spinBtn', disabled: sp.busy, onclick: function () { spinNow(ids); } }, sp.winner ? '🎡 আবার ঘোরান' : '🎡 চাকা ঘোরান'));
+    setTimeout(function () { var c = $('#wheel'); if (c) drawWheel(c, names, sp.rot); }, 0);
+    var root = h('div', { class: 'stack' }, box);
+    if (sp.winner && S.players.has(sp.winner)) {
+      var p = S.players.get(sp.winner);
+      root.append(h('section', { class: 'card panel winbox' },
+        h('p', { class: 'kicker' }, '🎉 ফলাফল'),
+        h('div', { class: 'winrow' }, avatar(p, 88), h('div', null, h('h2', null, p.name), h('p', { class: 'muted' }, mode.e + ' ' + mode.r))),
+        h('button', { class: 'btn', onclick: function () { openSpinCard(sp.winner, mode); } }, icon('down'), 'শেয়ার কার্ড বানান')));
+    }
+    return root;
+  }
+  function viewCompare() {
+    var ids = sortedPlayers().map(function (e) { return e[0]; });
+    var c = S.cmp;
+    if (!S.players.has(c.a)) c.a = ids[0];
+    if (!S.players.has(c.b) || c.b === c.a) c.b = ids.filter(function (i) { return i !== c.a; })[0];
+    function sel(key) {
+      var s = h('select', { class: 'sel', 'aria-label': 'প্লেয়ার বাছুন', onchange: function (e) { c[key] = e.target.value; renderView(); } });
+      ids.forEach(function (id) { s.append(h('option', { value: id, selected: c[key] === id }, S.players.get(id).name)); });
+      s.value = c[key];
+      return s;
+    }
+    var A = allStats(c.a), B = allStats(c.b), pa = S.players.get(c.a), pb = S.players.get(c.b);
+    var rows = [['জয়', A.wins, B.wins], ['ড্র', A.draws, B.draws], ['গোল', A.goals, B.goals], ['গড় গোল', +A.avg.toFixed(1), +B.avg.toFixed(1)], ['হ্যাটট্রিক', A.hat, B.hat], ['সেরা (সপ্তাহ/মাস)', A.champs, B.champs], ['রেটিং', ratingFor(c.a), ratingFor(c.b)]];
+    var sa = 0, sb = 0;
+    var tbl = h('div', { class: 'cmp' });
+    rows.forEach(function (r) {
+      var wa = r[1] > r[2], wb = r[2] > r[1];
+      if (wa) sa++; if (wb) sb++;
+      tbl.append(h('div', { class: 'cmprow' }, h('b', { class: wa ? 'win' : '' }, String(r[1])), h('span', null, r[0]), h('b', { class: wb ? 'win' : '' }, String(r[2]))));
+    });
+    var verdict = sa === sb ? '🤝 দুজনেই সমান সমান!' : '🔥 ' + (sa > sb ? pa.name : pb.name) + ' এগিয়ে (' + Math.max(sa, sb) + '–' + Math.min(sa, sb) + ')';
+    return h('section', { class: 'card panel' },
+      h('h2', null, '⚔️ কে এগিয়ে?'),
+      h('div', { class: 'cmphead' },
+        h('div', { class: 'cmpside' }, avatar(pa, 72), sel('a'), ttlChip(c.a)),
+        h('span', { class: 'vs' }, 'VS'),
+        h('div', { class: 'cmpside' }, avatar(pb, 72), sel('b'), ttlChip(c.b))),
+      tbl, h('p', { class: 'verdict' }, verdict));
+  }
+  /* ---------- votes ---------- */
+  function weekKey() { return dateStr(new Date(range('week', 0).start)); }
+  function devId() {
+    try { var d = localStorage.getItem('nb-dev'); if (!d) { d = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); localStorage.setItem('nb-dev', d); } return d; }
+    catch (e) { return 'tmp' + Math.random().toString(36).slice(2, 12); }
+  }
+  function myVote() { try { return localStorage.getItem('nb-vote-' + weekKey()); } catch (e) { return null; } }
+  async function castVote(pid) {
+    if (S.voteBusy || !S.db) return;
+    if (myVote()) { toast('এই সপ্তাহে আপনি আগেই ভোট দিয়েছেন'); return; }
+    S.voteBusy = true; renderView();
+    var wk = weekKey();
+    try {
+      await S.db.doc('votes/' + wk + '_' + devId()).set({ week: wk, playerId: pid, ts: Date.now() });
+      try { localStorage.setItem('nb-vote-' + wk, pid); } catch (e) { /* ignore */ }
+      toast('ভোট দেওয়া হয়েছে 🗳️');
+    } catch (e) {
+      console.error(e);
+      if (e && e.code === 'permission-denied') {
+        if (S.votesOk) { try { localStorage.setItem('nb-vote-' + wk, 'x'); } catch (er) { /* ignore */ } toast('এই সপ্তাহে আপনি আগেই ভোট দিয়েছেন'); }
+        else toast('ভোট এখনো চালু হয়নি। (rules আপডেট দরকার)');
+      } else toast('ভোট দেওয়া যায়নি, আবার চেষ্টা করুন।');
+    }
+    S.voteBusy = false; renderView();
+  }
+  function viewVote() {
+    var votes = S.votes || [], mine = myVote(), counts = {}, total = 0;
+    votes.forEach(function (v) { if (S.players.has(v.playerId)) { counts[v.playerId] = (counts[v.playerId] || 0) + 1; total++; } });
+    var list = Object.keys(counts).map(function (id) { return { id: id, n: counts[id] }; }).sort(function (a, b) { return b.n - a.n; });
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🗳️ এই সপ্তাহে কে সেরা হবে?'),
+      h('p', { class: 'muted small' }, 'সপ্তাহ: ' + rangeLabel('week', 0) + ' · প্রতি সপ্তাহে একজন একটাই ভোট দিতে পারবেন।'));
+    if (S.voteErr) { box.append(h('p', { class: 'notice' }, 'ভোট এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
+    if (list.length) {
+      var res = h('div', { class: 'vres' });
+      list.slice(0, 5).forEach(function (r, i) {
+        var bar = h('div', { class: 'bar' }, h('i')); bar.firstChild.style.width = Math.round(r.n / list[0].n * 100) + '%';
+        res.append(h('div', { class: 'vrow' + (mine === r.id ? ' mine' : '') }, h('span', { class: 'trank' }, String(i + 1)), avatar(S.players.get(r.id), 38),
+          h('div', { class: 'grow' }, h('strong', null, S.players.get(r.id).name), bar), h('span', { class: 'trophies' }, r.n + ' 🗳️')));
+      });
+      box.append(res, h('p', { class: 'muted small' }, 'মোট ' + total + ' ভোট'));
+    } else box.append(h('p', { class: 'muted' }, 'এখনো কেউ ভোট দেয়নি। প্রথম ভোটটা আপনিই দিন!'));
+    if (mine) {
+      var mp = S.players.get(mine);
+      box.append(h('div', { class: 'picked' }, h('span', null, '✅ আপনার ভোট: ' + (mp ? mp.name : 'দেওয়া হয়েছে'))));
+    } else {
+      var chips = h('div', { class: 'chips scroll', role: 'group', 'aria-label': 'ভোট দিন' });
+      var cnt = h('div', { class: 'cnt' });
+      var fill = function () {
+        chips.textContent = '';
+        var l = sortedPlayers().filter(function (e) { return matchPlayer(e[1], S.qVote); });
+        l.forEach(function (e) { chips.append(h('button', { class: 'chip', disabled: !!S.voteBusy, onclick: function () { castVote(e[0]); } }, avatar(e[1], 44), h('span', { class: 't' }, e[1].name))); });
+        if (!l.length) chips.append(h('p', { class: 'muted small' }, 'কোনো প্লেয়ার পাওয়া যায়নি।'));
+        cnt.textContent = 'নামে চাপ দিলেই ভোট হয়ে যাবে';
+      };
+      fill();
+      box.append(searchBox('vote', function () { return S.qVote; }, function (v) { S.qVote = v; }, fill, 'নাম লিখে খুঁজুন'), cnt, chips);
+    }
+    return box;
+  }
+  function listenVotes() {
+    if (!S.db) return;
+    if (S.voteUnsub) { try { S.voteUnsub(); } catch (e) { /* ignore */ } }
+    S.voteUnsub = S.db.collection('votes').where('week', '==', weekKey()).onSnapshot(function (snap) {
+      S.votes = snap.docs.map(function (d) { return d.data(); }); S.voteErr = false; S.votesOk = true;
+      if (S.tab === 'fun' && !S.spin.busy) renderView();
+    }, function (e) { console.error(e); S.voteErr = true; if (S.tab === 'fun' && !S.spin.busy) renderView(); });
+  }
+  function openSpinCard(id, mode) {
+    var p = S.players.get(id); if (!p) return;
+    startSpecial('spin', { spin: { name: p.name, photo: p.photo || null, label: mode.r, q: mode.q, e: mode.e } }, 'LUCKY SPIN', 'spin');
+  }
+  function openFifa(id) {
+    var p = S.players.get(id); if (!p) return;
+    var a = allStats(id), t = titleFor(id);
+    startSpecial('fifa', { fifa: { name: p.name, photo: p.photo || null, number: p.number || '', rating: ratingFor(id), title: t.e + ' ' + t.n, a: a } }, 'PLAYER CARD', 'fifa-' + id);
+  }
+  function startSpecial(kind, extra, title, key) {
+    var now = new Date();
+    S.card = Object.assign({ leaders: [], kind: kind, rows: [], idx: 0, fmt: 'post', title: title, rangeTxt: now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(),
+      key: key + '-' + dateStr(now), blob: null, url: null, loading: false, err: false }, extra);
+    S.sheet = { mode: 'card', id: null };
+    renderSheet(); $('#scrim').hidden = false; buildCard();
   }
 
   /* ---------- sheet ---------- */
@@ -1038,7 +1301,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (!p) { closeSheet(); return; }
     var head = h('div', { class: 'sheet-head' }, h('p', { class: 'eyebrow' }, 'প্লেয়ার প্রোফাইল'), closeBtn);
     var pro = h('div', { class: 'pro' }, avatar(p, 104),
-      h('div', null, h('h2', null, p.name), p.number ? h('p', { class: 'no' }, '#' + p.number) : null));
+      h('div', null, h('h2', null, p.name), p.number ? h('p', { class: 'no' }, '#' + p.number) : null, ttlChip(id)));
     var tbl = h('table', { class: 'tbl' },
       h('thead', null, h('tr', null, h('th', null, 'সময়'), h('th', null, 'জয়'), h('th', null, 'ড্র'), h('th', null, 'গোল'))),
       h('tbody', null, [['এই সপ্তাহ', 'week'], ['এই মাস', 'month'], ['সব সময়', 'all']].map(function (x) {
@@ -1057,7 +1320,8 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
           h('span', { class: 'e', 'aria-hidden': 'true' }, x.b.e),
           h('div', { class: 'bt' }, h('strong', null, x.b.n + (x.on && x.n > 1 ? ' ×' + x.n : '')), h('span', { class: 'd' }, x.b.d)));
       })));
-    sh.append(head, pro, tbl, bsec, hist);
+    var fifaBtn = h('button', { class: 'btn lime', onclick: function () { openFifa(id); } }, '🃏 প্লেয়ার কার্ড বানান');
+    sh.append(head, pro, fifaBtn, tbl, bsec, hist);
     if (S.canWrite) {
       var key = 'player:' + id, act = h('div', { class: 'actions' });
       if (S.confirm === key) {
@@ -1290,7 +1554,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var board = card.kind === 'board';
     cardBg(x, W, H, story ? 980 : 700);
 
-    var logoSize = board ? (story ? 280 : 200) : (story ? 300 : 230), logoY = story ? 215 : 34;
+    var isF = card.kind === 'fifa', logoSize = board ? (story ? 280 : 200) : isF ? (story ? 190 : 150) : (story ? 300 : 230), logoY = story ? (isF ? 285 + 20 : 215) : (isF ? 36 : 34);
     try {
       var logo = await loadImg(LOGO);
       var lcx = W / 2, lcy = logoY + logoSize / 2, lr = logoSize * 0.58;
@@ -1334,6 +1598,58 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         x.fillStyle = '#A9EEF4'; x.fillText(String(r.goals), cxs[2], ry + RH / 2 + (story ? 30 : 25));
       });
       footer(x, W, story ? 1742 : H - 40, NUM);
+    } else if (card.kind === 'fifa') {
+      var F = card.fifa, dy = story ? 285 : 0;
+      x.save(); x.translate(0, dy);
+      var cx0 = 130, cw = 820, cy0 = 228, ch = 1040;
+      x.save(); x.shadowColor = 'rgba(0,0,0,0.45)'; x.shadowBlur = 50; x.shadowOffsetY = 18;
+      rr(x, cx0, cy0, cw, ch, 80); x.fillStyle = gg(x, cx0, cy0, cx0 + cw, cy0 + ch); x.fill(); x.restore();
+      rr(x, cx0 + 14, cy0 + 14, cw - 28, ch - 28, 68); x.lineWidth = 3; x.strokeStyle = 'rgba(90,64,12,0.45)'; x.stroke();
+      var sh2 = x.createLinearGradient(0, cy0, 0, cy0 + ch * 0.5); sh2.addColorStop(0, 'rgba(255,255,255,0.35)'); sh2.addColorStop(1, 'rgba(255,255,255,0)');
+      rr(x, cx0, cy0, cw, ch, 80); x.fillStyle = sh2; x.fill();
+      var DK = '#2A1E05';
+      x.textAlign = 'center'; x.fillStyle = DK; x.font = '800 190px ' + NUM; x.fillText(String(F.rating), 290, cy0 + 215);
+      x.font = '700 44px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '8px'; x.fillText('RATING', 296, cy0 + 268); if ('letterSpacing' in x) x.letterSpacing = '0px';
+      if (F.number) { x.font = '800 92px ' + NUM; x.fillText('#' + F.number, 290, cy0 + 392); }
+      var fpx = 500, fpy = cy0 + 60, fps = 380;
+      x.save(); rr(x, fpx, fpy, fps, fps, 48); x.clip();
+      if (F.photo) { try { var fim = await loadImg(F.photo); x.drawImage(fim, fpx, fpy, fps, fps); } catch (e) { x.fillStyle = '#2B5666'; x.fillRect(fpx, fpy, fps, fps); } }
+      else { x.fillStyle = '#2B5666'; x.fillRect(fpx, fpy, fps, fps); x.fillStyle = '#BFF1F6'; x.font = '800 190px ' + BN; x.textBaseline = 'middle'; x.fillText(initial(F.name), fpx + fps / 2, fpy + fps / 2 + 8); x.textBaseline = 'alphabetic'; }
+      x.restore(); rr(x, fpx, fpy, fps, fps, 48); x.lineWidth = 8; x.strokeStyle = DK; x.stroke();
+      x.fillStyle = DK; fitFont(x, F.name, 700, 80, 800, BN); x.fillText(F.name, W / 2, cy0 + 548);
+      x.font = '700 44px ' + BN; x.fillStyle = '#5A4410'; x.fillText(F.title, W / 2, cy0 + 612);
+      x.fillStyle = 'rgba(42,30,5,0.35)'; x.fillRect(cx0 + 90, cy0 + 650, cw - 180, 4);
+      var st = [['WIN', F.a.wins], ['DRAW', F.a.draws], ['GOAL', F.a.goals], ['HAT-TRICK', F.a.hat], ['STREAK', F.a.streak], ['TITLES', F.a.champs]];
+      st.forEach(function (s, i) {
+        var col = i % 3, row = Math.floor(i / 3), sx = 270 + col * 270, sy = cy0 + 760 + row * 150;
+        x.fillStyle = DK; x.font = '800 96px ' + NUM; x.fillText(String(s[1]), sx, sy);
+        x.font = '700 30px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillStyle = '#5A4410'; x.fillText(s[0], sx + 2, sy + 42); if ('letterSpacing' in x) x.letterSpacing = '0px';
+      });
+      x.restore();
+      footer(x, W, story ? 1790 : H - 36, NUM);
+    } else if (card.kind === 'spin') {
+      var SP = card.spin;
+      var tY3 = story ? 620 : 330, rY3 = story ? 712 : 424, P3 = story ? 540 : 410, pY3 = story ? 820 : 520;
+      ribbon(x, W, tY3, card.title, NUM, story ? 58 : 52);
+      x.textAlign = 'center'; x.fillStyle = '#ECE8D3';
+      if ('letterSpacing' in x) x.letterSpacing = '4px';
+      fitFont(x, card.rangeTxt, 900, story ? 44 : 38, 600, NUM); x.fillText(card.rangeTxt, W / 2, rY3);
+      if ('letterSpacing' in x) x.letterSpacing = '0px';
+      var px3 = (W - P3) / 2;
+      x.save(); x.shadowColor = 'rgba(231,194,106,0.5)'; x.shadowBlur = 80; rr(x, px3, pY3, P3, P3, 56); x.fillStyle = '#244B5B'; x.fill(); x.restore();
+      x.save(); rr(x, px3, pY3, P3, P3, 56); x.clip();
+      if (SP.photo) { try { var im3 = await loadImg(SP.photo); x.drawImage(im3, px3, pY3, P3, P3); } catch (e) { x.fillStyle = '#2B5666'; x.fillRect(px3, pY3, P3, P3); } }
+      else { x.fillStyle = '#2B5666'; x.fillRect(px3, pY3, P3, P3); x.fillStyle = '#BFF1F6'; x.font = '800 ' + Math.round(P3 * 0.5) + 'px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(SP.name), W / 2, pY3 + P3 / 2 + 8); x.textBaseline = 'alphabetic'; }
+      x.restore();
+      rr(x, px3, pY3, P3, P3, 56); x.lineWidth = 14; x.strokeStyle = gg(x, px3, pY3, px3 + P3, pY3 + P3); x.stroke();
+      x.font = '120px sans-serif'; x.textAlign = 'center'; x.fillText(SP.e, px3 + P3 - 40, pY3 + 40);
+      x.fillStyle = '#ECE8D3'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 20;
+      fitFont(x, SP.name, 900, story ? 100 : 86, 800, BN); x.fillText(SP.name, W / 2, story ? 1480 : 1040); x.restore();
+      var py3 = story ? 1530 : 1090, ph3 = story ? 190 : 170;
+      glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
+      x.fillStyle = '#F8E7AE'; fitFont(x, SP.e + ' ' + SP.label, W - 220, story ? 84 : 76, 800, BN);
+      x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(SP.e + ' ' + SP.label, W / 2, py3 + ph3 / 2 + 8); x.textBaseline = 'alphabetic';
+      footer(x, W, story ? 1790 : H - 36, NUM);
     } else {
       var L = card.leaders[card.idx];
       var tY2 = story ? 620 : 330, rY = story ? 712 : 424;
@@ -1438,7 +1754,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var pv = h('div', { class: 'preview' });
     if (c.loading) pv.append(h('p', { class: 'muted' }, 'কার্ড তৈরি হচ্ছে…'));
     else if (c.err) pv.append(h('p', { class: 'muted' }, 'কার্ড বানানো যায়নি, আবার চেষ্টা করুন।'));
-    else if (c.url) pv.append(h('img', { src: c.url, alt: c.title + (c.kind === 'board' ? '' : ': ' + c.leaders[c.idx].name) }));
+    else if (c.url) pv.append(h('img', { src: c.url, alt: c.title + (c.kind === 'player' ? ': ' + c.leaders[c.idx].name : '') }));
     wrap.append(pv);
     wrap.append(h('div', { class: 'actions' },
       h('button', { class: 'btn', disabled: !c.blob || c.loading, onclick: saveCard }, icon('down'), 'PNG ডাউনলোড'),
@@ -1472,8 +1788,9 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return;
     }
     if (!(S.loaded.p && S.loaded.w)) { v.append(h('p', { class: 'muted' }, 'লোড হচ্ছে…')); return; }
+    if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : viewPlayers());
+    v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
