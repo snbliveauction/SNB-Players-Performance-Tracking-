@@ -1541,7 +1541,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   function loginSheet(closeBtn) {
     var g = S.lg;
-    var em = h('input', { type: 'email', placeholder: 'ইমেইল', autocomplete: 'username', autocapitalize: 'none', value: g.email });
+    var em = h('input', { type: 'email', placeholder: 'ইমেইল', autocomplete: 'username', autocapitalize: 'none', autocorrect: 'off', spellcheck: 'false', value: g.email });
     var pw = h('input', { type: g.show ? 'text' : 'password', placeholder: 'পাসওয়ার্ড', autocomplete: 'current-password', value: g.pw });
     em.oninput = function () { g.email = em.value; };
     pw.oninput = function () { g.pw = pw.value; };
@@ -1563,7 +1563,10 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (c === 'auth/too-many-requests') return 'অনেকবার ভুল হয়েছে। একটু পরে চেষ্টা করুন।';
     if (c === 'auth/network-request-failed') return 'ইন্টারনেট নেই।';
     if (c === 'auth/user-disabled') return 'এই অ্যাকাউন্ট বন্ধ করা আছে।';
-    return 'ইমেইল বা পাসওয়ার্ড ভুল।';
+    if (c === 'auth/operation-not-allowed') return 'Firebase-এ Email/Password লগইন চালু করা নেই। (operation-not-allowed)';
+    if (c === 'auth/unauthorized-domain') return 'এই সাইটের ঠিকানা Firebase-এ অনুমোদিত নয়। (unauthorized-domain)';
+    if (c === 'auth/invalid-api-key' || c === 'auth/api-key-not-valid') return 'Firebase কনফিগ ভুল। (' + c + ')';
+    return 'ইমেইল বা পাসওয়ার্ড ভুল, অথবা এই ইমেইলে পাসওয়ার্ড-অ্যাকাউন্ট খোলা হয়নি। (' + (c || 'unknown') + ')';
   }
   async function emailLogin() {
     var g = S.lg, em = String(g.email || '').trim().toLowerCase();
