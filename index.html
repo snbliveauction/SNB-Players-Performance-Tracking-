@@ -499,11 +499,19 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .mmf b { font-size: 11px; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mmc.up .mmf { opacity: 1; }
 .mmc.done { border-color: #2E8B57; box-shadow: 0 0 12px rgba(46,139,87,0.5); }
-.shcv { aspect-ratio: 4 / 3; height: auto; }
+.shcv { aspect-ratio: 4 / 3; height: auto; width: 100%; max-width: 100%; touch-action: manipulation; }
+.kits { display: flex; gap: 10px; margin: 8px 0 14px; }
+.kit { width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); }
+.kit.on { border-color: #E7C26A; box-shadow: 0 0 0 3px rgba(231,194,106,0.45); }
 .hlrow { display: flex; align-items: center; justify-content: space-around; gap: 6px; margin: 12px 0; }
 .hls { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; flex: 1; }
 .hls b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hlv { font-size: 40px; font-weight: 800; color: #F6DD8E; font-family: var(--f-display); line-height: 1; }
+
+.sqg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0; }
+.sqt { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 16px; border: 2px solid var(--line-2); background: rgba(255,255,255,0.05); color: var(--ink); font-family: var(--f-display); transition: transform 0.1s, background 0.1s, box-shadow 0.1s; min-width: 0; }
+.sqt b { font-size: 13px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sqt.lit { background: rgba(231,194,106,0.45); border-color: #E7C26A; box-shadow: 0 0 24px rgba(231,194,106,0.7); transform: scale(1.06); }
 </style>
 </head>
 <body>
@@ -1324,7 +1332,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return 'ok';
     } catch (e) { console.error(e); return 'err'; }
   }
-  var GM = { g: ['🕵️', 'প্লেয়ার চিনো', 'ঝাপসা, সাদা-কালো, জুম! ৩টা জীবন, সময় কম।'], p: ['🧩', 'ছবি পাজল', 'স্লাইড করে ছবি মেলাও। কম চালে, কম সময়ে।'], q: ['🧠', 'ক্লাব কুইজ', 'ক্লাবের আসল রেকর্ড থেকে ১০টা প্রশ্ন।'], m: ['🃏', 'মেমোরি ম্যাচ', 'প্লেয়ারদের জোড়া মেলাও। কম চালে, কম সময়ে!'], s: ['⚽', 'পেনাল্টি শুটআউট', '৫টা শট। টাইমিং ঠিক রাখো, টপ কর্নারে মারলে বেশি পয়েন্ট!'], h: ['📈', 'কে বেশি?', 'কার রেকর্ড বেশি? একটা ভুল হলেই শেষ!'] };
+  var GM = { g: ['🕵️', 'প্লেয়ার চিনো', 'ঝাপসা, সাদা-কালো, জুম! ৩টা জীবন, সময় কম।'], p: ['🧩', 'ছবি পাজল', 'স্লাইড করে ছবি মেলাও। কম চালে, কম সময়ে।'], q: ['🧠', 'ক্লাব কুইজ', 'ক্লাবের আসল রেকর্ড থেকে ১০টা প্রশ্ন।'], m: ['🃏', 'মেমোরি ম্যাচ', 'প্লেয়ারদের জোড়া মেলাও। কম চালে, কম সময়ে!'], s: ['⚽', 'পেনাল্টি শুটআউট', '৩ ধাপে শট: দিক, উচ্চতা, শক্তি। কঠিনতা আর জার্সি বেছে নাও!'], h: ['🧠', 'ক্রম মনে রাখো', 'প্লেয়ারদের জ্বলে ওঠার ক্রম মনে রাখো। প্রতি রাউন্ডে কঠিন হয়!'] };
   function finishGame(m, score, extra) {
     var G = S.game; G.res = { m: m, score: Math.round(score), status: 'saving', extra: extra || '' }; G.mode = 'res'; S.guess.run = false;
     renderView();
@@ -1345,7 +1353,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   function startMode(m) {
     S.game.res = null;
-    if (m === 'g') chStart(); else if (m === 'p') { S.game.mode = 'pzpick'; renderView(); } else if (m === 'm') mmStart(); else if (m === 's') shStart(); else if (m === 'h') hlStart(); else qzStart();
+    if (m === 'g') chStart(); else if (m === 'p') { S.game.mode = 'pzpick'; renderView(); } else if (m === 'm') mmStart(); else if (m === 's') { S.game.mode = 'shmenu'; renderView(); } else if (m === 'h') sqStart(); else qzStart();
   }
   function scoreBoard() {
     var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, m: x.m || 0, s: x.s || 0, h: x.h || 0, t: (x.g || 0) + (x.q || 0) + (x.m || 0) + (x.s || 0) + (x.h || 0) }; }).sort(function (a, b) { return b.t - a.t; });
@@ -1358,7 +1366,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     rows.slice(0, 10).forEach(function (r, i) {
       var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : String(i + 1);
       list.append(h('div', { class: 'lrow' + (r.id === me ? ' mine' : '') }, h('span', { class: 'lrk' }, medal),
-        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · 🧠 ' + r.q + ' · 🃏 ' + r.m + ' · ⚽ ' + r.s + ' · 📈 ' + r.h)), h('span', { class: 'ltot' }, String(r.t))));
+        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · 🧠 ' + r.q + ' · 🃏 ' + r.m + ' · ⚽ ' + r.s + ' · 🔢 ' + r.h)), h('span', { class: 'ltot' }, String(r.t))));
     });
     box.append(list);
     if (myPos >= 10) box.append(h('p', { class: 'small' }, 'আপনার অবস্থান: ' + (myPos + 1) + ' (' + rows[myPos].t + ' পয়েন্ট)'));
@@ -1605,119 +1613,271 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     return box;
   }
 
-  /* ----- game 5: penalty shootout ----- */
+  /* ----- game 5: penalty shootout (realistic) ----- */
+  var SH_KITS = [['#2F8FA3', 'টিল'], ['#C8372D', 'লাল'], ['#F2B134', 'হলুদ'], ['#EDEDED', 'সাদা'], ['#2E8B57', 'সবুজ'], ['#6D4CC2', 'বেগুনি']];
+  var SH_LV = [
+    { n: '🟢 সহজ', sp: 1, reach: 0.14, cut: 0.6, read: 0.25, wind: 0, mult: 0.8 },
+    { n: '🟡 মাঝারি', sp: 1.45, reach: 0.17, cut: 0.7, read: 0.55, wind: 0.05, mult: 1 },
+    { n: '🔴 কঠিন', sp: 2, reach: 0.2, cut: 0.8, read: 0.8, wind: 0.1, mult: 1.25 }
+  ];
+  var SHG = { l: 170, w: 380, t: 255, b: 365 }; /* goal frame on canvas (720x540) */
+  function shOpt() { if (!S.shOpt) S.shOpt = { lvl: 1, kit: 0 }; return S.shOpt; }
+  function shMenu() {
+    var o = shOpt(), box = h('section', { class: 'card panel' }, h('h2', null, '⚽ পেনাল্টি শুটআউট'),
+      h('p', { class: 'muted small' }, '৩টা ধাপ: দিক, উচ্চতা, শক্তি। কিপার আপনার শট আন্দাজ করার চেষ্টা করবে!'));
+    var lv = h('div', { class: 'seg kind' }); SH_LV.forEach(function (l, i) { lv.append(h('button', { 'aria-pressed': o.lvl === i ? 'true' : 'false', onclick: function () { o.lvl = i; renderView(); } }, l.n)); });
+    var kits = h('div', { class: 'kits' }); SH_KITS.forEach(function (k, i) { var b = h('button', { class: 'kit' + (o.kit === i ? ' on' : ''), 'aria-label': k[1], onclick: function () { o.kit = i; renderView(); } }); b.style.background = k[0]; kits.append(b); });
+    var lvInfo = ['সবচেয়ে সহজ। কিপার প্রায়ই ভুল দিকে ঝাঁপায়।', 'বাতাস আছে, কিপার মাঝে মাঝে আন্দাজ করে ফেলে।', 'জোরালো বাতাস, চতুর কিপার, উপরের কর্নার খুব সরু। স্কোর ১.২৫ গুণ!'][o.lvl];
+    box.append(h('p', { class: 'small' }, 'কঠিনতা'), lv, h('p', { class: 'muted small' }, lvInfo), h('p', { class: 'small' }, 'আপনার জার্সির রং'), kits,
+      h('button', { class: 'btn block', onclick: shStart }, '▶️ শুরু করুন'),
+      h('button', { class: 'link-btn', onclick: function () { S.game.mode = null; renderView(); } }, '← ফিরে যান'));
+    return box;
+  }
   function shStart() {
-    S.sh = { i: 0, score: 0, goals: 0, phase: 'x', px: 0.5, py: 0.5, t0: performance.now(), res: null, ball: null, keeper: 0.5, msg: '', anim: 0 };
-    S.game.mode = 'sh'; S.guess.run = true; renderView(); setTimeout(shLoop, 0);
+    var o = shOpt(); S.sh = { i: 0, score: 0, goals: 0, phase: 'x', px: 0.5, py: 0.5, pp: 0, t0: performance.now(), res: null, lv: SH_LV[o.lvl], kit: SH_KITS[o.kit][0], ball: null, kp: null, wind: 0, trail: [], ripple: null, cheer: 0, tt: 0 };
+    shNewShot(); S.game.mode = 'sh'; S.guess.run = true; renderView(); setTimeout(shLoop, 0);
+  }
+  function shNewShot() { var z = S.sh; z.wind = z.lv.wind ? (rand(2) ? 1 : -1) * (z.lv.wind * (0.5 + rand(51) / 100)) : 0; z.phase = 'x'; z.ball = null; z.kp = null; z.trail = []; z.ripple = null; z.res = null; z.t0 = performance.now(); z.kick = 0; z.cheer = 0; }
+  function shBg() {
+    if (S.shBgC) return S.shBgC;
+    var c = document.createElement('canvas'); c.width = 720; c.height = 540; var x = c.getContext('2d'), seed = 7;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    var sky = x.createLinearGradient(0, 0, 0, 230); sky.addColorStop(0, '#05080F'); sky.addColorStop(1, '#14202E'); x.fillStyle = sky; x.fillRect(0, 0, 720, 232);
+    /* crowd */
+    var cols = ['#7A2230', '#2B4C7E', '#C9A24A', '#E8E8E8', '#3C7A5A', '#8C5BB0', '#D96B3B'];
+    for (var r = 0; r < 14; r++) { var yy = 40 + r * 12.6, sc = 0.7 + r * 0.04; for (var i = 0; i < 90; i++) { var xx = i * 8.1 + (r % 2) * 4 + rnd() * 3; x.fillStyle = cols[Math.floor(rnd() * cols.length)]; x.globalAlpha = 0.5 + rnd() * 0.35; x.beginPath(); x.arc(xx, yy + rnd() * 3, 3.2 * sc, 0, 7); x.fill(); x.fillStyle = '#E3B58F'; x.beginPath(); x.arc(xx, yy - 4 * sc, 2 * sc, 0, 7); x.fill(); } }
+    x.globalAlpha = 1; var shade = x.createLinearGradient(0, 30, 0, 215); shade.addColorStop(0, 'rgba(5,8,15,0.75)'); shade.addColorStop(1, 'rgba(5,8,15,0.15)'); x.fillStyle = shade; x.fillRect(0, 30, 720, 185);
+    /* floodlights */
+    [[40, 12], [680, 12], [360, 4]].forEach(function (p) { var g = x.createRadialGradient(p[0], p[1], 0, p[0], p[1], 190); g.addColorStop(0, 'rgba(255,248,220,0.55)'); g.addColorStop(1, 'rgba(255,248,220,0)'); x.fillStyle = g; x.fillRect(0, 0, 720, 260); });
+    /* ad boards */
+    x.fillStyle = '#0B2A4A'; x.fillRect(0, 205, 720, 26); x.fillStyle = '#E7C26A'; x.font = '800 15px Arial'; x.textBaseline = 'middle'; x.textAlign = 'center';
+    for (var a = 0; a < 3; a++) { x.fillText('SYLHET NET BREAKERS', 120 + a * 240, 218); } x.fillStyle = 'rgba(255,255,255,0.15)'; x.fillRect(0, 205, 720, 2); x.fillStyle = '#05080F'; x.fillRect(0, 231, 720, 3);
+    /* pitch with perspective stripes */
+    for (var k = 0; k < 12; k++) { var y0 = 234 + 306 * Math.pow(k / 12, 1.45), y1 = 234 + 306 * Math.pow((k + 1) / 12, 1.45); x.fillStyle = k % 2 ? '#2B6B38' : '#337A41'; x.fillRect(0, y0, 720, y1 - y0 + 1); }
+    var vg = x.createLinearGradient(0, 234, 0, 540); vg.addColorStop(0, 'rgba(0,0,0,0.35)'); vg.addColorStop(0.5, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.25)'); x.fillStyle = vg; x.fillRect(0, 234, 720, 306);
+    /* lines */
+    x.strokeStyle = 'rgba(255,255,255,0.85)'; x.lineWidth = 3; x.beginPath(); x.moveTo(0, 365); x.lineTo(720, 365); x.stroke();
+    x.lineWidth = 2.5; x.beginPath(); x.moveTo(110, 365); x.lineTo(80, 412); x.lineTo(640, 412); x.lineTo(610, 365); x.stroke();
+    x.beginPath(); x.moveTo(60, 365); x.lineTo(-40, 540); x.moveTo(660, 365); x.lineTo(760, 540); x.stroke();
+    x.fillStyle = 'rgba(255,255,255,0.9)'; x.beginPath(); x.ellipse(360, 482, 6, 3, 0, 0, 7); x.fill();
+    S.shBgC = c; return c;
+  }
+  function shGoalPt(fx, fy) { return { x: SHG.l + fx * SHG.w, y: SHG.b - fy * (SHG.b - SHG.t) }; }
+  function shNet(x, z, ripple) {
+    /* back net (depth) */
+    x.fillStyle = 'rgba(8,14,22,0.55)'; x.beginPath(); x.moveTo(SHG.l, SHG.t); x.lineTo(SHG.l + SHG.w, SHG.t); x.lineTo(SHG.l + SHG.w - 26, SHG.t + 14); x.lineTo(SHG.l + 26, SHG.t + 14); x.closePath(); x.fill();
+    x.fillStyle = 'rgba(8,14,22,0.35)'; x.fillRect(SHG.l, SHG.t, SHG.w, SHG.b - SHG.t);
+    x.strokeStyle = 'rgba(255,255,255,0.22)'; x.lineWidth = 1;
+    var amp = ripple ? Math.max(0, 1 - (performance.now() - ripple.t0) / 1100) : 0, rt = ripple ? (performance.now() - ripple.t0) / 1000 : 0;
+    function dsp(px, py) { if (!amp) return 0; var dx = px - ripple.x, dy = py - ripple.y, d = Math.sqrt(dx * dx + dy * dy); return amp * 9 * Math.exp(-d * d / 5200) * Math.sin(rt * 18 - d * 0.06); }
+    for (var vx = SHG.l; vx <= SHG.l + SHG.w; vx += 14) { x.beginPath(); for (var vy = SHG.t; vy <= SHG.b; vy += 8) { var o = dsp(vx, vy); if (vy === SHG.t) x.moveTo(vx + o, vy + o * 0.6); else x.lineTo(vx + o, vy + o * 0.6); } x.stroke(); }
+    for (var hy = SHG.t; hy <= SHG.b; hy += 12) { x.beginPath(); for (var hx = SHG.l; hx <= SHG.l + SHG.w; hx += 8) { var o2 = dsp(hx, hy); if (hx === SHG.l) x.moveTo(hx + o2, hy + o2 * 0.6); else x.lineTo(hx + o2, hy + o2 * 0.6); } x.stroke(); }
+  }
+  function shPosts(x) {
+    var w = 9, g = x.createLinearGradient(0, 0, 0, 1); x.save();
+    x.fillStyle = '#F4F1E4'; x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 8; x.shadowOffsetY = 4;
+    x.fillRect(SHG.l - w / 2, SHG.t - w / 2, w, SHG.b - SHG.t + w / 2); x.fillRect(SHG.l + SHG.w - w / 2, SHG.t - w / 2, w, SHG.b - SHG.t + w / 2); x.fillRect(SHG.l - w / 2, SHG.t - w / 2, SHG.w + w, w);
+    x.restore(); x.fillStyle = 'rgba(0,0,0,0.18)'; x.fillRect(SHG.l + 1, SHG.t - w / 2, 3, SHG.b - SHG.t); x.fillRect(SHG.l + SHG.w + 1, SHG.t - w / 2, 3, SHG.b - SHG.t);
+  }
+  function shBall(x, b) {
+    x.save(); x.globalAlpha = 0.28; x.fillStyle = '#000'; x.beginPath(); x.ellipse(b.sx, b.sy, b.r * 1.1, b.r * 0.38, 0, 0, 7); x.fill(); x.restore();
+    for (var i = 0; i < b.tr.length; i++) { x.globalAlpha = 0.07 * (i + 1); x.fillStyle = '#fff'; x.beginPath(); x.arc(b.tr[i][0], b.tr[i][1], b.r * (0.55 + i * 0.07), 0, 7); x.fill(); }
+    x.globalAlpha = 1; x.save(); x.translate(b.x, b.y); x.rotate(b.a);
+    var g = x.createRadialGradient(-b.r * 0.35, -b.r * 0.4, b.r * 0.1, 0, 0, b.r); g.addColorStop(0, '#fff'); g.addColorStop(1, '#C9CED4'); x.fillStyle = g; x.beginPath(); x.arc(0, 0, b.r, 0, 7); x.fill();
+    x.fillStyle = '#1B1F26'; x.beginPath(); for (var k = 0; k < 5; k++) { var an = k * 1.2566 - 1.5708; x.lineTo(Math.cos(an) * b.r * 0.38, Math.sin(an) * b.r * 0.38); } x.closePath(); x.fill();
+    for (var m = 0; m < 5; m++) { var a2 = m * 1.2566 - 1.5708; x.beginPath(); x.arc(Math.cos(a2) * b.r * 0.82, Math.sin(a2) * b.r * 0.82, b.r * 0.2, 0, 7); x.fill(); }
+    x.restore(); x.strokeStyle = 'rgba(0,0,0,0.35)'; x.lineWidth = 1; x.beginPath(); x.arc(b.x, b.y, b.r, 0, 7); x.stroke();
+  }
+  function shKeeper(x, k) {
+    /* k: {x,y (pelvis), ang, arm (0..1 stretch), sway} */
+    var sc = 1.2; x.save(); x.fillStyle = 'rgba(0,0,0,0.3)'; x.beginPath(); x.ellipse(k.gx, SHG.b + 4, 30 * sc, 6 * sc, 0, 0, 7); x.fill(); x.restore();
+    x.save(); x.translate(k.x, k.y); x.rotate(k.ang); x.scale(sc, sc);
+    x.lineCap = 'round'; x.lineJoin = 'round';
+    x.strokeStyle = '#1B2430'; x.lineWidth = 9; x.beginPath(); x.moveTo(-5, 4); x.lineTo(-8 - k.spread, 30); x.moveTo(5, 4); x.lineTo(8 + k.spread, 30); x.stroke(); /* legs */
+    x.strokeStyle = '#EDEDED'; x.lineWidth = 7; x.beginPath(); x.moveTo(-8 - k.spread, 24); x.lineTo(-8 - k.spread, 33); x.moveTo(8 + k.spread, 24); x.lineTo(8 + k.spread, 33); x.stroke();
+    x.fillStyle = '#F2B134'; x.beginPath(); if (x.roundRect) x.roundRect(-11, -34, 22, 40, 6); else x.rect(-11, -34, 22, 40); x.fill();
+    x.fillStyle = 'rgba(0,0,0,0.16)'; x.fillRect(-11, -14, 22, 4);
+    var ah = 16 + k.arm * 26, side = k.arm; /* arms: bent out at idle, stretched up when diving */
+    x.strokeStyle = '#F2B134'; x.lineWidth = 7; var ex = 14 + (1 - side) * 12, ey = -22 - side * 20, hx = 16 + (1 - side) * 14 - side * 8, hy = -22 - ah * 1.0 + (1 - side) * 14;
+    x.beginPath(); x.moveTo(-10, -30); x.lineTo(-ex, ey); x.lineTo(-hx, hy); x.moveTo(10, -30); x.lineTo(ex, ey); x.lineTo(hx, hy); x.stroke();
+    x.fillStyle = '#7CE08A'; x.beginPath(); x.arc(-hx, hy, 6, 0, 7); x.arc(hx, hy, 6, 0, 7); x.fill();
+    x.fillStyle = '#E3B58F'; x.beginPath(); x.arc(0, -43, 8.5, 0, 7); x.fill(); x.fillStyle = '#20150E'; x.beginPath(); x.arc(0, -46, 8.5, Math.PI, 0); x.fill();
+    x.restore();
+  }
+  function shShooter(x, z, bx, by) {
+    var kick = z.kick, px = bx - 58 + kick * 30, py = by + 22 - kick * 6, c = z.kit;
+    x.save(); x.fillStyle = 'rgba(0,0,0,0.3)'; x.beginPath(); x.ellipse(px, py + 52, 26, 6, 0, 0, 7); x.fill();
+    x.lineCap = 'round'; x.strokeStyle = '#E3B58F'; x.lineWidth = 10; x.beginPath(); x.moveTo(px - 7, py + 18); x.lineTo(px - 9, py + 50); x.stroke();
+    x.beginPath(); x.moveTo(px + 7, py + 18); x.lineTo(px + 9 + kick * 16, py + 50 - kick * 6); x.stroke();
+    x.strokeStyle = '#222'; x.lineWidth = 11; x.beginPath(); x.moveTo(px - 7, py + 40); x.lineTo(px - 9, py + 52); x.moveTo(px + 7 + kick * 4, py + 40); x.lineTo(px + 9 + kick * 18, py + 52 - kick * 7); x.stroke();
+    x.fillStyle = '#12161C'; x.fillRect(px - 15, py + 10, 30, 16);
+    x.fillStyle = c; x.beginPath(); if (x.roundRect) x.roundRect(px - 17, py - 28, 34, 42, 8); else x.rect(px - 17, py - 28, 34, 42); x.fill();
+    x.fillStyle = 'rgba(0,0,0,0.18)'; x.fillRect(px - 17, py - 28, 34, 6);
+    var lum = parseInt(c.slice(1, 3), 16) * 0.3 + parseInt(c.slice(3, 5), 16) * 0.59 + parseInt(c.slice(5, 7), 16) * 0.11;
+    x.fillStyle = lum > 150 ? '#1B2430' : '#fff'; x.font = '800 20px Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('10', px, py - 6);
+    x.strokeStyle = c; x.lineWidth = 8; x.beginPath(); x.moveTo(px - 16, py - 22); x.lineTo(px - 24, py + 2); x.moveTo(px + 16, py - 22); x.lineTo(px + 24 + kick * 8, py + 2 - kick * 6); x.stroke();
+    x.fillStyle = '#E3B58F'; x.beginPath(); x.arc(px, py - 38, 10, 0, 7); x.fill(); x.fillStyle = '#20150E'; x.beginPath(); x.arc(px, py - 41, 10.5, Math.PI * 0.95, Math.PI * 2.05); x.fill();
+    x.restore();
   }
   function shDraw() {
-    var z = S.sh, cv = $('#shcv'); if (!cv) return false;
-    var x = cv.getContext('2d'), W = 320, H = 240, gx = 30, gy = 22, gw = 260, gh = 120;
-    x.clearRect(0, 0, W, H);
-    var gr = x.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#0E2A33'); gr.addColorStop(0.55, '#14343C'); gr.addColorStop(0.56, '#2C6B3A'); gr.addColorStop(1, '#1F5230'); x.fillStyle = gr; x.fillRect(0, 0, W, H);
-    x.fillStyle = 'rgba(255,255,255,0.08)'; for (var i = 0; i <= 13; i++) { x.fillRect(gx + i * 20, gy, 1, gh); } for (var j = 0; j <= 6; j++) { x.fillRect(gx, gy + j * 20, gw, 1); }
-    x.strokeStyle = '#F4F1E4'; x.lineWidth = 5; x.beginPath(); x.moveTo(gx, gy + gh); x.lineTo(gx, gy); x.lineTo(gx + gw, gy); x.lineTo(gx + gw, gy + gh); x.stroke();
-    x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(gx - 6, gy + gh, gw + 12, 2);
-    // keeper
-    var kx = gx + z.keeper * gw, ky = gy + gh - 34; x.fillStyle = '#F2B134'; x.fillRect(kx - 12, ky, 24, 34); x.fillStyle = '#FFD9B0'; x.beginPath(); x.arc(kx, ky - 8, 9, 0, 7); x.fill();
-    x.strokeStyle = '#F2B134'; x.lineWidth = 6; x.beginPath(); x.moveTo(kx - 12, ky + 8); x.lineTo(kx - 26, ky - 4); x.moveTo(kx + 12, ky + 8); x.lineTo(kx + 26, ky - 4); x.stroke();
-    // aim
-    if (z.phase === 'x' || z.phase === 'y') {
-      x.strokeStyle = '#E7C26A'; x.lineWidth = 3; var ax = gx + z.px * gw;
-      x.beginPath(); x.moveTo(ax, gy - 6); x.lineTo(ax, gy + gh + 6); x.stroke();
-      if (z.phase === 'y') { var ay = gy + (1 - z.py) * gh; x.beginPath(); x.moveTo(gx - 6, ay); x.lineTo(gx + gw + 6, ay); x.stroke(); x.beginPath(); x.arc(ax, ay, 9, 0, 7); x.stroke(); }
+    var z = S.sh, cv = $('#shcv'); if (!cv || !z) return false;
+    var x = cv.getContext('2d'), now = performance.now(), W = 720, H = 540;
+    x.drawImage(shBg(), 0, 0);
+    if (z.cheer && now < z.cheer) { x.fillStyle = 'rgba(255,240,180,' + (0.18 * ((z.cheer - now) / 900)).toFixed(3) + ')'; x.fillRect(0, 30, W, 175); for (var f = 0; f < 14; f++) { var fx = ((f * 97 + Math.floor(now / 90) * 53) % 700) + 10, fy = 50 + ((f * 41 + Math.floor(now / 70) * 29) % 140); x.fillStyle = 'rgba(255,255,255,0.9)'; x.fillRect(fx, fy, 3, 3); } }
+    shNet(x, z, z.ripple);
+    /* keeper */
+    var k = z.kp ? z.kpState : { x: SHG.l + SHG.w / 2 + Math.sin(now / 420) * 5, y: SHG.b - 34, ang: 0, arm: 0.1 + 0.1 * Math.sin(now / 300), spread: 4 + Math.sin(now / 420) * 2 };
+    k.gx = k.x; shKeeper(x, k);
+    var inside = z.ball && z.ball.inNet;
+    if (z.ball && inside) shBall(x, z.ball);
+    shPosts(x);
+    /* ball + shooter */
+    var b0 = z.ball || { x: 360, y: 478, r: 17, sx: 360, sy: 496, a: 0, tr: [] };
+    shShooter(x, z, 360, 478);
+    if (!inside) shBall(x, b0);
+    /* aim overlays */
+    if (z.phase === 'x' || z.phase === 'y' || z.phase === 'p') {
+      x.strokeStyle = 'rgba(231,194,106,0.95)'; x.lineWidth = 3; x.setLineDash([8, 6]);
+      var ax = SHG.l + z.px * SHG.w; if (z.phase !== 'x') ax = SHG.l + z.fx * SHG.w;
+      x.beginPath(); x.moveTo(ax, SHG.t - 18); x.lineTo(ax, SHG.b + 6); x.stroke();
+      if (z.phase === 'y' || z.phase === 'p') { var ay = z.phase === 'y' ? SHG.b - z.py * (SHG.b - SHG.t) : SHG.b - z.fy * (SHG.b - SHG.t); x.beginPath(); x.moveTo(SHG.l - 14, ay); x.lineTo(SHG.l + SHG.w + 14, ay); x.stroke(); x.setLineDash([]); x.lineWidth = 3; x.beginPath(); x.arc(ax, ay, 12, 0, 7); x.stroke(); x.beginPath(); x.arc(ax, ay, 3, 0, 7); x.fill(); }
+      x.setLineDash([]);
     }
-    // ball
-    var b = z.ball || { x: W / 2, y: 212, r: 11 }; x.fillStyle = '#fff'; x.beginPath(); x.arc(b.x, b.y, b.r, 0, 7); x.fill(); x.strokeStyle = '#222'; x.lineWidth = 2; x.stroke();
-    x.fillStyle = '#222'; x.beginPath(); x.arc(b.x, b.y, b.r * 0.38, 0, 7); x.fill();
+    if (z.phase === 'p') {
+      var bx = 662, by = 300, bh = 190, bw = 22; x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillRect(bx - 4, by - 4, bw + 8, bh + 8);
+      var gz = x.createLinearGradient(0, by, 0, by + bh); gz.addColorStop(0, '#C8372D'); gz.addColorStop(0.04, '#F2B134'); gz.addColorStop(0.12, '#4DBF6A'); gz.addColorStop(0.38, '#4DBF6A'); gz.addColorStop(0.52, '#F2B134'); gz.addColorStop(1, '#C8372D');
+      x.fillStyle = gz; x.fillRect(bx, by, bw, bh); var my = by + bh - z.pp * bh; x.fillStyle = '#fff'; x.fillRect(bx - 8, my - 3, bw + 16, 6);
+      x.fillStyle = '#fff'; x.font = '700 13px Arial'; x.textAlign = 'center'; x.fillText('শক্তি', bx + bw / 2, by - 12);
+    }
     return true;
   }
+  function shBezier(p0, p1, p2, t) { var u = 1 - t; return { x: u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x, y: u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y }; }
   function shLoop() {
     var z = S.sh; if (!z || !$('#shcv')) return;
-    var t = (performance.now() - z.t0) / 1000, sp = 1.5 + z.i * 0.45;
-    if (z.phase === 'x') z.px = 0.5 + 0.5 * Math.sin(t * sp * 2.2);
-    else if (z.phase === 'y') z.py = 0.5 + 0.5 * Math.sin(t * sp * 2.7);
-    else if (z.phase === 'fly') {
-      var k = Math.min(1, (performance.now() - z.fly0) / 420), tx = 30 + z.fx * 260, ty = 22 + (1 - z.fy) * 120;
-      z.ball = { x: 160 + (tx - 160) * k, y: 212 + (ty - 212) * k, r: 11 - 4 * k };
-      z.keeper = z.k0 + (z.kc - z.k0) * Math.min(1, k * 1.2);
-      if (k >= 1) { shResolve(); return; }
-    }
+    var now = performance.now(), t = (now - z.t0) / 1000, sp = z.lv.sp;
+    if (z.phase === 'x') z.px = 0.5 + 0.5 * Math.sin(t * sp * 2.3);
+    else if (z.phase === 'y') z.py = 0.5 + 0.5 * Math.sin(t * sp * 2.8);
+    else if (z.phase === 'p') z.pp = 0.5 + 0.5 * Math.sin(t * sp * 3.1 - 1.57);
+    else if (z.phase === 'fly' || z.phase === 'after') shStep(now);
     shDraw();
     if (z.phase !== 'done') requestAnimationFrame(shLoop);
+  }
+  function shStep(now) {
+    var z = S.sh, f = z.flight, k = Math.min(1, (now - f.t0) / f.dur);
+    z.kick = Math.min(1, (now - f.t0) / 140) * (z.phase === 'fly' ? 1 : Math.max(0, 1 - (now - f.tEnd) / 300));
+    if (z.phase === 'fly') {
+      var kk = Math.max(0, k), p = shBezier(f.p0, f.pc, f.p1, kk), r = 17 - 9 * kk;
+      z.ball = { x: p.x, y: p.y, r: r, sx: p.x, sy: f.p0.y + 18 - (f.p0.y - f.groundY) * kk, a: kk * f.spin, tr: z.trail.slice(-5), inNet: false };
+      z.trail.push([p.x, p.y]); if (z.trail.length > 6) z.trail.shift();
+      var kp = z.kp, kr = Math.max(0, Math.min(1, (kk - kp.delay) / (0.92 - kp.delay))), e = 1 - Math.pow(1 - kr, 2.2);
+      z.kpState = { x: kp.x0 + (kp.x1 - kp.x0) * e, y: kp.y0 + (kp.y1 - kp.y0) * e - Math.sin(e * Math.PI) * 14, ang: kp.ang * e, arm: kp.dive ? e : 0.2, spread: 4 + e * 6 };
+      if (k >= 1) { z.phase = 'after'; f.tEnd = now; f.post = z.outcome; if (z.outcome.t === 'goal') { z.ripple = { x: f.p1.x, y: f.p1.y, t0: now }; z.cheer = now + 900; } }
+    } else {
+      var q = Math.min(1, (now - f.tEnd) / 800), o = z.outcome, b = z.ball;
+      if (o.t === 'goal') { b.inNet = true; b.x = f.p1.x + (f.p1.x - f.pc.x) * 0.05 * q; b.y = Math.min(SHG.b - 6, f.p1.y + 38 * q * q); b.r = 8 - 1.5 * q; b.a += 0.2; b.sy = SHG.b + 2; }
+      else if (o.t === 'save') { b.x += (f.p1.x - f.pc.x) * 0.06; b.y += 9 * q - 5 * (1 - q); b.r = Math.min(13, b.r + 0.12); b.sy = Math.max(b.sy, b.y + 40); b.a += 0.3; }
+      else if (o.t === 'post' || o.t === 'bar') { b.x += (f.pc.x - f.p1.x) * 0.1 * (1 - q); b.y += (o.t === 'bar' ? -6 : 1) * (1 - q) + 12 * q; b.r = Math.min(14, b.r + 0.14); b.a += 0.3; }
+      else { b.x += (f.p1.x - f.pc.x) * 0.12; b.y += o.t === 'over' ? -9 : 1.5; b.r = Math.max(5, b.r - 0.08); b.a += 0.2; }
+      if (q >= 1) { z.phase = 'done'; shFinish(); }
+    }
   }
   function shTap() {
     var z = S.sh; if (!z) return;
     if (z.phase === 'x') { z.fx = z.px; z.phase = 'y'; z.t0 = performance.now(); }
-    else if (z.phase === 'y') {
-      z.fy = z.py; z.phase = 'fly'; z.fly0 = performance.now(); z.k0 = z.keeper;
-      z.kc = [0.2, 0.5, 0.8][rand(3)];
-    }
-    var b = $('#shbtn'); if (b) b.textContent = z.phase === 'y' ? '⬆️ উচ্চতা ঠিক করো!' : '…';
+    else if (z.phase === 'y') { z.fy = z.py; z.phase = 'p'; z.t0 = performance.now(); }
+    else if (z.phase === 'p') { z.fp = z.pp; shShoot(); return; }
+    shBtn();
   }
-  function shResolve() {
-    var z = S.sh, x = z.fx, y = z.fy, res, pts = 0;
-    if (x < 0.05 || x > 0.95 || y > 0.95 || y < 0.04) { res = '🚫 বাইরে!'; }
-    else if (Math.abs(x - z.kc) < 0.17 && y < 0.75) { res = '🧤 সেভ!'; }
-    else { pts = y >= 0.75 ? 200 : 150; res = y >= 0.75 ? '🔥 টপ কর্নারে গোল!' : '⚽ গোল!'; z.goals++; }
-    z.score += pts; z.res = res; z.phase = 'done'; z.last = pts; shDraw(); renderView();
+  function shBtn() { var z = S.sh, b = $('#shbtn'); if (b && z) b.textContent = z.phase === 'x' ? '🎯 দিক ঠিক করো' : z.phase === 'y' ? '⬆️ উচ্চতা ঠিক করো' : z.phase === 'p' ? '💪 শক্তি ঠিক করো' : '…'; var m = $('#shmsg'); if (m && z) m.textContent = z.phase === 'x' ? 'দাগ ডানে-বামে ঘুরছে, ঠিক জায়গায় থামাও!' : z.phase === 'y' ? 'এবার উপর-নিচ। উপরের কর্নার সেরা, কিন্তু বারের উপর গেলে মিস!' : z.phase === 'p' ? 'শক্তি সবুজ অংশে থামাও। কম হলে কিপার ধরে ফেলবে, বেশি হলে আকাশে!' : ''; }
+  function shShoot() {
+    var z = S.sh, lv = z.lv, wx = z.wind, fx = z.fx, fy = z.fy, p = z.fp;
+    var fxe = fx + wx; /* wind drift */
+    var out = { t: 'goal', pts: 0 };
+    var weak = p < 0.38 || p > 0.98 && false;
+    if (p > 0.96) out = { t: 'over' };
+    else if (fxe < -0.02 || fxe > 1.02) out = { t: 'wide' };
+    else if (fxe < 0.035 || fxe > 0.965) out = { t: 'post' };
+    else if (fy > 0.965) out = { t: 'bar' };
+    /* keeper */
+    var readIt = Math.random() < lv.read, kc = readIt ? Math.max(0.12, Math.min(0.88, fx + (Math.random() - 0.5) * 0.24)) : 0.12 + Math.random() * 0.76;
+    var reach = lv.reach * (weak ? 1.6 : 1), cut = weak ? 1.1 : lv.cut;
+    if (out.t === 'goal' && Math.abs(fxe - kc) < reach && fy < cut) out = { t: 'save' };
+    if (out.t === 'goal') { out.pts = Math.round((120 + (fy >= 0.7 ? 40 : 0) + ((fxe < 0.16 || fxe > 0.84) ? 40 : 0)) * lv.mult); }
+    z.outcome = out;
+    var tp = shGoalPt(Math.max(-0.15, Math.min(1.15, fxe)), out.t === 'over' ? 1.5 : fy), p0 = { x: 360, y: 478 }, tgt = tp;
+    var dur = 780 - 330 * Math.min(1, p) + (weak ? 200 : 0);
+    var pc = { x: (p0.x + tgt.x) / 2 + wx * 140 * -1 + (tgt.x - 360) * 0.05, y: Math.min(p0.y, tgt.y) - 30 - 70 * (1 - Math.min(fy, 1)) * 0 };
+    z.flight = { t0: performance.now() + 140, dur: dur, p0: p0, pc: pc, p1: tgt, spin: 14 + p * 10, groundY: SHG.b };
+    /* keeper plan */
+    var kx0 = SHG.l + SHG.w / 2, ky0 = SHG.b - 34, h = out.t === 'save' ? tp : { x: SHG.l + kc * SHG.w, y: SHG.b - (0.15 + Math.random() * 0.4) * (SHG.b - SHG.t) };
+    var dx = h.x - kx0, dy = h.y - ky0, len = Math.sqrt(dx * dx + dy * dy) || 1, ux = dx / len, uy = dy / len;
+    var dive = Math.abs(dx) > 28 || h.y < ky0 - 40, x1 = h.x - ux * 62, y1 = Math.min(SHG.b - 18, h.y - uy * 62), ang = Math.atan2(dx, -dy);
+    ang = Math.max(-1.35, Math.min(1.35, ang));
+    z.kp = { x0: kx0, y0: ky0, x1: dive ? x1 : kx0, y1: dive ? y1 : ky0 - 18, ang: dive ? ang : 0, dive: dive, delay: [0.28, 0.2, 0.12][S.shOpt.lvl] };
+    z.kpState = { x: kx0, y: ky0, ang: 0, arm: 0.2, spread: 4 };
+    z.phase = 'fly'; z.trail = []; shBtn();
+  }
+  function shFinish() {
+    var z = S.sh, o = z.outcome; z.score += o.pts || 0; if (o.t === 'goal') z.goals++;
+    z.res = { goal: '⚽ গোল!!', save: '🧤 কিপার ঠেকিয়ে দিল!', post: '😱 পোস্টে লাগল!', bar: '😱 ক্রসবারে লাগল!', over: '🚀 বল আকাশে!', wide: '🚫 বাইরে!' }[o.t]; if (o.t === 'goal' && o.pts >= 200 * z.lv.mult - 1) z.res = '🔥 টপ কর্নারে গোল!';
+    renderView();
   }
   function viewShoot() {
-    var z = S.sh, last = z.i >= 4;
+    var z = S.sh, last = z.i >= 4, windTxt = z.lv.wind ? '💨 বাতাস ' + (z.wind > 0 ? '➡️' : '⬅️') + (Math.abs(z.wind) > z.lv.wind * 0.8 ? '➡️⬅️'.slice(0, 0) : '') + (Math.abs(z.wind) > z.lv.wind * 0.8 ? ' (জোরে)' : ' (হালকা)') : '🌤️ বাতাস নেই';
+    var cv = h('canvas', { id: 'shcv', width: 720, height: 540, class: 'gcv shcv' }); cv.onpointerdown = function (e) { e.preventDefault(); if (S.sh.phase === 'x' || S.sh.phase === 'y' || S.sh.phase === 'p') shTap(); };
     var box = h('section', { class: 'card panel' }, h('h2', null, '⚽ পেনাল্টি শুটআউট'),
-      h('p', { class: 'muted small' }, 'শট ' + (z.i + 1) + '/5 · পয়েন্ট ' + z.score + ' · গোল ' + z.goals), h('div', { class: 'gwrap' }, h('canvas', { id: 'shcv', width: 320, height: 240, class: 'gcv shcv' })));
+      h('p', { class: 'muted small' }, 'শট ' + (z.i + 1) + '/5 · পয়েন্ট ' + z.score + ' · গোল ' + z.goals + ' · ' + z.lv.n), h('p', { class: 'small' }, windTxt), h('div', { class: 'gwrap' }, cv));
     if (z.phase === 'done') {
-      box.append(h('p', { class: 'qtext' }, z.res + (z.last ? ' +' + z.last : '')),
-        h('button', { class: 'btn block', onclick: function () { if (last) { S.guess.run = false; finishGame('s', z.score, '⚽ ' + z.goals + '/5 গোল'); } else { z.i++; z.phase = 'x'; z.ball = null; z.keeper = 0.5; z.t0 = performance.now(); z.res = null; renderView(); setTimeout(shLoop, 0); } } }, last ? '🏁 ফলাফল দেখুন' : 'পরের শট ▶️'));
+      box.append(h('p', { class: 'qtext' }, z.res + (z.outcome.pts ? ' +' + z.outcome.pts : '')),
+        h('button', { class: 'btn block', onclick: function () { if (last) { S.guess.run = false; finishGame('s', Math.min(1000, z.score), '⚽ ' + z.goals + '/5 গোল · ' + z.lv.n); } else { z.i++; shNewShot(); renderView(); setTimeout(shLoop, 0); } } }, last ? '🏁 ফলাফল দেখুন' : 'পরের শট ▶️'));
+    } else if (z.phase === 'fly' || z.phase === 'after') {
+      box.append(h('p', { class: 'muted small' }, '…'));
     } else {
-      box.append(h('p', { class: 'muted small' }, z.phase === 'x' ? 'দাগ ডানে-বামে ঘুরছে, ঠিক জায়গায় থামাও!' : 'এবার উপর-নিচ। উপরে (কিন্তু বারের নিচে!) মারলে কিপার ধরতে পারে না।'),
-        h('button', { class: 'btn block', id: 'shbtn', onclick: shTap }, z.phase === 'x' ? '🎯 দিক ঠিক করো' : '⬆️ উচ্চতা ঠিক করো!'));
+      box.append(h('p', { class: 'muted small', id: 'shmsg' }, z.phase === 'x' ? 'দাগ ডানে-বামে ঘুরছে, ঠিক জায়গায় থামাও!' : z.phase === 'y' ? 'এবার উপর-নিচ। উপরের কর্নার সেরা, কিন্তু বারের উপর গেলে মিস!' : 'শক্তি সবুজ অংশে থামাও। কম হলে কিপার ধরে ফেলবে, বেশি হলে আকাশে!'),
+        h('button', { class: 'btn block', id: 'shbtn', onclick: shTap }, z.phase === 'x' ? '🎯 দিক ঠিক করো' : z.phase === 'y' ? '⬆️ উচ্চতা ঠিক করো' : '💪 শক্তি ঠিক করো'));
     }
-    box.append(h('button', { class: 'link-btn', onclick: function () { S.guess.run = false; S.game.mode = null; renderView(); } }, '✖ ছেড়ে দিন'));
+    box.append(h('p', { class: 'muted small' }, 'টিপ: ছবির উপরেও ট্যাপ করা যায়।'), h('button', { class: 'link-btn', onclick: function () { S.guess.run = false; S.game.mode = null; renderView(); } }, '✖ ছেড়ে দিন'));
     setTimeout(shDraw, 0);
     return box;
   }
 
-  /* ----- game 6: higher or lower ----- */
-  var HL_ST = [['goals', 'গোল', '⚽'], ['wins', 'জয়', '🏆'], ['draws', 'ড্র', '🤝'], ['r', 'কার্ড রেটিং', '🃏'], ['hat', 'হ্যাটট্রিক', '🎩']];
-  function hlVal(id, k) { return k === 'r' ? ratingFor(id) : allStats(id)[k]; }
-  function hlNext(keepA) {
-    var z = S.hl, ids = Array.from(S.players.keys());
-    for (var tr = 0; tr < 60; tr++) {
-      var st = HL_ST[rand(HL_ST.length)], a = keepA && tr < 30 ? z.b : ids[rand(ids.length)], b = ids[rand(ids.length)];
-      if (a === b) continue;
-      if (hlVal(a, st[0]) === hlVal(b, st[0])) continue;
-      z.st = st; z.a = a; z.b = b; z.picked = null; return true;
+  /* ----- game 6: sequence memory (hard) ----- */
+  function sqStart() {
+    if (S.players.size < 4) { toast('এই গেমের জন্য অন্তত ৪ জন প্লেয়ার লাগবে'); return; }
+    var pool = shuffle(Array.from(S.players.keys())).slice(0, 6);
+    S.sq = { pool: pool, seq: [], pos: 0, phase: 'show', round: 0, over: false, tok: 0 };
+    sqNext(); S.game.mode = 'sq'; S.guess.run = true; renderView();
+  }
+  function sqNext() { var q = S.sq; q.seq.push(rand(q.pool.length)); if (q.seq.length < 3) q.seq.push(rand(q.pool.length)); if (q.seq.length < 3) q.seq.push(rand(q.pool.length)); q.pos = 0; q.phase = 'show'; }
+  function sqPlay() {
+    var q = S.sq, tok = ++q.tok, gap = Math.max(260, 720 - q.round * 40), i = 0;
+    var msg = $('#sqmsg'); if (msg) msg.textContent = '👀 ভালো করে দেখো...';
+    function lit(k, on) { var el = $('#sq' + k); if (el) el.classList.toggle('lit', on); }
+    function step() {
+      if (tok !== q.tok || !$('#sqg')) return;
+      if (i >= q.seq.length) { q.phase = 'input'; if (msg) msg.textContent = '👉 এবার একই ক্রমে ট্যাপ করো (' + q.seq.length + 'টা)'; return; }
+      var k = q.seq[i]; lit(k, true); setTimeout(function () { lit(k, false); i++; setTimeout(step, gap * 0.35); }, gap * 0.65);
     }
-    return false;
+    setTimeout(step, 600);
   }
-  function hlStart() {
-    S.hl = { streak: 0, over: false }; if (!hlNext(false)) { toast('এখনো পর্যাপ্ত আলাদা রেকর্ড নেই। কিছু ম্যাচ যোগ হলে আবার চেষ্টা করুন।'); return; }
-    S.game.mode = 'hl'; S.guess.run = true; renderView();
+  function sqTap(k) {
+    var q = S.sq; if (q.phase !== 'input' || q.over) return;
+    var el = $('#sq' + k); if (el) { el.classList.add('lit'); setTimeout(function () { el.classList.remove('lit'); }, 160); }
+    if (q.seq[q.pos] !== k) { q.over = true; q.phase = 'over'; renderView(); return; }
+    q.pos++;
+    if (q.pos >= q.seq.length) { q.round++; q.phase = 'wait'; var m = $('#sqmsg'); if (m) m.textContent = '✅ ঠিক! রাউন্ড ' + q.round + ' শেষ'; var sc = $('#sqsc'); if (sc) sc.textContent = 'রাউন্ড পার: ' + q.round; setTimeout(function () { if (!$('#sqg')) return; sqNext(); sqPlay(); }, 900); }
   }
-  function hlPick(higher) {
-    var z = S.hl; if (z.picked !== null) return;
-    var va = hlVal(z.a, z.st[0]), vb = hlVal(z.b, z.st[0]); z.picked = higher; z.ok = higher ? vb > va : vb < va;
-    if (z.ok) z.streak++; else z.over = true;
-    renderView();
-  }
-  function viewHL() {
-    var z = S.hl, pa = S.players.get(z.a), pb = S.players.get(z.b), va = hlVal(z.a, z.st[0]), vb = hlVal(z.b, z.st[0]), done = z.picked !== null;
-    function side(p, val, show) { return h('div', { class: 'hls' }, avatar(p, 84), h('b', null, p.name), h('span', { class: 'hlv' }, show ? String(val) : '?')); }
-    var box = h('section', { class: 'card panel' }, h('h2', null, '📈 কে বেশি?'),
-      h('p', { class: 'muted small' }, 'স্ট্রিক: ' + z.streak + ' · প্রতিটা সঠিক উত্তরে ১০০ পয়েন্ট (সর্বোচ্চ ১০০০)'),
-      h('p', { class: 'qtext' }, z.st[2] + ' ' + pb.name + '-এর ' + z.st[1] + ' কি ' + pa.name + '-এর চেয়ে বেশি না কম?'),
-      h('div', { class: 'hlrow' }, side(pa, va, true), h('span', { class: 'vs' }, 'VS'), side(pb, vb, done)));
-    if (!done) {
-      box.append(h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: function () { hlPick(true); } }, '⬆️ বেশি'), h('button', { class: 'btn ghost', onclick: function () { hlPick(false); } }, '⬇️ কম')));
-    } else {
-      box.append(h('p', { class: 'qtext' }, z.ok ? '✅ ঠিক! স্ট্রিক ' + z.streak : '❌ ভুল! ' + pb.name + '-এর ' + z.st[1] + ' ছিল ' + vb),
-        h('button', { class: 'btn block', onclick: function () {
-          if (z.over || z.streak >= 10) { S.guess.run = false; finishGame('h', z.streak * 100, '📈 টানা ' + z.streak + 'টা সঠিক'); }
-          else if (!hlNext(true)) { S.guess.run = false; finishGame('h', z.streak * 100, '📈 টানা ' + z.streak + 'টা সঠিক'); }
-          else renderView();
-        } }, z.over || z.streak >= 10 ? '🏁 ফলাফল দেখুন' : 'পরেরটা ▶️'));
-    }
+  function viewSeq() {
+    var q = S.sq, grid = h('div', { class: 'sqg', id: 'sqg' });
+    q.pool.forEach(function (id, k) { var p = S.players.get(id); grid.append(h('button', { class: 'sqt', id: 'sq' + k, onclick: function () { sqTap(k); } }, avatar(p, 58), h('b', null, p.name))); });
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🧠 ক্রম মনে রাখো'),
+      h('p', { class: 'muted small' }, 'প্লেয়াররা একে একে জ্বলে উঠবে। একই ক্রমে ট্যাপ করো। প্রতি রাউন্ডে একজন করে বাড়ে আর গতি বাড়ে!'),
+      h('p', { class: 'small', id: 'sqsc' }, 'রাউন্ড পার: ' + q.round), h('p', { class: 'qtext', id: 'sqmsg' }, ''), grid);
+    if (q.over) {
+      box.append(h('p', { class: 'qtext' }, '❌ ভুল ক্রম! ' + q.round + 'টা রাউন্ড পার করেছেন।'),
+        h('button', { class: 'btn block', onclick: function () { S.guess.run = false; finishGame('h', Math.min(1000, q.round * 100), '🧠 ' + q.round + 'টা রাউন্ড পার (সর্বোচ্চ সিকোয়েন্স ' + (q.seq.length - 1) + ')'); } }, '🏁 ফলাফল দেখুন'));
+    } else if (q.phase === 'show') setTimeout(sqPlay, 0);
+    box.append(h('button', { class: 'link-btn', onclick: function () { q.tok++; S.guess.run = false; S.game.mode = null; renderView(); } }, '✖ ছেড়ে দিন'));
     return box;
   }
 
@@ -1730,13 +1890,14 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (G.mode === 'pzpick') { root.append(viewPzPick()); return root; }
     if (G.mode === 'mm') { root.append(viewMem()); return root; }
     if (G.mode === 'sh') { root.append(viewShoot()); return root; }
-    if (G.mode === 'hl') { root.append(viewHL()); return root; }
+    if (G.mode === 'shmenu') { root.append(shMenu()); return root; }
+    if (G.mode === 'sq') { root.append(viewSeq()); return root; }
     if (G.mode === 'res' && G.res) { root.append(resultBox(), scoreBoard()); return root; }
     var hub = h('section', { class: 'card panel' }, h('h2', null, '🎮 গেম জোন'), h('p', { class: 'muted small' }, 'পাঁচটা গেম, প্রতিটায় সর্বোচ্চ ১০০০। সব গেমের সেরা স্কোর মিলিয়ে লিডারবোর্ডে টপ স্কোরার!'));
     var okG = S.players.size >= 4 && withPhoto >= 1, okQ = S.players.size >= 4;
     var modes = h('div', { class: 'gmodes' });
     ['g', 'q', 'm', 's', 'h'].forEach(function (m) {
-      var dis = (m === 'g' && !okG) || (m === 'p' && !withPhoto) || ((m === 'q' || m === 'm') && !okQ) || (m === 'h' && S.players.size < 3);
+      var dis = (m === 'g' && !okG) || (m === 'p' && !withPhoto) || ((m === 'q' || m === 'm') && !okQ) || (m === 'h' && S.players.size < 4);
       modes.append(h('button', { class: 'gm', disabled: dis, onclick: function () { startMode(m); } }, h('span', { class: 'gme' }, GM[m][0]), h('span', { class: 'gmt' }, GM[m][1]), h('span', { class: 'gmd' }, GM[m][2]), h('span', { class: 'gmb' }, '🏅 সেরা: ' + bestOf(m))));
     });
     hub.append(modes);
