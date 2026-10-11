@@ -673,7 +673,8 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var c = e && e.code;
     if (c === 'permission-denied') { S.canWrite = false; toast('সেভ হয়নি। অ্যাডমিন হিসেবে লগইন করুন।'); }
     else if (c === 'resource-exhausted') toast('আজকের ফ্রি সীমা শেষ। কিছুক্ষণ পরে চেষ্টা করুন।');
-    else toast('সেভ হয়নি, আবার চেষ্টা করুন।');
+    else if (c === 'unavailable' || c === 'deadline-exceeded') toast('ইন্টারনেট ধীর বা বন্ধ। একটু পরে আবার চেষ্টা করুন। (' + c + ')');
+    else toast('সেভ হয়নি (' + (c || (e && e.message) || 'unknown') + ')');
     refresh();
   }
 
@@ -1126,7 +1127,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         closeSheet();
       } else {
         var id = S.sheet.id;
-        await S.db.doc('players/' + id).update(data);
+        await S.db.doc('players/' + id).set(data, { merge: true });
         S.sheet = { mode: 'profile', id: id };
         renderSheet();
       }
