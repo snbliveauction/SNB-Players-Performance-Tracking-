@@ -314,7 +314,7 @@ body {
 }
 .top { padding: 14px 14px 0; border-radius: 22px; border: 1px solid var(--line); background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02)); box-shadow: var(--shadow); gap: 10px; }
 
-.logo { filter: drop-shadow(0 6px 18px rgba(124,200,207,0.35)); }
+.logo { box-sizing: border-box; padding: 6px; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #22404E, #0A1319); box-shadow: 0 0 0 2px #E7C26A, 0 8px 20px rgba(0,0,0,0.4); object-fit: contain; }
 .city { background: var(--grad-gold); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.42em; }
 .brand h1 { background: linear-gradient(180deg, #FFFFFF 10%, #CFE9EB 60%, #8FC9D0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
 .tabs { border: 0; background: rgba(0,0,0,0.28); border-radius: 14px; padding: 4px; gap: 2px; margin: 0 -2px 12px; }
@@ -741,7 +741,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return e2;
     }
     var top = active[0];
-    var leaders = [top];
+    var leaders = active.filter(function (r) { return r.wins === top.wins && r.draws === top.draws && r.goals === top.goals; });
     var faces = h('div', { class: 'faces' });
     leaders.slice(0, 4).forEach(function (r) { faces.append(avatar(r.p, leaders.length === 1 ? 112 : 72)); });
     var names = leaders.map(function (r) { return r.p.name; }).join(' ও ');
@@ -1292,8 +1292,13 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var logoSize = board ? (story ? 280 : 200) : (story ? 300 : 230), logoY = story ? 215 : 34;
     try {
       var logo = await loadImg(LOGO);
-      x.save(); x.shadowColor = 'rgba(124,200,207,0.55)'; x.shadowBlur = 60;
-      x.drawImage(logo, (W - logoSize) / 2, logoY, logoSize, logoSize); x.restore();
+      var lcx = W / 2, lcy = logoY + logoSize / 2, lr = logoSize * 0.58;
+      x.save(); x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 40; x.shadowOffsetY = 10;
+      x.beginPath(); x.arc(lcx, lcy, lr, 0, 7);
+      var pg = x.createRadialGradient(lcx, lcy - lr * 0.4, lr * 0.1, lcx, lcy, lr);
+      pg.addColorStop(0, '#22404E'); pg.addColorStop(1, '#0A1319'); x.fillStyle = pg; x.fill(); x.restore();
+      x.beginPath(); x.arc(lcx, lcy, lr, 0, 7); x.lineWidth = 8; x.strokeStyle = gg(x, lcx - lr, lcy - lr, lcx + lr, lcy + lr); x.stroke();
+      x.drawImage(logo, lcx - logoSize * 0.43, lcy - logoSize * 0.43, logoSize * 0.86, logoSize * 0.86);
     } catch (e) { /* skip logo */ }
 
     if (board) {
