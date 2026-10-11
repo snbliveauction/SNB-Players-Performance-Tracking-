@@ -394,6 +394,12 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 }
 
 /* fun */
+.tab.funtab { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.funic { display: inline-flex; filter: drop-shadow(0 0 5px rgba(231,194,106,0.55)); }
+.tab.funtab:not([aria-selected="true"]) span:last-child { background: var(--grad-gold); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; }
+.tab[aria-selected="true"].funtab .funic { filter: none; }
+.tab[aria-selected="true"].funtab path { fill: #08262A; }
+.qtext { font-family: var(--f-display); font-weight: 800; font-size: 18px; color: var(--gold); }
 .ttl { display: inline-block; font-size: 12.5px; font-weight: 600; color: var(--gold); line-height: 1.3; margin-top: 1px; }
 .pro .ttl { font-size: 15px; margin-top: 4px; }
 .nm .ttl { display: block; margin-top: 0; }
@@ -509,7 +515,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    funTab: 'spin', spin: { mode: 0, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
@@ -732,10 +738,16 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tabs.push(['hall', 'হল অফ ফেম']);
     tabs.push(['fun', '🎉 মজা']);
     tabs.forEach(function (x) {
-      t.append(h('button', {
-        class: 'tab', role: 'tab', 'aria-selected': S.tab === x[0] ? 'true' : 'false',
+      var b = h('button', {
+        class: 'tab' + (x[0] === 'fun' ? ' funtab' : ''), role: 'tab', 'aria-selected': S.tab === x[0] ? 'true' : 'false',
         onclick: function () { S.tab = x[0]; S.confirm = null; renderTabs(); renderView(); }
-      }, x[1]));
+      }, x[0] === 'fun' ? '' : x[1]);
+      if (x[0] === 'fun') {
+        var ic = document.createElement('span'); ic.className = 'funic'; ic.setAttribute('aria-hidden', 'true');
+        ic.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18"><defs><linearGradient id="gfun" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1B8"/><stop offset=".55" stop-color="#E7C26A"/><stop offset="1" stop-color="#C9923A"/></linearGradient></defs><path d="M10 2.5l1.9 5.6 5.6 1.9-5.6 1.9L10 17.5l-1.9-5.6L2.5 10l5.6-1.9z" fill="url(#gfun)"/><path d="M18.5 13.5l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z" fill="url(#gfun)"/><path d="M19 2.5l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6z" fill="url(#gfun)"/></svg>';
+        b.append(ic, h('span', null, 'মজা'));
+      }
+      t.append(b);
     });
   }
 
@@ -1063,11 +1075,25 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 
   /* ---------- fun tab ---------- */
   var SPINS = [
-    { e: '☕', q: 'আজ চা কে খাওয়াবে?', r: 'আজ চা খাওয়াবে!' },
-    { e: '⚽', q: 'আজকের পেনাল্টি টেকার কে?', r: 'পেনাল্টি নেবে!' },
-    { e: '🧢', q: 'আজকের ক্যাপ্টেন কে?', r: 'আজকের ক্যাপ্টেন!' },
-    { e: '🧤', q: 'আজকের গোলকিপার কে?', r: 'আজ গোলপোস্টে!' },
-    { e: '🍔', q: 'আজ খাবারের বিল কার?', r: 'আজ বিল দেবে!' }
+    ['☕', 'আজ চা কে খাওয়াবে?', 'আজ চা খাওয়াবে!'], ['⚽', 'আজকের পেনাল্টি টেকার কে?', 'পেনাল্টি নেবে!'],
+    ['🧢', 'আজকের ক্যাপ্টেন কে?', 'আজকের ক্যাপ্টেন!'], ['🧤', 'আজকের গোলকিপার কে?', 'আজ গোলপোস্টে!'],
+    ['🍔', 'আজ খাবারের বিল কার?', 'আজ বিল দেবে!'], ['🥇', 'আজ ম্যান অফ দ্য ম্যাচ কে হবে?', 'ম্যান অফ দ্য ম্যাচ!'],
+    ['🔥', 'আজ হ্যাটট্রিক কে করবে?', 'আজ হ্যাটট্রিক করবে!'], ['🎤', 'জয়ের পর স্পিচ কে দেবে?', 'স্পিচ দেবে!'],
+    ['📸', 'আজকের ফটোগ্রাফার কে?', 'ছবি তুলবে!'], ['🧃', 'সবার জন্য জুস কে আনবে?', 'আজ জুস আনবে!'],
+    ['🏃', 'ওয়ার্ম-আপ কে লিড করবে?', 'ওয়ার্ম-আপ লিড করবে!'], ['🕺', 'গোলের পর নাচ কে দেখাবে?', 'নাচ দেখাবে!'],
+    ['📣', 'আজ সবাইকে ডেকে মাঠে কে আনবে?', 'সবাইকে ডেকে আনবে!'], ['🍦', 'আইসক্রিম ট্রিট কে দেবে?', 'আইসক্রিম খাওয়াবে!'],
+    ['🎯', 'আজ ফ্রি-কিক কে নেবে?', 'ফ্রি-কিক নেবে!'], ['🛡️', 'আজ ডিফেন্স কে সামলাবে?', 'ডিফেন্স সামলাবে!'],
+    ['🧠', 'আজকের কোচ কে হবে?', 'আজ কোচ সে-ই!'], ['🧹', 'ম্যাচের পর সব কে গুছিয়ে রাখবে?', 'সব গুছিয়ে রাখবে!'],
+    ['😂', 'আজকের জোকার অব দ্য ডে কে?', 'সবাইকে হাসাবে!'], ['🚀', 'আজ সবচেয়ে দ্রুত দৌড়বিদ কে?', 'আজ সে রকেট!'],
+    ['🥤', 'আজ কোল্ড ড্রিংকস কে খাওয়াবে?', 'কোল্ড ড্রিংকস খাওয়াবে!'], ['🎶', 'ম্যাচের পর গান কে গাইবে?', 'গান গাইবে!'],
+    ['📱', 'ম্যাচের ভিডিও কে করবে?', 'ভিডিও করবে!'], ['🏆', 'এই সপ্তাহের ট্রফি কে পাবে?', 'ট্রফি পাবে!'],
+    ['👑', 'আজ রাজা কে?', 'আজ সে-ই রাজা!'], ['🧊', 'সবচেয়ে ঠান্ডা মাথার প্লেয়ার কে?', 'আজ ঠান্ডা মাথা!'],
+    ['💣', 'আজকের গোল মেশিন কে?', 'আজ গোল মেশিন!'], ['🎁', 'আজ সারপ্রাইজ কে আনবে?', 'সারপ্রাইজ আনবে!'],
+    ['🤝', 'নতুনদের কে গাইড করবে?', 'নতুনদের গাইড!'], ['🕰️', 'আজ সবার আগে মাঠে কে পৌঁছাবে?', 'সবার আগে আসবে!'],
+    ['🍕', 'পিৎজা পার্টির বিল কার?', 'পিৎজা খাওয়াবে!'], ['🔮', 'আজ কার ভাগ্য খুলবে?', 'আজ ভাগ্যবান!'],
+    ['🎈', 'ম্যাচের আগে সবাইকে কে চাঙ্গা করবে?', 'সবাইকে চাঙ্গা করবে!'], ['🧲', 'আজ বল সবচেয়ে বেশি কার পায়ে থাকবে?', 'বল তার পায়েই!'],
+    ['🎬', 'আজকের হাইলাইটসের হিরো কে?', 'আজ হাইলাইটসের হিরো!'], ['🥁', 'গোলের পর ড্রাম কে বাজাবে?', 'সেলিব্রেশন লিড করবে!'],
+    ['🌟', 'আজ কে সারপ্রাইজ গোল করবে?', 'সারপ্রাইজ গোল করবে!'], ['🎲', 'আজ কে ঝুঁকি নিয়ে লং শট মারবে?', 'লং শট মারবে!']
   ];
   var WHEEL_COL = ['#2F8FA3', '#E7C26A', '#7FB04A', '#D9805F', '#6C7FD1', '#4BB3A0', '#C9669A', '#E0A63C'];
   function drawWheel(cv, names, rot) {
@@ -1093,6 +1119,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var sp = S.spin; if (sp.busy || !ids.length) return;
     var cv = $('#wheel'); if (!cv) return;
     var n = ids.length, seg = Math.PI * 2 / n, win = rand(n);
+    sp.cur = sp.mode === 'mystery' ? SPINS[rand(SPINS.length)] : SPINS[sp.pick];
     var from = sp.rot % (Math.PI * 2), to = -(win + 0.5) * seg + Math.PI * 2 * (6 + rand(3));
     if (to < from) to += Math.PI * 2 * 6;
     var names = ids.map(function (id) { return S.players.get(id).name; });
@@ -1123,26 +1150,34 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     return root;
   }
   function viewSpin() {
-    var sp = S.spin, mode = SPINS[sp.mode] || SPINS[0];
+    var sp = S.spin;
     var ids = sortedPlayers().map(function (e) { return e[0]; });
     var names = ids.map(function (id) { return S.players.get(id).name; });
-    var chips = h('div', { class: 'chips2' });
-    SPINS.forEach(function (m, i) {
-      chips.append(h('button', { class: 'chip2', 'aria-pressed': sp.mode === i ? 'true' : 'false', onclick: function () { if (sp.busy) return; sp.mode = i; sp.winner = null; renderView(); } }, m.e + ' ' + m.q));
-    });
+    var modeSeg = h('div', { class: 'seg kind', role: 'group', 'aria-label': 'প্রশ্নের ধরন' },
+      h('button', { 'aria-pressed': sp.mode === 'mystery' ? 'true' : 'false', onclick: function () { if (sp.busy) return; sp.mode = 'mystery'; sp.winner = null; renderView(); } }, '🎲 রহস্য প্রশ্ন'),
+      h('button', { 'aria-pressed': sp.mode === 'pick' ? 'true' : 'false', onclick: function () { if (sp.busy) return; sp.mode = 'pick'; sp.winner = null; renderView(); } }, '📝 নিজে বাছি'));
+    var head, sub;
+    if (sp.mode === 'mystery') { head = '🎲 রহস্য স্পিন'; sub = h('p', { class: 'muted small' }, 'প্রশ্নটা লুকানো! চাকা থামলে প্রশ্ন আর বিজয়ী একসাথে জানা যাবে। মোট ' + SPINS.length + 'টা প্রশ্নের একটা আসবে।'); }
+    else {
+      head = SPINS[sp.pick][0] + ' ' + SPINS[sp.pick][1];
+      var sel = h('select', { class: 'sel', 'aria-label': 'প্রশ্ন বাছুন', onchange: function (e) { sp.pick = +e.target.value; sp.winner = null; renderView(); } });
+      SPINS.forEach(function (q, i) { sel.append(h('option', { value: String(i), selected: sp.pick === i }, q[0] + ' ' + q[1])); });
+      sel.value = String(sp.pick); sub = sel;
+    }
     var cv = h('canvas', { id: 'wheel', width: 640, height: 640, class: 'wheel', 'aria-label': 'লাকি স্পিন চাকা' });
     var box = h('section', { class: 'card panel spinbox' },
-      h('h2', null, mode.e + ' ' + mode.q), chips,
+      h('h2', null, head), modeSeg, sub,
       h('div', { class: 'wheelwrap' }, cv),
       h('button', { class: 'btn block', id: 'spinBtn', disabled: sp.busy, onclick: function () { spinNow(ids); } }, sp.winner ? '🎡 আবার ঘোরান' : '🎡 চাকা ঘোরান'));
     setTimeout(function () { var c = $('#wheel'); if (c) drawWheel(c, names, sp.rot); }, 0);
     var root = h('div', { class: 'stack' }, box);
-    if (sp.winner && S.players.has(sp.winner)) {
-      var p = S.players.get(sp.winner);
+    if (sp.winner && S.players.has(sp.winner) && sp.cur) {
+      var p = S.players.get(sp.winner), q = sp.cur;
       root.append(h('section', { class: 'card panel winbox' },
         h('p', { class: 'kicker' }, '🎉 ফলাফল'),
-        h('div', { class: 'winrow' }, avatar(p, 88), h('div', null, h('h2', null, p.name), h('p', { class: 'muted' }, mode.e + ' ' + mode.r))),
-        h('button', { class: 'btn', onclick: function () { openSpinCard(sp.winner, mode); } }, icon('down'), 'শেয়ার কার্ড বানান')));
+        h('p', { class: 'qtext' }, q[0] + ' ' + q[1]),
+        h('div', { class: 'winrow' }, avatar(p, 88), h('div', null, h('h2', null, p.name), h('p', { class: 'muted' }, q[2]))),
+        h('button', { class: 'btn', onclick: function () { openSpinCard(sp.winner, q); } }, icon('down'), 'শেয়ার কার্ড বানান')));
     }
     return root;
   }
@@ -1244,7 +1279,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   function openSpinCard(id, mode) {
     var p = S.players.get(id); if (!p) return;
-    startSpecial('spin', { spin: { name: p.name, photo: p.photo || null, label: mode.r, q: mode.q, e: mode.e } }, 'LUCKY SPIN', 'spin');
+    startSpecial('spin', { spin: { name: p.name, photo: p.photo || null, label: mode[2], q: mode[1], e: mode[0] } }, 'LUCKY SPIN', 'spin');
   }
   function openFifa(id) {
     var p = S.players.get(id); if (!p) return;
@@ -1479,32 +1514,57 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     x.beginPath(); x.moveTo(0, -r); x.quadraticCurveTo(0, 0, r, 0); x.quadraticCurveTo(0, 0, 0, r); x.quadraticCurveTo(0, 0, -r, 0); x.quadraticCurveTo(0, 0, 0, -r);
     x.fill(); x.restore();
   }
-  function cardBg(x, W, H, focusY) {
+  var THEMES = {
+    player: { c: ['#2A6E80', '#1E4F63', '#173A4C'], ray: 'rgba(255,255,255,0.13)', glow: ['rgba(190,240,246,0.40)', 'rgba(248,231,174,0.10)'], spark: ['#F8E7AE', '#BFEFF3'], bar: ['#A8CB45', '#E7C26A', '#7CC8CF'], vig: 'rgba(6,24,34,0.35)' },
+    board: { c: ['#10583F', '#0B3F2E', '#072A20'], ray: 'rgba(214,255,140,0.10)', glow: ['rgba(168,230,90,0.38)', 'rgba(255,255,255,0.06)'], spark: ['#E6FFB0', '#FFFFFF'], bar: ['#C6E86A', '#FFFFFF', '#C6E86A'], vig: 'rgba(2,20,14,0.45)', kind: 'pitch' },
+    fifa: { c: ['#4A2D9C', '#2C1A66', '#150B3A'], ray: 'rgba(255,226,150,0.10)', glow: ['rgba(190,150,255,0.45)', 'rgba(255,214,120,0.10)'], spark: ['#FFE9A8', '#D8C4FF'], bar: ['#E7C26A', '#B79BFF', '#E7C26A'], vig: 'rgba(8,3,28,0.5)', kind: 'night' },
+    spin: { c: ['#6A1FB8', '#B3267F', '#FF7A2F'], ray: 'rgba(255,255,255,0.14)', glow: ['rgba(255,226,130,0.5)', 'rgba(255,255,255,0.08)'], spark: ['#FFF3C4', '#FFFFFF'], bar: ['#FFD166', '#FF5D8F', '#7AE0FF'], vig: 'rgba(40,6,50,0.35)', kind: 'party' }
+  };
+  function cardBg(x, W, H, focusY, kind) {
+    var T = THEMES[kind] || THEMES.player;
     var g = x.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#2A6E80'); g.addColorStop(0.5, '#1E4F63'); g.addColorStop(1, '#173A4C');
+    g.addColorStop(0, T.c[0]); g.addColorStop(0.5, T.c[1]); g.addColorStop(1, T.c[2]);
     x.fillStyle = g; x.fillRect(0, 0, W, H);
-    for (var i = 0; i < W; i += 90) { x.fillStyle = 'rgba(255,255,255,0.04)'; x.fillRect(i, 0, 45, H); }
+    var i;
+    if (T.kind === 'pitch') { for (i = 0; i < H; i += 200) { x.fillStyle = 'rgba(255,255,255,0.05)'; x.fillRect(0, i, W, 100); } }
+    else if (T.kind === 'night') { for (i = -H; i < W; i += 160) { x.save(); x.translate(i, 0); x.rotate(0.35); x.fillStyle = 'rgba(255,255,255,0.03)'; x.fillRect(0, -200, 70, H * 1.6); x.restore(); } }
+    else if (T.kind !== 'party') { for (i = 0; i < W; i += 90) { x.fillStyle = 'rgba(255,255,255,0.04)'; x.fillRect(i, 0, 45, H); } }
     for (var r = -4; r <= 4; r++) {
       x.beginPath(); x.moveTo(W / 2, -80); x.lineTo(W / 2 + r * 330 - 70, H * 0.85); x.lineTo(W / 2 + r * 330 + 70, H * 0.85); x.closePath();
       var rg0 = x.createLinearGradient(0, 0, 0, H * 0.85);
-      rg0.addColorStop(0, 'rgba(255,255,255,0.13)'); rg0.addColorStop(1, 'rgba(124,200,207,0)');
+      rg0.addColorStop(0, T.ray); rg0.addColorStop(1, 'rgba(255,255,255,0)');
       x.fillStyle = rg0; x.fill();
     }
     var rg = x.createRadialGradient(W / 2, focusY, 20, W / 2, focusY, W * 0.78);
-    rg.addColorStop(0, 'rgba(190,240,246,0.40)'); rg.addColorStop(0.45, 'rgba(248,231,174,0.10)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    rg.addColorStop(0, T.glow[0]); rg.addColorStop(0.45, T.glow[1]); rg.addColorStop(1, 'rgba(0,0,0,0)');
     x.fillStyle = rg; x.fillRect(0, 0, W, H);
+    if (T.kind === 'pitch') {
+      x.save(); x.strokeStyle = 'rgba(255,255,255,0.10)'; x.lineWidth = 8;
+      x.beginPath(); x.arc(W / 2, H * 0.58, 300, 0, 7); x.stroke();
+      x.beginPath(); x.moveTo(0, H * 0.58); x.lineTo(W, H * 0.58); x.stroke();
+      x.beginPath(); x.arc(W / 2, H * 0.58, 14, 0, 7); x.fillStyle = 'rgba(255,255,255,0.14)'; x.fill(); x.restore();
+    }
     var seed = 7, rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    if (T.kind === 'party') {
+      var cols = ['#FFD166', '#7AE0FF', '#FF5D8F', '#B7F06A', '#FFFFFF', '#C9A8FF'];
+      for (var q = 0; q < 70; q++) {
+        var cx = rnd() * W, cy = rnd() * H, w = 12 + rnd() * 20, hh = 6 + rnd() * 10;
+        x.save(); x.translate(cx, cy); x.rotate(rnd() * 6.28); x.globalAlpha = 0.55 + rnd() * 0.4; x.fillStyle = cols[Math.floor(rnd() * cols.length)];
+        if (rnd() > 0.7) { x.beginPath(); x.arc(0, 0, hh * 0.8, 0, 7); x.fill(); } else x.fillRect(-w / 2, -hh / 2, w, hh);
+        x.restore();
+      }
+    }
     for (var k = 0; k < 46; k++) {
       var px = rnd() * W, py = rnd() * H, big = rnd() > 0.82;
       if (big && px > 170 && px < W - 170) px = px < W / 2 ? px * 0.16 : W - (W - px) * 0.16;
-      if (big) sparkle(x, px, py, 12 + rnd() * 14, 0.5 + rnd() * 0.4, rnd() > 0.5 ? '#F8E7AE' : '#BFEFF3');
-      else { x.globalAlpha = 0.15 + rnd() * 0.35; x.fillStyle = '#E7C26A'; x.beginPath(); x.arc(px, py, 1.5 + rnd() * 2.5, 0, 7); x.fill(); x.globalAlpha = 1; }
+      if (big) sparkle(x, px, py, 12 + rnd() * 14, 0.5 + rnd() * 0.4, rnd() > 0.5 ? T.spark[0] : T.spark[1]);
+      else { x.globalAlpha = 0.15 + rnd() * 0.35; x.fillStyle = T.spark[0]; x.beginPath(); x.arc(px, py, 1.5 + rnd() * 2.5, 0, 7); x.fill(); x.globalAlpha = 1; }
     }
     var vg = x.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
-    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(6,24,34,0.35)');
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, T.vig);
     x.fillStyle = vg; x.fillRect(0, 0, W, H);
     var tb = x.createLinearGradient(0, 0, W, 0);
-    tb.addColorStop(0, '#A8CB45'); tb.addColorStop(0.5, '#E7C26A'); tb.addColorStop(1, '#7CC8CF');
+    tb.addColorStop(0, T.bar[0]); tb.addColorStop(0.5, T.bar[1]); tb.addColorStop(1, T.bar[2]);
     x.fillStyle = tb; x.fillRect(0, 0, W, 12); x.fillRect(0, H - 12, W, 12);
   }
   function ribbon(x, W, cy, txt, NUM, size) {
@@ -1552,7 +1612,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var NUM = '"Barlow Condensed","Arial Narrow",sans-serif';
     var BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
     var board = card.kind === 'board';
-    cardBg(x, W, H, story ? 980 : 700);
+    cardBg(x, W, H, story ? 980 : 700, card.kind);
 
     var isF = card.kind === 'fifa', logoSize = board ? (story ? 280 : 200) : isF ? (story ? 190 : 150) : (story ? 300 : 230), logoY = story ? (isF ? 285 + 20 : 215) : (isF ? 36 : 34);
     try {
@@ -1635,8 +1695,16 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       if ('letterSpacing' in x) x.letterSpacing = '4px';
       fitFont(x, card.rangeTxt, 900, story ? 44 : 38, 600, NUM); x.fillText(card.rangeTxt, W / 2, rY3);
       if ('letterSpacing' in x) x.letterSpacing = '0px';
-      var px3 = (W - P3) / 2;
-      x.save(); x.shadowColor = 'rgba(231,194,106,0.5)'; x.shadowBlur = 80; rr(x, px3, pY3, P3, P3, 56); x.fillStyle = '#244B5B'; x.fill(); x.restore();
+      var px3 = (W - P3) / 2, wc = pY3 + P3 / 2, wr = P3 * (story ? 0.66 : 0.68), wn = 16;
+      var wcol = ['#FFD166', '#FF5D8F', '#7AE0FF', '#B7F06A', '#C9A8FF', '#FF9F5A'];
+      for (var wi = 0; wi < wn; wi++) {
+        x.beginPath(); x.moveTo(W / 2, wc); x.arc(W / 2, wc, wr, wi * 6.2832 / wn, (wi + 1) * 6.2832 / wn); x.closePath();
+        x.globalAlpha = 0.85; x.fillStyle = wcol[wi % wcol.length]; x.fill(); x.globalAlpha = 1;
+        x.lineWidth = 3; x.strokeStyle = 'rgba(255,255,255,0.7)'; x.stroke();
+      }
+      x.beginPath(); x.arc(W / 2, wc, wr, 0, 7); x.lineWidth = 14; x.strokeStyle = gg(x, 0, wc - wr, 0, wc + wr); x.stroke();
+      for (var bi = 0; bi < wn; bi++) { var ba = bi * 6.2832 / wn; x.beginPath(); x.arc(W / 2 + Math.cos(ba) * wr, wc + Math.sin(ba) * wr, 9, 0, 7); x.fillStyle = '#FFF3C4'; x.fill(); }
+      x.save(); x.shadowColor = 'rgba(231,194,106,0.5)'; x.shadowBlur = 80; rr(x, px3, pY3, P3, P3, 56); x.fillStyle = '#3A1B5E'; x.fill(); x.restore();
       x.save(); rr(x, px3, pY3, P3, P3, 56); x.clip();
       if (SP.photo) { try { var im3 = await loadImg(SP.photo); x.drawImage(im3, px3, pY3, P3, P3); } catch (e) { x.fillStyle = '#2B5666'; x.fillRect(px3, pY3, P3, P3); } }
       else { x.fillStyle = '#2B5666'; x.fillRect(px3, pY3, P3, P3); x.fillStyle = '#BFF1F6'; x.font = '800 ' + Math.round(P3 * 0.5) + 'px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(SP.name), W / 2, pY3 + P3 / 2 + 8); x.textBaseline = 'alphabetic'; }
@@ -1644,8 +1712,8 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       rr(x, px3, pY3, P3, P3, 56); x.lineWidth = 14; x.strokeStyle = gg(x, px3, pY3, px3 + P3, pY3 + P3); x.stroke();
       x.font = '120px sans-serif'; x.textAlign = 'center'; x.fillText(SP.e, px3 + P3 - 40, pY3 + 40);
       x.fillStyle = '#ECE8D3'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 20;
-      fitFont(x, SP.name, 900, story ? 100 : 86, 800, BN); x.fillText(SP.name, W / 2, story ? 1480 : 1040); x.restore();
-      var py3 = story ? 1530 : 1090, ph3 = story ? 190 : 170;
+      fitFont(x, SP.name, 900, story ? 100 : 86, 800, BN); x.fillText(SP.name, W / 2, story ? 1520 : 1066); x.restore();
+      var py3 = story ? 1570 : 1112, ph3 = story ? 180 : 152;
       glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
       x.fillStyle = '#F8E7AE'; fitFont(x, SP.e + ' ' + SP.label, W - 220, story ? 84 : 76, 800, BN);
       x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(SP.e + ' ' + SP.label, W / 2, py3 + ph3 / 2 + 8); x.textBaseline = 'alphabetic';
