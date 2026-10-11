@@ -99,6 +99,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* controls */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 18px; border-radius: 10px; border: 1px solid transparent; background: var(--aqua); color: var(--aqua-ink); font-family: var(--f-display); font-weight: 700; font-size: 16px; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btnrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .btn.ghost { background: transparent; border-color: var(--line-2); color: var(--ink); }
 .btn.danger { background: var(--danger-soft); color: var(--danger); }
 .btn.danger-solid { background: var(--danger); color: var(--bg-deep); }
@@ -515,7 +516,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    funTab: 'spin', spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', roast: { cur: null }, spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
@@ -1075,25 +1076,64 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 
   /* ---------- fun tab ---------- */
   var SPINS = [
-    ['☕', 'আজ চা কে খাওয়াবে?', 'আজ চা খাওয়াবে!'], ['⚽', 'আজকের পেনাল্টি টেকার কে?', 'পেনাল্টি নেবে!'],
-    ['🧢', 'আজকের ক্যাপ্টেন কে?', 'আজকের ক্যাপ্টেন!'], ['🧤', 'আজকের গোলকিপার কে?', 'আজ গোলপোস্টে!'],
-    ['🍔', 'আজ খাবারের বিল কার?', 'আজ বিল দেবে!'], ['🥇', 'আজ ম্যান অফ দ্য ম্যাচ কে হবে?', 'ম্যান অফ দ্য ম্যাচ!'],
-    ['🔥', 'আজ হ্যাটট্রিক কে করবে?', 'আজ হ্যাটট্রিক করবে!'], ['🎤', 'জয়ের পর স্পিচ কে দেবে?', 'স্পিচ দেবে!'],
-    ['📸', 'আজকের ফটোগ্রাফার কে?', 'ছবি তুলবে!'], ['🧃', 'সবার জন্য জুস কে আনবে?', 'আজ জুস আনবে!'],
-    ['🏃', 'ওয়ার্ম-আপ কে লিড করবে?', 'ওয়ার্ম-আপ লিড করবে!'], ['🕺', 'গোলের পর নাচ কে দেখাবে?', 'নাচ দেখাবে!'],
-    ['📣', 'আজ সবাইকে ডেকে মাঠে কে আনবে?', 'সবাইকে ডেকে আনবে!'], ['🍦', 'আইসক্রিম ট্রিট কে দেবে?', 'আইসক্রিম খাওয়াবে!'],
-    ['🎯', 'আজ ফ্রি-কিক কে নেবে?', 'ফ্রি-কিক নেবে!'], ['🛡️', 'আজ ডিফেন্স কে সামলাবে?', 'ডিফেন্স সামলাবে!'],
-    ['🧠', 'আজকের কোচ কে হবে?', 'আজ কোচ সে-ই!'], ['🧹', 'ম্যাচের পর সব কে গুছিয়ে রাখবে?', 'সব গুছিয়ে রাখবে!'],
-    ['😂', 'আজকের জোকার অব দ্য ডে কে?', 'সবাইকে হাসাবে!'], ['🚀', 'আজ সবচেয়ে দ্রুত দৌড়বিদ কে?', 'আজ সে রকেট!'],
-    ['🥤', 'আজ কোল্ড ড্রিংকস কে খাওয়াবে?', 'কোল্ড ড্রিংকস খাওয়াবে!'], ['🎶', 'ম্যাচের পর গান কে গাইবে?', 'গান গাইবে!'],
-    ['📱', 'ম্যাচের ভিডিও কে করবে?', 'ভিডিও করবে!'], ['🏆', 'এই সপ্তাহের ট্রফি কে পাবে?', 'ট্রফি পাবে!'],
-    ['👑', 'আজ রাজা কে?', 'আজ সে-ই রাজা!'], ['🧊', 'সবচেয়ে ঠান্ডা মাথার প্লেয়ার কে?', 'আজ ঠান্ডা মাথা!'],
-    ['💣', 'আজকের গোল মেশিন কে?', 'আজ গোল মেশিন!'], ['🎁', 'আজ সারপ্রাইজ কে আনবে?', 'সারপ্রাইজ আনবে!'],
-    ['🤝', 'নতুনদের কে গাইড করবে?', 'নতুনদের গাইড!'], ['🕰️', 'আজ সবার আগে মাঠে কে পৌঁছাবে?', 'সবার আগে আসবে!'],
-    ['🍕', 'পিৎজা পার্টির বিল কার?', 'পিৎজা খাওয়াবে!'], ['🔮', 'আজ কার ভাগ্য খুলবে?', 'আজ ভাগ্যবান!'],
-    ['🎈', 'ম্যাচের আগে সবাইকে কে চাঙ্গা করবে?', 'সবাইকে চাঙ্গা করবে!'], ['🧲', 'আজ বল সবচেয়ে বেশি কার পায়ে থাকবে?', 'বল তার পায়েই!'],
-    ['🎬', 'আজকের হাইলাইটসের হিরো কে?', 'আজ হাইলাইটসের হিরো!'], ['🥁', 'গোলের পর ড্রাম কে বাজাবে?', 'সেলিব্রেশন লিড করবে!'],
-    ['🌟', 'আজ কে সারপ্রাইজ গোল করবে?', 'সারপ্রাইজ গোল করবে!'], ['🎲', 'আজ কে ঝুঁকি নিয়ে লং শট মারবে?', 'লং শট মারবে!']
+    ['🍛', 'আজ কে বলবে "ভাই আমার সাথে টাকা নাই"?', 'আজ টাকা নাই বলবে 😂'],
+    ['🙈', 'মাঠে নামার আগে কে বলবে "আজ পায়ে ব্যথা"?', 'পায়ে ব্যথার অজুহাত দেবে!'],
+    ['🛌', 'কে আজ ঘুম থেকে উঠে দেরিতে আসবে?', 'আজও লেট করবে!'],
+    ['📱', 'খেলার মাঝেও কে ফোনে রিল দেখবে?', 'রিলেই ডুবে থাকবে!'],
+    ['🎭', 'কে আজ ফাউল খেয়ে সবচেয়ে বড় অভিনয় করবে?', 'অস্কার পাবে!'],
+    ['🍗', 'কে আজ সবার ভাগের বিরিয়ানি খেয়ে ফেলবে?', 'বিরিয়ানি চোর!'],
+    ['😴', 'কে আজ সাইডলাইনে বসেই ঘুমিয়ে পড়বে?', 'মাঠেই ঘুমাবে!'],
+    ['🤥', 'কে আজ বলবে "আমি তো পাস দিয়েছিলাম"?', 'মিথ্যাবাদী অব দ্য ডে!'],
+    ['🥅', 'কে আজ ফাঁকা গোলে মিস করবে?', 'ফাঁকা গোলে মিস করবে!'],
+    ['📸', 'কে গোল দিয়ে ১০ মিনিট সেলফি তুলবে?', 'সেলফি বাবু!'],
+    ['🧴', 'কে আজও চুল ঠিক রেখে খেলতে নামবে?', 'চুল নষ্ট হওয়া যাবে না!'],
+    ['🐢', 'কে আজ সবচেয়ে ধীরে দৌড়াবে?', 'আজ কচ্ছপ মোড!'],
+    ['🥶', 'কে আজ সবার আগে বলবে "ভাই অনেক গরম, থামো"?', 'হাঁপিয়ে যাবে!'],
+    ['🎙️', 'কে আজ রেফারির সাথে সবচেয়ে বেশি তর্ক করবে?', 'রেফারির সাথে ঝগড়া!'],
+    ['💸', 'কে ম্যাচের চাঁদা দিতে আজও ভুলে যাবে?', 'চাঁদা ভুলে গেছে!'],
+    ['🧦', 'কে আজ জুতা বাসায় ফেলে আসবে?', 'জুতা ছাড়াই আসবে!'],
+    ['🍉', 'কে আজ সবার জন্য তরমুজ কিনবে?', 'তরমুজ ট্রিট দেবে!'],
+    ['🦸', 'কে আজ দাবি করবে "আমি না থাকলে টিম শেষ"?', 'নিজেকে সুপারম্যান ভাববে!'],
+    ['😎', 'কে আজ সবচেয়ে বেশি স্টাইল মারবে?', 'স্টাইলের রাজা!'],
+    ['🤡', 'আজকের সেলফ-গোল চ্যাম্পিয়ন কে?', 'নিজের জালেই গোল দেবে!'],
+    ['🥵', 'কে আজ হাফটাইমেই "আমি আর পারব না" বলবে?', 'হাফটাইমেই শেষ!'],
+    ['🎓', 'কে আজ মাঠে বসে ট্যাকটিক্স ক্লাস নেবে?', 'ফ্রি কোচিং দেবে!'],
+    ['🐓', 'কে সকালে মুরগির আগে উঠে মাঠে চলে আসবে?', 'মুরগির আগে উঠবে!'],
+    ['🛵', 'কে আজ ম্যাচ ফেলে বাইক রেস দেবে?', 'রাস্তায় রেস দেবে!'],
+    ['📞', 'কে আজ প্রেমিকা/বউয়ের ফোনে মাঠ থেকে উধাও হবে?', 'ফোন ধরতে হারিয়ে যাবে!'],
+    ['🍜', 'কে ম্যাচের পর নুডলস ট্রিট দিতে বাধ্য?', 'নুডলস বিল তার!'],
+    ['🧃', 'কে আজ সবার পানি চুপি চুপি খেয়ে ফেলবে?', 'পানি চোর!'],
+    ['🪑', 'কে আজ বেঞ্চ গরম করবে?', 'বেঞ্চে বসে থাকবে!'],
+    ['🏳️', 'কে আজ ১০ মিনিটেই হার মেনে নেবে?', 'সাদা পতাকা উড়াবে!'],
+    ['🕵️', 'কে আজ বলের বদলে প্রতিপক্ষের পায়ে লাথি দেবে?', 'লাথির বাদশা!'],
+    ['🥳', 'কে আজ জিতলে সবচেয়ে বেশি লাফালাফি করবে?', 'পাগলের মতো লাফাবে!'],
+    ['😭', 'কে আজ হারলে সবচেয়ে বেশি কাঁদবে?', 'চোখের জলে ভাসবে!'],
+    ['🤳', 'কে আজ ম্যাচের সব ভিডিও ভুল জায়গায় রেকর্ড করবে?', 'ভিডিও গ্রাফার (ভুল ফ্রেমে)!'],
+    ['🍞', 'কে আজ বল না পেয়ে মাঠে হাঁটাহাঁটি করবে?', 'মর্নিং ওয়াক করবে!'],
+    ['📢', 'কে আজ সবার ভুল ধরবে কিন্তু নিজে মিস করবে?', 'মুখে সবজান্তা!'],
+    ['🎯', 'কে আজ গোলপোস্টের বদলে আকাশে শট মারবে?', 'বল আকাশে পাঠাবে!'],
+    ['🥇', 'সপ্তাহের "কে সবচেয়ে বেশি বড় বড় কথা বলে" পুরস্কার কার?', 'বড় কথার মাস্টার!'],
+    ['😏', 'কে আজ বলবে "আজ ইচ্ছা করে হেরেছি"?', 'হেরে গিয়েও গর্ব করবে!'],
+    ['🧂', 'কে আজ গোল দিলে আর কাউকে ভুলতে দেবে না?', '১০ বছর পর্যন্ত বলতে থাকবে!'],
+    ['🐶', 'কে আজ বল পেলে কাউকে পাস না দিয়ে একাই দৌড়াবে?', 'একাই খেলবে, পাস নাই!'],
+    ['🏃', 'কে আজ রেফারির বাঁশি শুনেও দৌড়াতে থাকবে?', 'বাঁশি শোনেনি!'],
+    ['☕', 'আজ কে চা খাওয়াবে?', 'আজ চা খাওয়াবে!'],
+    ['🍔', 'আজ খাবারের বিল কার?', 'আজ বিল দেবে!'],
+    ['🥇', 'আজ ম্যান অফ দ্য ম্যাচ কে হবে?', 'ম্যান অফ দ্য ম্যাচ!'],
+    ['🔥', 'আজ হ্যাটট্রিক কে করবে?', 'আজ হ্যাটট্রিক করবে!'],
+    ['🎤', 'জয়ের পর স্পিচ কে দেবে?', 'স্পিচ দেবে!'],
+    ['🕺', 'গোলের পর নাচ কে দেখাবে?', 'নাচ দেখাবে!'],
+    ['🍦', 'আইসক্রিম ট্রিট কে দেবে?', 'আইসক্রিম খাওয়াবে!'],
+    ['🧹', 'ম্যাচের পর সব কে গুছিয়ে রাখবে?', 'সব গুছিয়ে রাখবে!'],
+    ['😂', 'আজকের জোকার অব দ্য ডে কে?', 'সবাইকে হাসাবে!'],
+    ['🎶', 'ম্যাচের পর গান কে গাইবে?', 'গান গাইবে!'],
+    ['👑', 'আজ রাজা কে?', 'আজ সে-ই রাজা!'],
+    ['🕰️', 'আজ সবার আগে মাঠে কে পৌঁছাবে?', 'সবার আগে আসবে!'],
+    ['🍕', 'পিৎজা পার্টির বিল কার?', 'পিৎজা খাওয়াবে!'],
+    ['🎬', 'আজকের হাইলাইটসের হিরো কে?', 'হাইলাইটসের হিরো!'],
+    ['🧢', 'আজকের ক্যাপ্টেন কে?', 'আজকের ক্যাপ্টেন!'],
+    ['🧤', 'আজকের গোলকিপার কে?', 'আজ গোলপোস্টে!'],
+    ['⚽', 'আজকের পেনাল্টি টেকার কে?', 'পেনাল্টি নেবে!']
   ];
   var WHEEL_COL = ['#2F8FA3', '#E7C26A', '#7FB04A', '#D9805F', '#6C7FD1', '#4BB3A0', '#C9669A', '#E0A63C'];
   function drawWheel(cv, names, rot) {
@@ -1134,9 +1174,46 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       else { sp.rot = to; sp.busy = false; sp.winner = ids[win]; sp.ids = ids; renderView(); }
     })(t0);
   }
+  var ROAST_ANY = ['{n} এর পায়ে বল এলে বলও ভাবে "এবার আমার কী হবে!" 😂', '{n} মাঠে নামলে বিপক্ষ ভয় পায় না, হাসে!', '{n} এর দৌড় দেখে রেফারিও ভাবে ওয়ার্ম-আপ চলছে!', '{n} এর পাস সবসময় বিপক্ষকেই যায়, ভদ্রতা বলে কথা!', '{n} মাঠে আসে খেলতে, কিন্তু ব্যস্ত থাকে জামা ঠিক করতে!', '{n} এর স্কিল দেখে মেসি ফোন বন্ধ করে দিয়েছে!', '{n} এর সবচেয়ে বড় শক্তি: যেকোনো ভুলে বলা "ওটা ফাউল ছিল!"', '{n} গোল না করলেও সেলিব্রেশনটা আগে থেকেই প্র্যাকটিস করে রাখে!', '{n} এর প্রতিভা অনেক, শুধু মাঠে আসতে ভুলে যায়!'];
+  var ROAST_ZERO = ['{n} এর গোল-খরা: গোলপোস্ট এখন ওকে দেখলেই হাই দেয়!', '{n} গোল করার চেষ্টা করছে... গত জন্ম থেকে!', '{n} এর গোলের সংখ্যা দেখে ক্যালকুলেটরও লজ্জা পায়!'];
+  var ROAST_NOWIN = ['{n} এখনো জয়ের স্বাদ পায়নি, ওর কাছে জয় মানে গল্পের বই!', '{n} এর জন্য আজ শুধু একটা দোয়া: একটা জয় দাও আল্লাহ!'];
+  var ROAST_DRAW = ['{n} ড্রয়ের বাদশা! জেতেও না, হারেও না, শুধু সময় নষ্ট!', '{n} এর স্লোগান: "জিতব না, হারবও না, ড্র করেই যাব!"'];
+  var ROAST_HAT = ['{n} একটা হ্যাটট্রিক করেই এমন চলে যেন বিশ্বকাপ জিতেছে!', '{n} এর হ্যাটট্রিকের গল্প এখনো প্রতিদিন শুনতে হয়!'];
+  var ROAST_TOP = ['{n} এখন এত ভালো খেলছে যে সবার ভয়, পরের মাসে আবার না ট্রান্সফার চায়!', '{n} এর ফর্ম দেখে বাকিরা ভাবছে: এটা মানুষ নাকি মেশিন!'];
+  var AWARDS = [['🏅', 'সবচেয়ে বেশি অজুহাত দেওয়ার পুরস্কার'], ['🥇', 'সেরা অভিনেতা (ফাউল খাওয়ার নাটকে)'], ['😴', 'মাঠে ঘুমানোর রেকর্ড হোল্ডার'], ['🍗', 'বিরিয়ানি খাওয়ায় বিশ্বচ্যাম্পিয়ন'], ['🤥', 'মিথ্যা বলায় গোল্ড মেডেল'], ['📱', 'রিল দেখা মাস্টার'], ['🧴', 'চুল ঠিক রাখার ওস্তাদ'], ['🎙️', 'রেফারির সাথে তর্কের সম্রাট'], ['🐢', 'ধীরগতির কিং'], ['🎯', 'আকাশে শট মারার রেকর্ডধারী'], ['🥳', 'বেশি লাফালাফির পুরস্কার'], ['🕵️', 'লাথি মারায় এক্সপার্ট']];
+  function roastLine(id) {
+    var a = allStats(id), n = S.players.get(id).name, pool = ROAST_ANY.slice();
+    if (a.matches > 0 && a.goals === 0) pool = pool.concat(ROAST_ZERO, ROAST_ZERO);
+    if (a.wins === 0) pool = pool.concat(ROAST_NOWIN, ROAST_NOWIN);
+    if (a.draws > a.wins && a.draws > 0) pool = pool.concat(ROAST_DRAW, ROAST_DRAW);
+    if (a.hat > 0) pool = pool.concat(ROAST_HAT, ROAST_HAT);
+    if (a.wins >= 3 && a.goals >= 5) pool = pool.concat(ROAST_TOP, ROAST_TOP);
+    return pool[rand(pool.length)].replace(/\{n\}/g, n);
+  }
+  function viewRoast() {
+    var r = S.roast, ids = sortedPlayers().map(function (e) { return e[0]; });
+    function go(kind) {
+      var id = ids[rand(ids.length)];
+      if (kind === 'roast') r.cur = { id: id, e: '🔥', t: 'ROAST', line: roastLine(id) };
+      else { var w = AWARDS[rand(AWARDS.length)]; r.cur = { id: id, e: w[0], t: 'FUNNY AWARD', line: w[1] }; }
+      renderView();
+    }
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🔥 রোস্ট মেশিন'),
+      h('p', { class: 'muted small' }, 'এক ক্লিকে একজন প্লেয়ারকে (মজা করে!) রোস্ট বা ফানি অ্যাওয়ার্ড। সবাই হাসুক, কেউ রাগ করবে না 😄'),
+      h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: function () { go('roast'); } }, '🔥 রোস্ট করো'), h('button', { class: 'btn ghost', onclick: function () { go('award'); } }, '🏆 ফানি অ্যাওয়ার্ড')));
+    var root = h('div', { class: 'stack' }, box);
+    if (r.cur && S.players.has(r.cur.id)) {
+      var p = S.players.get(r.cur.id), c = r.cur;
+      root.append(h('section', { class: 'card panel winbox' },
+        h('p', { class: 'kicker' }, c.e + ' ' + (c.t === 'ROAST' ? 'রোস্ট' : 'ফানি অ্যাওয়ার্ড')),
+        h('div', { class: 'winrow' }, avatar(p, 88), h('div', null, h('h2', null, p.name), h('p', { class: 'muted' }, c.line))),
+        h('button', { class: 'btn', onclick: function () { openSpinCard(c.id, [c.e, c.t, c.line], c.t); } }, icon('down'), 'শেয়ার কার্ড বানান')));
+    }
+    return root;
+  }
   function funSeg() {
     var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'মজা' });
-    [['spin', '🎡 স্পিন'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
+    [['spin', '🎡 স্পিন'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
       seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.funTab = x[0]; renderView(); } }, x[1]));
     });
     return h('div', { class: 'periodbar' }, seg);
@@ -1145,7 +1222,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var root = h('div', { class: 'stack' }, funSeg());
     if (S.players.size < 2) { root.append(h('div', { class: 'card emptybox' }, h('h2', null, 'আরও প্লেয়ার লাগবে'), h('p', { class: 'muted' }, 'মজার সেকশন চালাতে অন্তত ২ জন প্লেয়ার যোগ করুন।'))); return root; }
     if (S.funTab === 'cmp') root.append(viewCompare());
-    else if (S.funTab === 'vote') root.append(viewVote());
+    else if (S.funTab === 'roast') root.append(viewRoast());
     else root.append(viewSpin());
     return root;
   }
@@ -1277,9 +1354,9 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       if (S.tab === 'fun' && !S.spin.busy) renderView();
     }, function (e) { console.error(e); S.voteErr = true; if (S.tab === 'fun' && !S.spin.busy) renderView(); });
   }
-  function openSpinCard(id, mode) {
+  function openSpinCard(id, mode, ttl) {
     var p = S.players.get(id); if (!p) return;
-    startSpecial('spin', { spin: { name: p.name, photo: p.photo || null, label: mode[2], q: mode[1], e: mode[0] } }, 'LUCKY SPIN', 'spin');
+    startSpecial('spin', { spin: { name: p.name, photo: p.photo || null, label: mode[2], q: mode[1], e: mode[0] } }, ttl || 'LUCKY SPIN', 'spin');
   }
   function openFifa(id) {
     var p = S.players.get(id); if (!p) return;
@@ -1710,9 +1787,23 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       x.fillStyle = '#ECE8D3'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 20;
       fitFont(x, SP.name, 900, story ? 100 : 86, 800, BN); x.fillText(SP.name, W / 2, story ? 1520 : 1066); x.restore();
       var py3 = story ? 1570 : 1112, ph3 = story ? 180 : 152;
-      glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
-      x.fillStyle = '#F8E7AE'; fitFont(x, SP.e + ' ' + SP.label, W - 220, story ? 84 : 76, 800, BN);
-      x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(SP.e + ' ' + SP.label, W / 2, py3 + ph3 / 2 + 8); x.textBaseline = 'alphabetic';
+      var lbl = SP.label, long3 = lbl.length > 24;
+      if (long3) {
+        var fz = story ? 50 : 44; x.font = '800 ' + fz + 'px ' + BN;
+        var wd = lbl.split(' '), ln = [], cur = '';
+        wd.forEach(function (w) { var t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > W - 240 && cur) { ln.push(cur); cur = w; } else cur = t; });
+        if (cur) ln.push(cur); ln = ln.slice(0, 3);
+        var lh = fz * 1.3; ph3 = Math.max(ph3, ln.length * lh + 50);
+        if (!story) py3 = 1100; 
+        glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
+        x.fillStyle = '#F8E7AE'; x.textAlign = 'center'; x.textBaseline = 'middle';
+        ln.forEach(function (t, k) { x.fillText(t, W / 2, py3 + ph3 / 2 + (k - (ln.length - 1) / 2) * lh + 4); });
+        x.textBaseline = 'alphabetic';
+      } else {
+        glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
+        x.fillStyle = '#F8E7AE'; fitFont(x, SP.e + ' ' + lbl, W - 220, story ? 84 : 76, 800, BN);
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(SP.e + ' ' + lbl, W / 2, py3 + ph3 / 2 + 8); x.textBaseline = 'alphabetic';
+      }
       footer(x, W, story ? 1790 : H - 36, NUM);
     } else {
       var L = card.leaders[card.idx];
