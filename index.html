@@ -562,8 +562,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return b.wins - a.wins || b.draws - a.draws || b.goals - a.goals || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
     });
     rows.forEach(function (r, i) {
-      var prev = rows[i - 1];
-      r.rank = prev && prev.wins === r.wins && prev.draws === r.draws && prev.goals === r.goals ? prev.rank : i + 1;
+      r.rank = i + 1;
     });
     return rows;
   }
@@ -742,13 +741,13 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return e2;
     }
     var top = active[0];
-    var leaders = active.filter(function (r) { return r.wins === top.wins && r.draws === top.draws && r.goals === top.goals; });
+    var leaders = [top];
     var faces = h('div', { class: 'faces' });
     leaders.slice(0, 4).forEach(function (r) { faces.append(avatar(r.p, leaders.length === 1 ? 112 : 72)); });
     var names = leaders.map(function (r) { return r.p.name; }).join(' ও ');
     return h('section', { class: 'hero' },
       h('p', { class: 'kicker' }, (leaders.length > 1 ? 'যুগ্ম ' : '') + kicker(S.period, S.offset)),
-      h('div', { class: 'hero-main' }, h('div', { class: 'crownwrap' }, h('span', { class: 'crown', 'aria-hidden': 'true' }, '👑'), faces),
+      h('div', { class: 'hero-main' }, faces,
         h('div', { class: 'hero-info' }, h('h2', null, names), h('p', { class: 'range' }, rangeLabel(S.period, S.offset)))),
       h('div', { class: 'hero-stats' },
         h('div', null, h('b', null, String(top.wins)), h('span', null, 'জয়')),
@@ -1217,17 +1216,17 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   function cardBg(x, W, H, focusY) {
     var g = x.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#070C11'); g.addColorStop(0.45, '#0F1822'); g.addColorStop(1, '#070C11');
+    g.addColorStop(0, '#2A6E80'); g.addColorStop(0.5, '#1E4F63'); g.addColorStop(1, '#173A4C');
     x.fillStyle = g; x.fillRect(0, 0, W, H);
-    for (var i = 0; i < W; i += 90) { x.fillStyle = 'rgba(255,255,255,0.018)'; x.fillRect(i, 0, 45, H); }
+    for (var i = 0; i < W; i += 90) { x.fillStyle = 'rgba(255,255,255,0.04)'; x.fillRect(i, 0, 45, H); }
     for (var r = -4; r <= 4; r++) {
       x.beginPath(); x.moveTo(W / 2, -80); x.lineTo(W / 2 + r * 330 - 70, H * 0.85); x.lineTo(W / 2 + r * 330 + 70, H * 0.85); x.closePath();
       var rg0 = x.createLinearGradient(0, 0, 0, H * 0.85);
-      rg0.addColorStop(0, 'rgba(124,200,207,0.10)'); rg0.addColorStop(1, 'rgba(124,200,207,0)');
+      rg0.addColorStop(0, 'rgba(255,255,255,0.13)'); rg0.addColorStop(1, 'rgba(124,200,207,0)');
       x.fillStyle = rg0; x.fill();
     }
     var rg = x.createRadialGradient(W / 2, focusY, 20, W / 2, focusY, W * 0.78);
-    rg.addColorStop(0, 'rgba(124,200,207,0.30)'); rg.addColorStop(0.45, 'rgba(231,194,106,0.08)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    rg.addColorStop(0, 'rgba(190,240,246,0.40)'); rg.addColorStop(0.45, 'rgba(248,231,174,0.10)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
     x.fillStyle = rg; x.fillRect(0, 0, W, H);
     var seed = 7, rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
     for (var k = 0; k < 46; k++) {
@@ -1237,7 +1236,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       else { x.globalAlpha = 0.15 + rnd() * 0.35; x.fillStyle = '#E7C26A'; x.beginPath(); x.arc(px, py, 1.5 + rnd() * 2.5, 0, 7); x.fill(); x.globalAlpha = 1; }
     }
     var vg = x.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
-    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.5)');
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(6,24,34,0.35)');
     x.fillStyle = vg; x.fillRect(0, 0, W, H);
     var tb = x.createLinearGradient(0, 0, W, 0);
     tb.addColorStop(0, '#A8CB45'); tb.addColorStop(0.5, '#E7C26A'); tb.addColorStop(1, '#7CC8CF');
@@ -1249,14 +1248,14 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var tw = x.measureText(txt).width, pw = tw + 150, ph = px * 1.55;
     x.save(); x.shadowColor = 'rgba(231,194,106,0.45)'; x.shadowBlur = 36;
     rr(x, (W - pw) / 2, cy - ph / 2, pw, ph, ph / 2); x.fillStyle = gg(x, 0, cy - ph / 2, 0, cy + ph / 2); x.fill(); x.restore();
-    x.fillStyle = '#0B1117'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = '#1A2A33'; x.textAlign = 'center'; x.textBaseline = 'middle';
     x.fillText(txt, W / 2 + 3, cy + px * 0.04);
     x.textBaseline = 'alphabetic';
     sparkle(x, (W - pw) / 2 - 36, cy, 18, 0.95, '#F8E7AE'); sparkle(x, (W + pw) / 2 + 36, cy, 18, 0.95, '#F8E7AE');
     if ('letterSpacing' in x) x.letterSpacing = '0px';
   }
   function footer(x, W, y, NUM) {
-    x.textAlign = 'center'; x.fillStyle = '#6F8091';
+    x.textAlign = 'center'; x.fillStyle = '#BFD8E0';
     if ('letterSpacing' in x) x.letterSpacing = '5px';
     x.font = '700 24px ' + NUM;
     var host = ''; try { host = location.protocol.indexOf('http') === 0 ? location.host : ''; } catch (e) { host = ''; }
@@ -1266,18 +1265,18 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   function glass(x, px, py, w, hh, r, accent) {
     rr(x, px, py, w, hh, r);
     var g = x.createLinearGradient(0, py, 0, py + hh);
-    g.addColorStop(0, 'rgba(255,255,255,0.11)'); g.addColorStop(1, 'rgba(255,255,255,0.03)');
+    g.addColorStop(0, 'rgba(255,255,255,0.22)'); g.addColorStop(1, 'rgba(255,255,255,0.09)');
     x.fillStyle = g; x.fill();
-    x.lineWidth = 2; x.strokeStyle = 'rgba(255,255,255,0.16)'; x.stroke();
+    x.lineWidth = 2; x.strokeStyle = 'rgba(255,255,255,0.32)'; x.stroke();
     if (accent) { x.save(); rr(x, px, py, w, hh, r); x.clip(); x.fillStyle = accent; x.fillRect(px, py, w, 7); x.restore(); }
   }
   function medal(x, cx, cy, r, rank, NUM) {
     var cols = rank === 1 ? ['#F8E7AE', '#B58B33'] : rank === 2 ? ['#EEF3F7', '#8393A3'] : rank === 3 ? ['#F0B48A', '#9A5A32'] : null;
     x.beginPath(); x.arc(cx, cy, r, 0, 7);
     if (cols) { var g = x.createLinearGradient(cx, cy - r, cx, cy + r); g.addColorStop(0, cols[0]); g.addColorStop(1, cols[1]); x.fillStyle = g; }
-    else x.fillStyle = 'rgba(255,255,255,0.10)';
+    else x.fillStyle = 'rgba(255,255,255,0.18)';
     x.fill();
-    x.fillStyle = cols ? '#0B1117' : '#94A4B1'; x.font = '800 ' + Math.round(r * 1.2) + 'px ' + NUM;
+    x.fillStyle = cols ? '#1A2A33' : '#D5E6EB'; x.font = '800 ' + Math.round(r * 1.2) + 'px ' + NUM;
     x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(rank), cx, cy + r * 0.06); x.textBaseline = 'alphabetic';
   }
   async function drawCard(card) {
@@ -1305,7 +1304,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       if ('letterSpacing' in x) x.letterSpacing = '4px';
       fitFont(x, card.rangeTxt, 900, story ? 44 : 38, 600, NUM); x.fillText(card.rangeTxt, W / 2, rgY);
       var hy = rgY + (story ? 70 : 58), RH = story ? 170 : 132, GAP = story ? 18 : 14, y0 = hy + 22;
-      x.fillStyle = '#6F8091'; x.font = '700 ' + (story ? 28 : 24) + 'px ' + NUM; x.textAlign = 'center';
+      x.fillStyle = '#D5E6EB'; x.font = '700 ' + (story ? 28 : 24) + 'px ' + NUM; x.textAlign = 'center';
       if ('letterSpacing' in x) x.letterSpacing = '1px';
       var cxs = [782, 880, 980];
       ['WIN', 'DRAW', 'GOAL'].forEach(function (t, i) { x.fillText(t, cxs[i], hy); });
@@ -1319,20 +1318,20 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         var as = story ? 112 : 92, ax = 176, ay = ry + (RH - as) / 2 + 3;
         x.save(); rr(x, ax, ay, as, as, 26); x.clip();
         if (imgs[i]) x.drawImage(imgs[i], ax, ay, as, as);
-        else { x.fillStyle = '#1C2631'; x.fillRect(ax, ay, as, as); x.fillStyle = '#7CC8CF'; x.font = '800 ' + Math.round(as * 0.5) + 'px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(r.name), ax + as / 2, ay + as / 2 + 4); x.textBaseline = 'alphabetic'; }
+        else { x.fillStyle = '#2B5666'; x.fillRect(ax, ay, as, as); x.fillStyle = '#BFF1F6'; x.font = '800 ' + Math.round(as * 0.5) + 'px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(r.name), ax + as / 2, ay + as / 2 + 4); x.textBaseline = 'alphabetic'; }
         x.restore();
         x.fillStyle = '#ECE8D3'; x.textAlign = 'left';
         fitFont(x, r.name, 440, story ? 54 : 46, 800, BN); x.fillText(r.name, ax + as + 26, ry + RH / 2 + (story ? 18 : 15));
         x.textAlign = 'center'; x.font = '800 ' + (story ? 84 : 70) + 'px ' + NUM;
-        x.fillStyle = '#A8CB45'; x.fillText(String(r.wins), cxs[0], ry + RH / 2 + (story ? 30 : 25));
-        x.fillStyle = '#E7C26A'; x.fillText(String(r.draws), cxs[1], ry + RH / 2 + (story ? 30 : 25));
-        x.fillStyle = '#7CC8CF'; x.fillText(String(r.goals), cxs[2], ry + RH / 2 + (story ? 30 : 25));
+        x.fillStyle = '#C6E86A'; x.fillText(String(r.wins), cxs[0], ry + RH / 2 + (story ? 30 : 25));
+        x.fillStyle = '#F4D88A'; x.fillText(String(r.draws), cxs[1], ry + RH / 2 + (story ? 30 : 25));
+        x.fillStyle = '#A9EEF4'; x.fillText(String(r.goals), cxs[2], ry + RH / 2 + (story ? 30 : 25));
       });
       footer(x, W, story ? 1742 : H - 40, NUM);
     } else {
       var L = card.leaders[card.idx];
       var tY2 = story ? 620 : 330, rY = story ? 712 : 424;
-      var P = story ? 540 : 410, pY = story ? 850 : 548;
+      var P = story ? 590 : 440, pY = story ? 800 : 520;
       var nY = story ? 1488 : 1050, tiY = story ? 1560 : 1102, tiH = story ? 190 : 172;
       ribbon(x, W, tY2, card.title, NUM, story ? 58 : 52);
       x.textAlign = 'center'; x.fillStyle = '#ECE8D3';
@@ -1341,22 +1340,21 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       if ('letterSpacing' in x) x.letterSpacing = '0px';
 
       var px0 = (W - P) / 2;
-      x.save(); x.shadowColor = 'rgba(231,194,106,0.5)'; x.shadowBlur = 80; rr(x, px0, pY, P, P, 56); x.fillStyle = '#10181F'; x.fill(); x.restore();
+      x.save(); x.shadowColor = 'rgba(231,194,106,0.5)'; x.shadowBlur = 80; rr(x, px0, pY, P, P, 56); x.fillStyle = '#244B5B'; x.fill(); x.restore();
       x.save(); rr(x, px0, pY, P, P, 56); x.clip();
       if (L.photo) {
         try { var im = await loadImg(L.photo); x.drawImage(im, px0, pY, P, P); }
-        catch (e) { x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P); }
+        catch (e) { x.fillStyle = '#2B5666'; x.fillRect(px0, pY, P, P); }
       } else {
-        x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P);
-        x.fillStyle = '#7CC8CF'; x.font = '800 ' + Math.round(P * 0.5) + 'px ' + BN;
+        x.fillStyle = '#2B5666'; x.fillRect(px0, pY, P, P);
+        x.fillStyle = '#BFF1F6'; x.font = '800 ' + Math.round(P * 0.5) + 'px ' + BN;
         x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(L.name), W / 2, pY + P / 2 + 8); x.textBaseline = 'alphabetic';
       }
-      var sh = x.createLinearGradient(0, pY + P * 0.6, 0, pY + P); sh.addColorStop(0, 'rgba(7,12,17,0)'); sh.addColorStop(1, 'rgba(7,12,17,0.55)');
+      var sh = x.createLinearGradient(0, pY + P * 0.6, 0, pY + P); sh.addColorStop(0, 'rgba(7,24,34,0)'); sh.addColorStop(1, 'rgba(7,24,34,0.35)');
       x.fillStyle = sh; x.fillRect(px0, pY, P, P);
       x.restore();
       rr(x, px0, pY, P, P, 56); x.lineWidth = 14; x.strokeStyle = gg(x, px0, pY, px0 + P, pY + P); x.stroke();
-      rr(x, px0 + 14, pY + 14, P - 28, P - 28, 44); x.lineWidth = 2; x.strokeStyle = 'rgba(11,17,23,0.55)'; x.stroke();
-      crown(x, W / 2, pY - (story ? 98 : 78), story ? 190 : 150);
+      rr(x, px0 + 14, pY + 14, P - 28, P - 28, 44); x.lineWidth = 2; x.strokeStyle = 'rgba(11,30,40,0.35)'; x.stroke();
 
       x.textAlign = 'center'; x.fillStyle = '#ECE8D3';
       x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 20;
@@ -1365,13 +1363,13 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       x.fillStyle = gg(x, W / 2 - 120, 0, W / 2 + 120, 0); x.fillRect(W / 2 - 120, nY + 24, 240, 6);
 
       var tw = 300, gap = 24, tx0 = (W - (tw * 3 + gap * 2)) / 2;
-      var tiles = [['WIN', L.wins, '#A8CB45'], ['DRAW', L.draws || 0, '#E7C26A'], ['GOAL', L.goals, '#7CC8CF']];
+      var tiles = [['WIN', L.wins, '#C6E86A'], ['DRAW', L.draws || 0, '#F4D88A'], ['GOAL', L.goals, '#A9EEF4']];
       tiles.forEach(function (t, i) {
         var tx = tx0 + i * (tw + gap);
         glass(x, tx, tiY, tw, tiH, 30, t[2]);
         x.textAlign = 'center'; x.fillStyle = t[2]; x.font = '800 ' + (story ? 120 : 104) + 'px ' + NUM;
         x.fillText(String(t[1]), tx + tw / 2, tiY + tiH * 0.62);
-        x.fillStyle = '#94A4B1'; x.font = '700 ' + (story ? 34 : 30) + 'px ' + NUM;
+        x.fillStyle = '#D5E6EB'; x.font = '700 ' + (story ? 34 : 30) + 'px ' + NUM;
         if ('letterSpacing' in x) x.letterSpacing = '6px';
         var lab = t[0] + ((t[1] === 1) ? '' : 'S'); x.fillText(lab, tx + tw / 2 + 3, tiY + tiH - (story ? 26 : 22));
         if ('letterSpacing' in x) x.letterSpacing = '0px';
