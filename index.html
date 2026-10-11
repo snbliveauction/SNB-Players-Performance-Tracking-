@@ -467,6 +467,30 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .react.on { background: rgba(231,194,106,0.22); border-color: #E7C26A; }
 .momprev { width: 100%; border-radius: 14px; margin: 10px 0; }
 .lbname { text-align: left; flex: 1; }
+
+.gmodes { display: grid; gap: 10px; margin-top: 12px; }
+.gm { display: grid; grid-template-columns: 52px 1fr; grid-template-rows: auto auto auto; column-gap: 12px; text-align: left; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.05); color: var(--ink); font-family: var(--f-display); }
+.gm:disabled { opacity: 0.45; }
+.gme { grid-row: 1 / 4; font-size: 38px; align-self: center; text-align: center; }
+.gmt { font-weight: 800; font-size: 18px; }
+.gmd { font-size: 13px; color: var(--muted); font-weight: 500; }
+.gmb { font-size: 13px; color: #E7C26A; font-weight: 700; margin-top: 2px; }
+.gmode { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: #E7C26A; }
+.qzq { font-size: 20px; line-height: 1.4; margin: 8px 0 12px; }
+.okline { color: #7BD389; font-weight: 700; }
+.lboard { display: flex; flex-direction: column; margin-top: 10px; }
+.lrow { display: flex; align-items: center; gap: 12px; padding: 10px 6px; border-bottom: 1px solid var(--line); }
+.lrow:last-child { border-bottom: 0; }
+.lrow.mine { background: rgba(231,194,106,0.12); border-radius: 10px; }
+.lrk { width: 30px; text-align: center; font-weight: 800; font-size: 18px; }
+.lmid { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ltot { font-weight: 800; font-size: 20px; color: #E7C26A; }
+.pzwrap { position: relative; width: min(340px, 100%); margin: 12px auto; }
+.pzb { position: relative; width: 100%; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #0C1A22; border: 3px solid #E7C26A; }
+.pzt { position: absolute; left: 0; top: 0; box-sizing: border-box; border: 1px solid rgba(0,0,0,0.5); transition: transform 0.15s ease; background-color: #2B5666; cursor: pointer; }
+.pzt span { position: absolute; left: 4px; top: 2px; font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px #000; }
+.pzpeek { position: absolute; inset: 0; border-radius: 14px; background-size: cover; background-position: center; border: 3px solid #E7C26A; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.pzpeek.on { opacity: 1; }
 </style>
 </head>
 <body>
@@ -552,7 +576,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    funTab: 'spin', roast: { cur: null }, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', roast: { cur: null }, game: { mode: null, res: null }, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
@@ -1270,76 +1294,290 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       h('p', { class: 'small tierline' }, '👑 ' + counts.legend + ' লিজেন্ড · 🥇 ' + counts.gold + ' গোল্ড · 🥈 ' + counts.silver + ' সিলভার · 🥉 ' + counts.bronze + ' ব্রোঞ্জ'), grid);
   }
 
-  /* ---------- fun: guess the player ---------- */
+  /* ---------- fun: games hub ---------- */
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = rand(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-  function guessBest() { try { return +localStorage.getItem('nb-guess-best') || 0; } catch (e) { return 0; } }
-  function guessStart() {
-    var g = S.guess, pool = shuffle(Array.from(S.players.entries()).filter(function (e) { return e[1].photo; }).map(function (e) { return e[0]; }));
-    g.rounds = pool.slice(0, 5); g.i = 0; g.score = 0; g.state = 'play'; guessRound();
+  function gBest(m) { try { return +localStorage.getItem('nb-gb-' + m) || 0; } catch (e) { return 0; } }
+  function gSetBest(m, v) { try { localStorage.setItem('nb-gb-' + m, String(v)); } catch (e) { /* ignore */ } }
+  function myScoreDoc() { var id = devId(), d = null; S.scores.forEach(function (x) { if (x.id === id) d = x; }); return d; }
+  function bestOf(m) { var d = myScoreDoc(); return Math.min(1000, Math.max(gBest(m), d && d[m] ? d[m] : 0)); }
+  async function saveScore(m, score) {
+    score = Math.max(0, Math.min(1000, Math.round(score)));
+    if (score > gBest(m)) gSetBest(m, score);
+    var nm = String(pname()).trim().slice(0, 20); if (!nm) return 'noname';
+    try {
+      await S.db.doc('scores/' + devId()).set({ name: nm, g: bestOf('g'), p: bestOf('p'), q: bestOf('q'), ts: firebase.firestore.FieldValue.serverTimestamp() });
+      try { localStorage.setItem('nb-pname', nm); } catch (e) { /* ignore */ }
+      return 'ok';
+    } catch (e) { console.error(e); return 'err'; }
   }
-  function guessRound() {
-    var g = S.guess, t = g.rounds[g.i];
-    var others = shuffle(Array.from(S.players.keys()).filter(function (id) { return id !== t; })).slice(0, 3);
-    g.target = t; g.opts = shuffle(others.concat([t])); g.picked = null; g.run = true; g.img = null; g.prog = 0; g.pts = 0;
+  var GM = { g: ['🕵️', 'প্লেয়ার চিনো', 'ঝাপসা, সাদা-কালো, জুম! ৩টা জীবন, সময় কম।'], p: ['🧩', 'ছবি পাজল', 'স্লাইড করে ছবি মেলাও। কম চালে, কম সময়ে।'], q: ['🧠', 'ক্লাব কুইজ', 'ক্লাবের আসল রেকর্ড থেকে ১০টা প্রশ্ন।'] };
+  function finishGame(m, score, extra) {
+    var G = S.game; G.res = { m: m, score: Math.round(score), status: 'saving', extra: extra || '' }; G.mode = 'res'; S.guess.run = false;
+    renderView();
+    saveScore(m, score).then(function (st) { if (G.res) { G.res.status = st; } if (S.tab === 'fun' && S.funTab === 'guess' && G.mode === 'res') renderView(); });
+  }
+  function resultBox() {
+    var G = S.game, r = G.res, m = r.m, best = bestOf(m);
+    var box = h('section', { class: 'card panel' }, h('h2', null, GM[m][0] + ' ' + GM[m][1]),
+      h('p', { class: 'qtext' }, 'স্কোর: ' + r.score + ' / 1000'), r.extra ? h('p', { class: 'muted' }, r.extra) : null,
+      h('p', { class: 'small' }, '🏅 আপনার সেরা: ' + best + (r.score >= best && r.score > 0 ? '  (নতুন রেকর্ড! 🎉)' : '')));
+    if (r.status === 'noname') {
+      var nin = h('input', { type: 'text', maxlength: 20, placeholder: 'নাম লিখুন (লিডারবোর্ডে দেখাবে)', value: pname(), class: 'sel' }); nin.oninput = function () { S.pname = nin.value; };
+      box.append(nin, h('button', { class: 'btn block', onclick: function () { if (!String(pname()).trim()) { toast('নাম লিখুন'); return; } r.status = 'saving'; renderView(); saveScore(m, 0).then(function (st) { r.status = st; renderView(); }); } }, '🏆 লিডারবোর্ডে যোগ হোন'));
+    } else if (r.status === 'ok') box.append(h('p', { class: 'small okline' }, '✅ লিডারবোর্ডে সেভ হয়েছে'));
+    else if (r.status === 'err') box.append(h('p', { class: 'notice' }, 'লিডারবোর্ডে সেভ হয়নি (অ্যাডমিন rules আপডেট করলে চালু হবে)। স্কোর আপনার ফোনে আছে।'));
+    box.append(h('button', { class: 'btn block', onclick: function () { startMode(m); } }, '🔁 আবার খেলুন'), h('button', { class: 'btn ghost block', onclick: function () { G.mode = null; G.res = null; renderView(); } }, '🎮 অন্য গেম'));
+    return box;
+  }
+  function startMode(m) {
+    S.game.res = null;
+    if (m === 'g') chStart(); else if (m === 'p') { S.game.mode = 'pzpick'; renderView(); } else qzStart();
+  }
+  function scoreBoard() {
+    var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, t: (x.g || 0) + (x.p || 0) + (x.q || 0) }; }).sort(function (a, b) { return b.t - a.t; });
+    var me = devId(), box = h('section', { class: 'card panel' }, h('h2', null, '🏆 টপ স্কোরার'),
+      h('p', { class: 'muted small' }, 'তিন গেমের সেরা স্কোরের যোগফল। সর্বোচ্চ ৩০০০।'));
+    if (S.scoreErr) { box.append(h('p', { class: 'notice' }, 'লিডারবোর্ড এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
+    if (!rows.length) { box.append(h('p', { class: 'muted' }, 'এখনো কেউ খেলেনি। প্রথম হোন! 🚀')); return box; }
+    var list = h('div', { class: 'lboard' }), myPos = -1;
+    rows.forEach(function (r, i) { if (r.id === me) myPos = i; });
+    rows.slice(0, 10).forEach(function (r, i) {
+      var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : String(i + 1);
+      list.append(h('div', { class: 'lrow' + (r.id === me ? ' mine' : '') }, h('span', { class: 'lrk' }, medal),
+        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · 🧩 ' + r.p + ' · 🧠 ' + r.q)), h('span', { class: 'ltot' }, String(r.t))));
+    });
+    box.append(list);
+    if (myPos >= 10) box.append(h('p', { class: 'small' }, 'আপনার অবস্থান: ' + (myPos + 1) + ' (' + rows[myPos].t + ' পয়েন্ট)'));
+    return box;
+  }
+
+  /* ----- game 1: guess the player (levels) ----- */
+  var CH_LV = [{ o: 4, t: 12, m: 'pix', l: 'ঝাপসা' }, { o: 4, t: 12, m: 'pix', l: 'ঝাপসা' }, { o: 6, t: 10, m: 'gray', l: 'সাদা-কালো' }, { o: 6, t: 10, m: 'gray', l: 'সাদা-কালো' }, { o: 6, t: 8, m: 'zoom', l: 'জুম (শুধু একটুখানি)' }, { o: 6, t: 8, m: 'zoom', l: 'জুম (শুধু একটুখানি)' }, { o: 6, t: 6, m: 'zg', l: 'জুম + সাদা-কালো' }, { o: 6, t: 6, m: 'zg', l: 'জুম + সাদা-কালো' }];
+  function chStart() {
+    var g = S.guess, pool = shuffle(Array.from(S.players.entries()).filter(function (e) { return e[1].photo; }).map(function (e) { return e[0]; }));
+    var r = []; while (r.length < 8) r = r.concat(r.length ? shuffle(pool) : pool); g.rounds = r.slice(0, 8);
+    g.i = 0; g.score = 0; g.lives = 3; S.game.mode = 'ch'; chRound();
+  }
+  function chRound() {
+    var g = S.guess, lv = CH_LV[g.i], t = g.rounds[g.i];
+    var others = shuffle(Array.from(S.players.keys()).filter(function (id) { return id !== t; })).slice(0, Math.min(lv.o, S.players.size) - 1);
+    g.target = t; g.opts = shuffle(others.concat([t])); g.picked = null; g.run = true; g.img = null; g.prog = 0; g.pts = 0; g.timeout = false;
+    g.crop = { x: 0.15 + Math.random() * 0.4, y: Math.random() * 0.35 };
     renderView();
   }
-  function guessPaint(cv, img, prog) {
+  function chPaint(cv, img, prog, mode, crop) {
     var sm = Math.max(6, Math.round(6 + 314 * prog * prog)), tmp = document.createElement('canvas'); tmp.width = tmp.height = sm;
-    tmp.getContext('2d').drawImage(img, 0, 0, sm, sm);
+    var tc = tmp.getContext('2d'), sx = 0, sy = 0, sw = img.width, sh = img.height;
+    if (mode === 'zoom' || mode === 'zg') { sw = img.width * 0.42; sh = img.height * 0.42; sx = crop.x * (img.width - sw); sy = crop.y * (img.height - sh); }
+    tc.drawImage(img, sx, sy, sw, sh, 0, 0, sm, sm);
+    if (mode === 'gray' || mode === 'zg') {
+      var id = tc.getImageData(0, 0, sm, sm), d = id.data;
+      for (var i = 0; i < d.length; i += 4) { var v = 0.3 * d[i] + 0.59 * d[i + 1] + 0.11 * d[i + 2]; d[i] = d[i + 1] = d[i + 2] = v; }
+      tc.putImageData(id, 0, 0);
+    }
     var x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, 320, 320); x.drawImage(tmp, 0, 0, sm, sm, 0, 0, 320, 320);
   }
-  function guessTick(t0) {
+  function chTick(t0, T) {
     var g = S.guess, cv = $('#gcv'); if (!cv || !g.run || !g.img) return;
-    g.prog = Math.min(1, (performance.now() - t0) / 12000); guessPaint(cv, g.img, g.prog);
+    g.prog = Math.min(1, (performance.now() - t0) / (T * 1000)); chPaint(cv, g.img, g.prog, CH_LV[g.i].m, g.crop);
     var bar = $('#gbar'); if (bar) bar.style.width = Math.round((1 - g.prog) * 100) + '%';
-    if (g.prog < 1) requestAnimationFrame(function () { guessTick(t0); });
+    if (g.prog < 1) requestAnimationFrame(function () { chTick(t0, T); }); else chPick(null);
   }
-  function guessPick(id) {
+  function chPick(id) {
     var g = S.guess; if (!g.run) return;
-    g.run = false; g.picked = id;
-    g.pts = id === g.target ? Math.round(110 - 100 * g.prog) : 0; g.score += g.pts;
-    if (g.i === g.rounds.length - 1) { try { if (g.score > guessBest()) localStorage.setItem('nb-guess-best', String(g.score)); } catch (e) { /* ignore */ } }
+    g.run = false; g.picked = id; g.timeout = id === null;
+    if (id === g.target) { g.pts = Math.round(25 + 100 * (1 - g.prog)); g.score += g.pts; } else { g.pts = 0; g.lives--; }
     renderView();
   }
-  function viewGuess() {
-    var g = S.guess, withPhoto = Array.from(S.players.values()).filter(function (p) { return p.photo; }).length;
-    var box = h('section', { class: 'card panel' }, h('h2', null, '🕵️ প্লেয়ার চিনো'));
-    if (S.players.size < 4 || withPhoto < 1) { box.append(h('p', { class: 'muted' }, 'এই খেলার জন্য কমপক্ষে ৪ জন প্লেয়ার আর অন্তত একজনের ছবি লাগবে।')); return box; }
-    if (g.state === 'idle') {
-      box.append(h('p', { class: 'muted small' }, 'ঝাপসা ছবি ধীরে ধীরে পরিষ্কার হবে। যত তাড়াতাড়ি চিনবেন তত বেশি পয়েন্ট! ৫ রাউন্ড।'),
-        h('p', { class: 'small' }, '🏅 আপনার সেরা স্কোর: ' + guessBest()),
-        h('button', { class: 'btn block', onclick: guessStart }, '▶️ খেলা শুরু'));
-      return box;
-    }
-    if (g.state === 'end' || (g.i >= g.rounds.length)) {
-      var best = guessBest(), msg = g.score >= 400 ? '🔥 তুমি তো ক্লাবের আসল ফ্যান!' : g.score >= 200 ? '👍 মোটামুটি চেনো সবাইকে' : '😅 আরেকটু ভালো করে দেখো সবাইকে!';
-      box.append(h('p', { class: 'qtext' }, 'স্কোর: ' + g.score + ' / ' + (g.rounds.length * 110)), h('p', { class: 'muted' }, msg), h('p', { class: 'small' }, '🏅 সেরা স্কোর: ' + best),
-        h('button', { class: 'btn block', onclick: function () { g.state = 'idle'; guessStart(); } }, '🔁 আবার খেলুন'));
-      return box;
-    }
-    var p = S.players.get(g.target), done = g.picked !== null;
+  function viewChino() {
+    var g = S.guess, lv = CH_LV[g.i], p = S.players.get(g.target), done = g.picked !== null || g.timeout;
+    var hearts = '❤️'.repeat(Math.max(0, g.lives)) + '🖤'.repeat(Math.max(0, 3 - g.lives));
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🕵️ প্লেয়ার চিনো'),
+      h('p', { class: 'muted small' }, 'রাউন্ড ' + (g.i + 1) + '/8 · ' + hearts + ' · পয়েন্ট ' + g.score), h('p', { class: 'gmode' }, 'এই রাউন্ড: ' + lv.l + ' · ' + lv.t + ' সেকেন্ড'));
     var cv = h('canvas', { id: 'gcv', width: 320, height: 320, class: 'gcv' });
-    var bar = h('div', { class: 'gbarw' }, h('i', { id: 'gbar' }));
-    box.append(h('p', { class: 'muted small' }, 'রাউন্ড ' + (g.i + 1) + '/' + g.rounds.length + ' · পয়েন্ট ' + g.score), h('div', { class: 'gwrap' }, cv), done ? null : bar);
+    box.append(h('div', { class: 'gwrap' }, cv), done ? null : h('div', { class: 'gbarw' }, h('i', { id: 'gbar' })));
     var opts = h('div', { class: 'gopts' });
     g.opts.forEach(function (id) {
-      var cls = 'gopt';
-      if (done) { if (id === g.target) cls += ' ok'; else if (id === g.picked) cls += ' bad'; }
-      opts.append(h('button', { class: cls, disabled: done, onclick: function () { guessPick(id); } }, S.players.get(id).name));
+      var cls = 'gopt'; if (done) { if (id === g.target) cls += ' ok'; else if (id === g.picked) cls += ' bad'; }
+      opts.append(h('button', { class: cls, disabled: done, onclick: function () { chPick(id); } }, S.players.get(id).name));
     });
     box.append(opts);
     if (done) {
-      box.append(h('p', { class: 'qtext' }, g.picked === g.target ? '✅ ঠিক! +' + g.pts + ' পয়েন্ট' : '❌ ভুল! এটা ছিল ' + p.name),
-        h('button', { class: 'btn block', onclick: function () { if (g.i + 1 >= g.rounds.length) { g.i++; g.state = 'end'; renderView(); } else { g.i++; guessRound(); } } }, g.i + 1 >= g.rounds.length ? '🏁 ফলাফল দেখুন' : 'পরের রাউন্ড ▶️'));
+      var ok = g.picked === g.target, over = g.lives <= 0, last = g.i >= 7;
+      box.append(h('p', { class: 'qtext' }, ok ? '✅ ঠিক! +' + g.pts : (g.timeout ? '⏰ সময় শেষ! ' : '❌ ভুল! ') + 'এটা ছিল ' + p.name),
+        h('button', { class: 'btn block', onclick: function () {
+          if (over || last) finishGame('g', g.score, over ? '💔 জীবন শেষ! ' + g.i + 'টা রাউন্ড পার করেছেন।' : '🏁 সব রাউন্ড শেষ!');
+          else { g.i++; chRound(); }
+        } }, over || last ? '🏁 ফলাফল দেখুন' : 'পরের রাউন্ড ▶️'));
     }
     setTimeout(function () {
       var c = $('#gcv'); if (!c) return;
-      loadImg(p.photo).then(function (img) {
-        g.img = img;
-        if (g.run) { var t0 = performance.now(); guessTick(t0); } else guessPaint(c, img, 1);
-      }).catch(function () { /* ignore */ });
+      loadImg(p.photo).then(function (img) { g.img = img; if (g.run) chTick(performance.now(), lv.t); else chPaint(c, img, 1, 'pix', g.crop); }).catch(function () { /* ignore */ });
     }, 0);
     return box;
+  }
+
+  /* ----- game 2: sliding puzzle ----- */
+  function pzStart(n) {
+    var ids = Array.from(S.players.entries()).filter(function (e) { return e[1].photo; }), pid = ids.length ? ids[rand(ids.length)][0] : null;
+    var N = n * n, arr = []; for (var i = 0; i < N; i++) arr.push(i);
+    var bl = N - 1, last = -1;
+    for (var k = 0; k < (n === 3 ? 90 : 220); k++) {
+      var r = Math.floor(bl / n), c = bl % n, mv = [];
+      if (r > 0) mv.push(bl - n); if (r < n - 1) mv.push(bl + n); if (c > 0) mv.push(bl - 1); if (c < n - 1) mv.push(bl + 1);
+      mv = mv.filter(function (x) { return x !== last; }); var to = mv[rand(mv.length)];
+      arr[bl] = arr[to]; arr[to] = N - 1; last = bl; bl = to;
+    }
+    var solved = arr.every(function (v, i) { return v === i; }); if (solved) { var t = arr[0]; arr[0] = arr[1]; arr[1] = t; if (n % 1 === 0) { /* swap makes it unsolvable parity-wise; re-run */ return pzStart(n); } }
+    S.pz = { n: n, arr: arr, moves: 0, t0: 0, peeks: 0, pid: pid, done: false };
+    S.game.mode = 'pz'; S.guess.run = true; renderView();
+  }
+  function viewPzPick() {
+    var G = S.game;
+    return h('section', { class: 'card panel' }, h('h2', null, '🧩 ছবি পাজল'), h('p', { class: 'muted small' }, 'টাইল স্লাইড করে ছবি ঠিক করো। কম চাল ও কম সময়ে বেশি পয়েন্ট। "ঝলক" দেখলে ১০ সেকেন্ড কাটা যাবে!'),
+      h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: function () { pzStart(3); } }, '3×3 (মাঝারি)'), h('button', { class: 'btn ghost', onclick: function () { pzStart(4); } }, '4×4 (কঠিন 🔥)')),
+      h('button', { class: 'btn ghost block', onclick: function () { G.mode = null; renderView(); } }, '← ফিরে যান'));
+  }
+  function pzScore(z, secs) {
+    var eff = secs + z.peeks * 10;
+    var sc = z.n === 3 ? 1000 - 12 * Math.max(0, z.moves - 22) - 2 * eff : 1000 - 4 * Math.max(0, z.moves - 55) - 1 * eff;
+    return Math.max(50, Math.min(1000, Math.round(sc)));
+  }
+  function viewPuzzle() {
+    var z = S.pz, n = z.n, N = n * n, p = z.pid ? S.players.get(z.pid) : null;
+    var board = h('div', { class: 'pzb' }), tiles = {};
+    function pos(v) { var i = z.arr.indexOf(v); return 'translate(' + (i % n) * 100 + '%,' + Math.floor(i / n) * 100 + '%)'; }
+    for (var v = 0; v < N - 1; v++) {
+      (function (v) {
+        var t = h('div', { class: 'pzt', style: 'width:' + 100 / n + '%;height:' + 100 / n + '%;' + (p ? 'background-image:url(' + p.photo + ');background-size:' + n * 100 + '% ' + n * 100 + '%;background-position:' + ((v % n) * 100 / (n - 1)) + '% ' + (Math.floor(v / n) * 100 / (n - 1)) + '%;' : '') },
+          h('span', null, String(v + 1)));
+        t.style.transform = pos(v); tiles[v] = t;
+        t.addEventListener('click', function () {
+          if (z.done) return; if (!z.t0) z.t0 = Date.now();
+          var i = z.arr.indexOf(v), bl = z.arr.indexOf(N - 1), r = Math.floor(i / n), c = i % n, br = Math.floor(bl / n), bc = bl % n;
+          if (Math.abs(r - br) + Math.abs(c - bc) !== 1) return;
+          z.arr[bl] = v; z.arr[i] = N - 1; z.moves++; t.style.transform = pos(v);
+          var mv = $('#pzm'); if (mv) mv.textContent = String(z.moves);
+          if (z.arr.every(function (x, k) { return x === k; })) {
+            z.done = true; var secs = Math.round((Date.now() - z.t0) / 1000);
+            setTimeout(function () { finishGame('p', pzScore(z, secs), z.moves + ' চাল · ' + secs + ' সেকেন্ড' + (z.peeks ? ' · ' + z.peeks + 'বার ঝলক' : '')); }, 450);
+          }
+        });
+        board.append(t);
+      })(v);
+    }
+    var peek = h('div', { class: 'pzpeek', id: 'pzpk' });
+    if (p) peek.style.backgroundImage = 'url(' + p.photo + ')';
+    var wrap = h('div', { class: 'pzwrap' }, board, peek);
+    var pbtn = h('button', { class: 'btn ghost', onclick: function () {
+      if (z.done) return; z.peeks++; if (!z.t0) z.t0 = Date.now(); peek.classList.add('on'); var pc = $('#pzpc'); if (pc) pc.textContent = String(z.peeks);
+      setTimeout(function () { peek.classList.remove('on'); }, 1500);
+    } }, '👁️ ঝলক (−১০সে) ×', h('span', { id: 'pzpc' }, String(z.peeks)));
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🧩 ছবি পাজল ' + n + '×' + n),
+      h('p', { class: 'muted small' }, 'চাল: ', h('b', { id: 'pzm' }, String(z.moves)), ' · সময়: ', h('b', { id: 'pzt' }, '0'), ' সে'),
+      wrap, pbtn, h('button', { class: 'link-btn', onclick: function () { S.guess.run = false; S.game.mode = 'pzpick'; renderView(); } }, '✖ ছেড়ে দিন'));
+    var iv = setInterval(function () { var el = $('#pzt'); if (!el || z.done) { clearInterval(iv); return; } if (z.t0) el.textContent = String(Math.round((Date.now() - z.t0) / 1000)); }, 500);
+    return box;
+  }
+
+  /* ----- game 3: club quiz ----- */
+  function numOpts(v, step) {
+    var set = [v], cand = []; for (var d = -4; d <= 5; d++) if (d !== 0 && v + d * step >= 0) cand.push(v + d * step);
+    cand = shuffle(cand); for (var i = 0; i < cand.length && set.length < 4; i++) if (set.indexOf(cand[i]) < 0) set.push(cand[i]);
+    return set;
+  }
+  function qzBuild() {
+    var ids = Array.from(S.players.keys()), st = {};
+    ids.forEach(function (id) { var a = allStats(id), r = ratingFor(id); st[id] = { a: a, r: r, t: titleFor(id), tier: tierOf(r) }; });
+    function nm(id) { return S.players.get(id).name; }
+    function pick(excl, k) { return shuffle(ids.filter(function (i) { return excl.indexOf(i) < 0; })).slice(0, k); }
+    function mk(q, opts, ans) { var o = shuffle(opts.map(function (t, i) { return { t: String(t), c: i === ans }; })); return { q: q, opts: o.map(function (x) { return x.t; }), a: o.findIndex(function (x) { return x.c; }) }; }
+    function topBy(key, label) {
+      return function () {
+        var s = ids.slice().sort(function (a, b) { return st[b].a[key] - st[a].a[key]; });
+        if (s.length < 4 || st[s[0]].a[key] <= st[s[1]].a[key] || st[s[0]].a[key] === 0) return null;
+        return mk(label, [s[0]].concat(pick([s[0]], 3)).map(nm), 0);
+      };
+    }
+    function numQ(label, key, step) {
+      return function () { var id = ids[rand(ids.length)], v = key === 'r' ? st[id].r : key === 'm' ? st[id].a.matches : st[id].a[key]; return mk(nm(id) + ' ' + label, numOpts(v, step).map(String), 0); };
+    }
+    var gens = [
+      topBy('goals', 'সব সময়ের সর্বোচ্চ গোলদাতা কে?'), topBy('wins', 'এখন পর্যন্ত সবচেয়ে বেশি ম্যাচ কে জিতেছে?'), topBy('draws', 'সবচেয়ে বেশি ড্র কে করেছে?'), topBy('hat', 'সবচেয়ে বেশি হ্যাটট্রিক কার?'),
+      numQ('মোট কয়টা গোল করেছে?', 'goals', 1), numQ('কয়টা ম্যাচ জিতেছে?', 'wins', 1), numQ('কয়টা ম্যাচ ড্র করেছে?', 'draws', 1), numQ('এর কার্ড রেটিং কত?', 'r', 2), numQ('মোট কয়টা ম্যাচ খেলেছে (জয় + ড্র)?', 'm', 1),
+      function () {
+        var h1 = ids.filter(function (i) { return st[i].a.hat > 0; }), h0 = ids.filter(function (i) { return st[i].a.hat === 0; });
+        if (!h1.length || h0.length < 3) return null; var c = h1[rand(h1.length)];
+        return mk('নিচের কে হ্যাটট্রিক করেছে?', [c].concat(shuffle(h0).slice(0, 3)).map(nm), 0);
+      },
+      function () {
+        var id = ids[rand(ids.length)], t = st[id].t.e + ' ' + st[id].t.n, pool = {}; ids.forEach(function (i) { pool[st[i].t.e + ' ' + st[i].t.n] = 1; });
+        ['⚽ মাঠের যোদ্ধা', '😴 ঘুমন্ত সিংহ', '🛡️ শান্ত যোদ্ধা', '⭐ উঠতি তারকা', '💪 জয়ের কারিগর', '🤝 ড্রয়ের রাজা'].forEach(function (x) { pool[x] = 1; });
+        var o = shuffle(Object.keys(pool).filter(function (x) { return x !== t; })).slice(0, 3); return mk(nm(id) + ' এর বর্তমান টাইটেল কোনটা?', [t].concat(o), 0);
+      },
+      function () { var id = ids[rand(ids.length)]; return mk(nm(id) + ' এর কার্ড এখন কোন লেভেলে?', ['LEGEND', 'GOLD', 'SILVER', 'BRONZE'].map(function (x) { return x; }), ['LEGEND', 'GOLD', 'SILVER', 'BRONZE'].indexOf(st[id].tier.n)); },
+      function () {
+        var a = ids[rand(ids.length)], b = ids[rand(ids.length)]; if (a === b || st[a].a.goals === st[b].a.goals) return null;
+        return mk(nm(a) + ' আর ' + nm(b) + ': কে বেশি গোল করেছে?', [nm(a), nm(b)], st[a].a.goals > st[b].a.goals ? 0 : 1);
+      }
+    ];
+    var qs = [], seen = {}, tries = 0;
+    while (qs.length < 10 && tries < 200) { tries++; var q = gens[rand(gens.length)](); if (!q || seen[q.q]) continue; seen[q.q] = 1; qs.push(q); }
+    return qs;
+  }
+  function qzStart() {
+    if (S.players.size < 4) { toast('কুইজের জন্য অন্তত ৪ জন প্লেয়ার লাগবে'); return; }
+    var qs = qzBuild(); if (qs.length < 3) { toast('এখনো পর্যাপ্ত রেকর্ড নেই। কিছু ম্যাচ যোগ হলে আবার চেষ্টা করুন।'); return; }
+    S.quiz = { qs: qs, i: 0, score: 0, right: 0, picked: null, prog: 0, pts: 0 }; S.game.mode = 'qz'; qzRound();
+  }
+  function qzRound() { var q = S.quiz; q.picked = null; q.prog = 0; q.pts = 0; S.guess.run = true; renderView(); }
+  function qzTick(t0) {
+    var q = S.quiz, bar = $('#gbar'); if (!bar || !S.guess.run) return;
+    q.prog = Math.min(1, (performance.now() - t0) / 12000); bar.style.width = Math.round((1 - q.prog) * 100) + '%';
+    if (q.prog < 1) requestAnimationFrame(function () { qzTick(t0); }); else qzPick(-1);
+  }
+  function qzPick(k) {
+    var q = S.quiz; if (!S.guess.run) return; S.guess.run = false; q.picked = k;
+    if (k === q.qs[q.i].a) { q.pts = Math.round(50 + 50 * (1 - q.prog)); q.score += q.pts; q.right++; } else q.pts = 0;
+    renderView();
+  }
+  function viewQuiz() {
+    var q = S.quiz, cur = q.qs[q.i], done = q.picked !== null;
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🧠 ক্লাব কুইজ'), h('p', { class: 'muted small' }, 'প্রশ্ন ' + (q.i + 1) + '/' + q.qs.length + ' · পয়েন্ট ' + q.score + ' · ১২ সেকেন্ড'),
+      h('p', { class: 'qtext qzq' }, cur.q), done ? null : h('div', { class: 'gbarw' }, h('i', { id: 'gbar' })));
+    var opts = h('div', { class: 'gopts' });
+    cur.opts.forEach(function (t, k) {
+      var cls = 'gopt'; if (done) { if (k === cur.a) cls += ' ok'; else if (k === q.picked) cls += ' bad'; }
+      opts.append(h('button', { class: cls, disabled: done, onclick: function () { qzPick(k); } }, t));
+    });
+    box.append(opts);
+    if (done) {
+      var last = q.i >= q.qs.length - 1;
+      box.append(h('p', { class: 'qtext' }, q.picked === cur.a ? '✅ ঠিক! +' + q.pts : (q.picked === -1 ? '⏰ সময় শেষ!' : '❌ ভুল!')),
+        h('button', { class: 'btn block', onclick: function () { if (last) finishGame('q', q.score * 10 / q.qs.length, q.right + '/' + q.qs.length + 'টা ঠিক'); else { q.i++; qzRound(); } } }, last ? '🏁 ফলাফল দেখুন' : 'পরের প্রশ্ন ▶️'));
+    } else setTimeout(function () { qzTick(performance.now()); }, 0);
+    return box;
+  }
+
+  function viewGuess() {
+    var G = S.game, withPhoto = Array.from(S.players.values()).filter(function (p) { return p.photo; }).length;
+    var root = h('div', { class: 'stack' });
+    if (G.mode === 'ch') { root.append(viewChino()); return root; }
+    if (G.mode === 'pz') { root.append(viewPuzzle()); return root; }
+    if (G.mode === 'qz') { root.append(viewQuiz()); return root; }
+    if (G.mode === 'pzpick') { root.append(viewPzPick()); return root; }
+    if (G.mode === 'res' && G.res) { root.append(resultBox(), scoreBoard()); return root; }
+    var hub = h('section', { class: 'card panel' }, h('h2', null, '🎮 গেম জোন'), h('p', { class: 'muted small' }, 'তিনটা গেম, প্রতিটায় সর্বোচ্চ ১০০০। তিনটার সেরা স্কোর মিলিয়ে লিডারবোর্ডে টপ স্কোরার!'));
+    var okG = S.players.size >= 4 && withPhoto >= 1, okQ = S.players.size >= 4;
+    var modes = h('div', { class: 'gmodes' });
+    ['g', 'p', 'q'].forEach(function (m) {
+      var dis = (m === 'g' && !okG) || (m === 'p' && !withPhoto) || (m === 'q' && !okQ);
+      modes.append(h('button', { class: 'gm', disabled: dis, onclick: function () { startMode(m); } }, h('span', { class: 'gme' }, GM[m][0]), h('span', { class: 'gmt' }, GM[m][1]), h('span', { class: 'gmd' }, GM[m][2]), h('span', { class: 'gmb' }, '🏅 সেরা: ' + bestOf(m))));
+    });
+    hub.append(modes);
+    if (!okG) hub.append(h('p', { class: 'muted small' }, 'কিছু গেমের জন্য অন্তত ৪ জন প্লেয়ার আর কয়েকজনের ছবি লাগবে।'));
+    root.append(hub, scoreBoard());
+    return root;
   }
 
   /* ---------- fun: goal predictor ---------- */
@@ -1487,7 +1725,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 
   function funSeg() {
     var seg = h('div', { class: 'seg funseg', role: 'group', 'aria-label': 'মজা' });
-    [['spin', '🎡 স্পিন'], ['pred', '🎯 প্রেডিক্ট'], ['moment', '📸 মুহূর্ত'], ['guess', '🕵️ চিনো'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
+    [['spin', '🎡 স্পিন'], ['pred', '🎯 প্রেডিক্ট'], ['moment', '📸 মুহূর্ত'], ['guess', '🎮 গেম'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
       seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.guess.run = false; S.funTab = x[0]; renderView(); } }, x[1]));
     });
     return h('div', { class: 'periodbar' }, seg);
@@ -2294,6 +2532,9 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     db.collection('predictions').onSnapshot(function (snap) {
       S.preds = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.predErr = false; funRefresh();
     }, function (e) { console.error(e); S.predErr = true; funRefresh(); });
+    db.collection('scores').limit(500).onSnapshot(function (snap) {
+      S.scores = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.scoreErr = false; funRefresh();
+    }, function (e) { console.error(e); S.scoreErr = true; funRefresh(); });
     db.collection('moments').orderBy('ts', 'desc').limit(30).onSnapshot(function (snap) {
       S.mom.list = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.mom.err = false; funRefresh();
     }, function (e) { console.error(e); S.mom.err = true; funRefresh(); });
