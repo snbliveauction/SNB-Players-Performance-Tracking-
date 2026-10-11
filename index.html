@@ -33,6 +33,7 @@ img { max-width: 100%; }
    striped-pitch hero for the period's best player with a social card button, then a ranked
    list (wins first, goals break ties). Weeks run Saturday to Friday. */
 :root {
+  --gold: #E7C26A;
   color-scheme: dark;
   --bg: #0F151C;
   --bg-deep: #0B1117;
@@ -104,7 +105,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn.lime { background: var(--lime); color: #1A2406; }
 .btn.sm { min-height: 36px; padding: 4px 12px; font-size: 14px; }
 .btn.block { width: 100%; }
-input[type="text"], input[type="date"] {
+input[type="text"], input[type="date"], input[type="email"], input[type="password"] {
   width: 100%; min-height: 44px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line-2);
   background: var(--surface-2); color: var(--ink); font: inherit; font-size: 16px;
 }
@@ -150,9 +151,10 @@ label.btn:focus-within { outline: 2px solid var(--aqua); outline-offset: 2px; }
 /* ranked list */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
 .list { overflow: hidden; }
-.lhead, .row { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) 42px 42px; gap: 12px; align-items: center; padding: 10px 14px; }
+.lhead, .row { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) 38px 38px 42px; gap: 10px; align-items: center; padding: 10px 14px; }
 .lhead { font-size: 12px; letter-spacing: 0.05em; color: var(--muted); background: var(--surface-2); border-bottom: 1px solid var(--line); }
 .lhead span:nth-child(n+4) { text-align: right; }
+.num { font-size: 24px; }
 .row { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); }
 .row:last-child { border-bottom: 0; }
 .row:hover { background: var(--surface-2); }
@@ -250,6 +252,30 @@ button.item:last-child { border-bottom: 0; }
 .steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
 .steps li { line-height: 1.5; }
 
+/* draws */
+.seg.kind { align-self: flex-start; }
+.num.mid { color: var(--gold); }
+.kindpill { font-size: 13px; font-weight: 700; padding: 2px 9px; border-radius: 8px; white-space: nowrap; }
+.kindpill.win { background: var(--lime-soft); color: var(--lime); }
+.kindpill.draw { background: #33290F; color: var(--gold); }
+.hero-stats div:nth-child(2) b { color: var(--gold); }
+.hero-stats { gap: 22px; flex-wrap: wrap; }
+
+/* search + login */
+.searchbox { position: relative; }
+.searchbox input { padding-right: 44px; }
+.searchbox .clr { position: absolute; right: 4px; top: 4px; width: 36px; height: 36px; border: 0; background: none; color: var(--muted); font-size: 20px; }
+.chips.scroll { max-height: 330px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 2px; }
+.picked { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--aqua-soft); border: 1px solid var(--aqua); font-weight: 600; }
+.cnt { font-size: 13px; color: var(--muted); margin-top: -6px; }
+.lgform { display: flex; flex-direction: column; gap: 12px; }
+.pwrow { position: relative; }
+.pwrow input { padding-right: 76px; }
+.pwrow .show { position: absolute; right: 6px; top: 6px; height: 32px; padding: 0 10px; border: 0; background: none; color: var(--aqua); font-weight: 700; font-size: 14px; }
+.err { color: var(--danger); font-size: 14px; min-height: 20px; }
+.sep { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.sep:before, .sep:after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
 .notice { padding: 14px 16px; border-radius: 12px; background: var(--lime-soft); color: var(--lime); font-size: 15px; }
 .emptybox { padding: 28px 18px; text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; }
 .emptybox h2 { font-family: var(--f-display); font-weight: 800; font-size: 20px; }
@@ -260,12 +286,111 @@ button.item:last-child { border-bottom: 0; }
 }
 @media (max-width: 420px) {
   .tab { font-size: 14px; }
-  .lhead, .row { gap: 10px; padding-inline: 10px; grid-template-columns: 26px 40px minmax(0, 1fr) 36px 36px; }
+  .lhead, .row { gap: 10px; padding-inline: 10px; grid-template-columns: 24px 40px minmax(0, 1fr) 30px 30px 34px; }
   .row .av { --s: 40px; }
   .hero h2 { font-size: 25px; }
   .hero-stats b { font-size: 50px; }
   .brand h1 { font-size: 30px; }
   .logo { width: 58px; height: 58px; }
+}
+
+/* ===== premium skin ===== */
+:root {
+  --bg: #0A1016; --bg-deep: #070C11; --surface: #141C26; --surface-2: #1A2430;
+  --line: rgba(255,255,255,0.08); --line-2: rgba(255,255,255,0.16);
+  --gold-2: #F8E7AE; --gold-3: #B58B33;
+  --grad-gold: linear-gradient(135deg, #F8E7AE 0%, #E7C26A 48%, #B58B33 100%);
+  --grad-aqua: linear-gradient(135deg, #A9E4EA 0%, #7CC8CF 55%, #4FA3AD 100%);
+  --shadow: 0 14px 36px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+html { background: var(--bg-deep); }
+body {
+  background:
+    radial-gradient(900px 520px at 88% -8%, rgba(124,200,207,0.17), transparent 62%),
+    radial-gradient(700px 520px at -12% 6%, rgba(168,203,69,0.10), transparent 60%),
+    radial-gradient(800px 600px at 50% 110%, rgba(231,194,106,0.07), transparent 60%),
+    linear-gradient(180deg, #0B121A, #070C11);
+  background-repeat: no-repeat; min-height: 100vh;
+}
+.top { padding: 14px 14px 0; border-radius: 22px; border: 1px solid var(--line); background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02)); box-shadow: var(--shadow); gap: 10px; }
+
+.logo { filter: drop-shadow(0 6px 18px rgba(124,200,207,0.35)); }
+.city { background: var(--grad-gold); -webkit-background-clip: text; background-clip: text; color: transparent; letter-spacing: 0.42em; }
+.brand h1 { background: linear-gradient(180deg, #FFFFFF 10%, #CFE9EB 60%, #8FC9D0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.tabs { border: 0; background: rgba(0,0,0,0.28); border-radius: 14px; padding: 4px; gap: 2px; margin: 0 -2px 12px; }
+.tab { border: 0; margin: 0; border-radius: 10px; padding: 9px 2px; transition: background .2s, color .2s; }
+.tab[aria-selected="true"] { color: #08262A; background: var(--grad-aqua); box-shadow: 0 4px 14px rgba(124,200,207,0.35); }
+.card { background: linear-gradient(180deg, #19222D 0%, #141C26 100%); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); }
+.btn { background: var(--grad-aqua); box-shadow: 0 6px 18px rgba(124,200,207,0.25); border-radius: 12px; letter-spacing: 0.01em; }
+.btn:active { transform: translateY(1px); }
+.btn.ghost { background: rgba(255,255,255,0.04); box-shadow: none; }
+.btn.danger { box-shadow: none; background: var(--danger-soft); }
+.btn.danger-solid { background: var(--danger); box-shadow: none; }
+.btn.lime { background: linear-gradient(135deg,#C4E26A,#A8CB45); }
+.seg { border-radius: 12px; background: rgba(0,0,0,0.28); border-color: var(--line); padding: 3px; gap: 2px; }
+.seg button { border-radius: 9px; }
+.seg button[aria-pressed="true"] { background: var(--grad-gold); color: #2A1E05; box-shadow: 0 3px 10px rgba(231,194,106,0.3); }
+.iconbtn { background: rgba(255,255,255,0.05); border-color: var(--line); }
+input[type="text"], input[type="date"], input[type="email"], input[type="password"] { background: rgba(0,0,0,0.3); border-color: var(--line-2); border-radius: 12px; }
+input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(124,200,207,0.22); }
+
+/* hero */
+.hero { border: 1px solid rgba(231,194,106,0.28); border-top: 0; border-radius: 22px; padding: 22px 18px 18px; box-shadow: 0 18px 44px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.03) inset;
+  background: radial-gradient(110% 80% at 85% -10%, rgba(231,194,106,0.20), transparent 55%), radial-gradient(90% 80% at 0% 100%, rgba(124,200,207,0.14), transparent 60%), repeating-linear-gradient(90deg, #141D27 0 44px, #111A23 44px 88px); }
+.hero::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, var(--lime), var(--gold), var(--aqua)); }
+.kicker { display: inline-flex; align-self: flex-start; padding: 3px 12px; border-radius: 999px; background: var(--grad-gold); color: #2A1E05; font-weight: 800; letter-spacing: 0.02em; }
+.crownwrap { position: relative; padding-top: 22px; }
+.crown { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); font-size: 30px; line-height: 1; filter: drop-shadow(0 4px 10px rgba(231,194,106,0.6)); z-index: 2; }
+.faces .av { box-shadow: 0 0 0 3px #E7C26A, 0 0 0 7px rgba(231,194,106,0.22), 0 12px 30px rgba(0,0,0,0.5); }
+.hero h2 { background: linear-gradient(180deg, #FFFFFF, #E9E2C8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero-stats { gap: 10px; }
+.hero-stats div { flex: 1 1 0; flex-direction: column; align-items: flex-start; gap: 2px; padding: 12px 12px 10px; border-radius: 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--line); min-width: 0; }
+.hero-stats b { font-size: 52px; }
+.hero-stats span { font-size: 13px; letter-spacing: 0.08em; }
+.hero-stats div:first-child b { color: var(--lime); }
+.hero-stats div:nth-child(2) b { color: var(--gold); }
+.hero-stats div:last-child b { color: var(--aqua); }
+
+/* leaderboard */
+.list { border-radius: 20px; }
+.lhead { background: rgba(0,0,0,0.25); }
+.row { transition: background .15s; }
+.row:hover { background: rgba(255,255,255,0.04); }
+.rank { font-size: 22px; }
+.row.first { background: linear-gradient(90deg, rgba(231,194,106,0.14), transparent 70%); }
+.row.m1 .rank, .row.m2 .rank, .row.m3 .rank { color: #1B1305; border-radius: 50%; width: 30px; height: 30px; line-height: 30px; font-size: 18px; margin-inline: auto; box-shadow: 0 3px 10px rgba(0,0,0,0.4); }
+.row.m1 .rank { background: var(--grad-gold); }
+.row.m2 .rank { background: linear-gradient(135deg, #F4F7FA, #8393A3); }
+.row.m3 .rank { background: linear-gradient(135deg, #F0B48A, #9A5A32); }
+.row.m1 .av { box-shadow: 0 0 0 2px #E7C26A; }
+.nm .bar { height: 5px; background: rgba(255,255,255,0.08); }
+.nm .bar i { background: linear-gradient(90deg, var(--aqua), var(--lime)); box-shadow: 0 0 10px rgba(168,203,69,0.45); }
+.num { font-size: 24px; }
+
+/* chips, sheets, pills */
+.chip { background: rgba(255,255,255,0.03); border-radius: 14px; }
+.chip[aria-pressed="true"] { background: rgba(124,200,207,0.14); }
+.picked { background: rgba(124,200,207,0.12); }
+.goalnum { background: linear-gradient(180deg, #D7EE85, #A8CB45); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sheet { background: linear-gradient(180deg, #19222D, #121A23); border-color: var(--line-2); box-shadow: 0 -20px 60px rgba(0,0,0,0.55); }
+.scrim { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.badge.on { background: linear-gradient(135deg, rgba(168,203,69,0.18), rgba(231,194,106,0.10)); border-color: rgba(231,194,106,0.55); }
+.pcard { transition: transform .15s; }
+.pcard:active { transform: scale(0.98); }
+.install { background: linear-gradient(135deg, rgba(124,200,207,0.16), rgba(231,194,106,0.08)); border-radius: 16px; }
+.toast { background: var(--grad-gold); color: #2A1E05; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+.emptybox { border-style: dashed; }
+@media (prefers-reduced-motion: no-preference) {
+  .stack > * { animation: rise .45s cubic-bezier(.2,.7,.2,1) both; }
+  .stack > *:nth-child(2) { animation-delay: .06s; }
+  .stack > *:nth-child(3) { animation-delay: .12s; }
+  .crown { animation: bob 3s ease-in-out infinite; }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes bob { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -3px); } }
+}
+@media (max-width: 420px) {
+  .hero-stats b { font-size: 44px; }
+  .top { padding: 12px 12px 0; }
 }
 </style>
 </head>
@@ -352,8 +477,8 @@ button.item:last-child { border-bottom: 0; }
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    pick: null, goals: 0, date: dateStr(new Date()), busy: false,
-    sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false,
+    pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
 
@@ -422,22 +547,23 @@ button.item:last-child { border-bottom: 0; }
     var m = new Map();
     S.wins.forEach(function (w) {
       if (w.ts >= start && w.ts < end) {
-        var a = m.get(w.playerId) || { wins: 0, goals: 0 };
-        a.wins++; a.goals += (w.goals || 0);
+        var a = m.get(w.playerId) || { wins: 0, draws: 0, goals: 0 };
+        if (w.type === 'draw') a.draws++; else a.wins++;
+        a.goals += (w.goals || 0);
         m.set(w.playerId, a);
       }
     });
     var rows = [];
     S.players.forEach(function (p, id) {
-      var a = m.get(id) || { wins: 0, goals: 0 };
-      rows.push({ id: id, p: p, wins: a.wins, goals: a.goals });
+      var a = m.get(id) || { wins: 0, draws: 0, goals: 0 };
+      rows.push({ id: id, p: p, wins: a.wins, draws: a.draws, goals: a.goals });
     });
     rows.sort(function (a, b) {
-      return b.wins - a.wins || b.goals - a.goals || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
+      return b.wins - a.wins || b.draws - a.draws || b.goals - a.goals || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
     });
     rows.forEach(function (r, i) {
       var prev = rows[i - 1];
-      r.rank = prev && prev.wins === r.wins && prev.goals === r.goals ? prev.rank : i + 1;
+      r.rank = prev && prev.wins === r.wins && prev.draws === r.draws && prev.goals === r.goals ? prev.rank : i + 1;
     });
     return rows;
   }
@@ -465,7 +591,7 @@ button.item:last-child { border-bottom: 0; }
     ['week', 'month'].forEach(function (per) {
       var groups = {};
       S.wins.forEach(function (w) {
-        if (!S.players.has(w.playerId)) return;
+        if (!S.players.has(w.playerId) || w.type === 'draw') return;
         var k = periodStart(per, w.ts);
         var g = groups[k] || (groups[k] = {});
         var a = g[w.playerId] || (g[w.playerId] = { wins: 0, goals: 0 });
@@ -496,12 +622,14 @@ button.item:last-child { border-bottom: 0; }
     if (c && c.w === S.wins && c.p === S.players) return c.f;
     var hall = buildHall(), f = {}, topGoals = 0;
     S.players.forEach(function (p, id) {
-      f[id] = { wins: 0, goals: 0, hat: 0, weeks: {}, streak: 0, wChamp: hall.tally.week[id] || 0, mChamp: hall.tally.month[id] || 0, top: false };
+      f[id] = { wins: 0, draws: 0, goals: 0, hat: 0, weeks: {}, streak: 0, wChamp: hall.tally.week[id] || 0, mChamp: hall.tally.month[id] || 0, top: false };
     });
     S.wins.forEach(function (w) {
       var a = f[w.playerId]; if (!a) return;
-      a.wins++; a.goals += (w.goals || 0);
+      a.goals += (w.goals || 0);
       if ((w.goals || 0) >= 3) a.hat++;
+      if (w.type === 'draw') { a.draws++; return; }
+      a.wins++;
       a.weeks[periodStart('week', w.ts)] = 1;
     });
     Object.keys(f).forEach(function (id) { topGoals = Math.max(topGoals, f[id].goals); });
@@ -560,7 +688,7 @@ button.item:last-child { border-bottom: 0; }
       r.append(h('span', { class: 'who' }, S.canWrite ? 'অ্যাডমিন' : 'অ্যাডমিন নন'),
         h('button', { class: 'link-btn', onclick: logout }, 'লগআউট'));
     } else {
-      r.append(h('button', { class: 'link-btn', onclick: login }, 'অ্যাডমিন লগইন'));
+      r.append(h('button', { class: 'link-btn', onclick: function () { openSheet('login'); } }, 'অ্যাডমিন লগইন'));
     }
   }
   function renderTabs() {
@@ -608,46 +736,48 @@ button.item:last-child { border-bottom: 0; }
     if (!active.length) {
       var e2 = h('section', { class: 'hero empty' },
         h('p', { class: 'kicker' }, kicker(S.period, S.offset)),
-        h('h2', null, 'এই সময়ে এখনো কোনো জয় লেখা হয়নি'),
+        h('h2', null, 'এই সময়ে এখনো কোনো ম্যাচ লেখা হয়নি'),
         h('p', { class: 'range' }, rangeLabel(S.period, S.offset)));
       if (S.canWrite) e2.append(h('div', { class: 'hero-actions' }, h('button', { class: 'btn', onclick: function () { S.tab = 'add'; renderTabs(); renderView(); } }, 'জয় যোগ করুন')));
       return e2;
     }
     var top = active[0];
-    var leaders = active.filter(function (r) { return r.wins === top.wins && r.goals === top.goals; });
+    var leaders = active.filter(function (r) { return r.wins === top.wins && r.draws === top.draws && r.goals === top.goals; });
     var faces = h('div', { class: 'faces' });
     leaders.slice(0, 4).forEach(function (r) { faces.append(avatar(r.p, leaders.length === 1 ? 112 : 72)); });
     var names = leaders.map(function (r) { return r.p.name; }).join(' ও ');
     return h('section', { class: 'hero' },
       h('p', { class: 'kicker' }, (leaders.length > 1 ? 'যুগ্ম ' : '') + kicker(S.period, S.offset)),
-      h('div', { class: 'hero-main' }, faces,
+      h('div', { class: 'hero-main' }, h('div', { class: 'crownwrap' }, h('span', { class: 'crown', 'aria-hidden': 'true' }, '👑'), faces),
         h('div', { class: 'hero-info' }, h('h2', null, names), h('p', { class: 'range' }, rangeLabel(S.period, S.offset)))),
       h('div', { class: 'hero-stats' },
         h('div', null, h('b', null, String(top.wins)), h('span', null, 'জয়')),
+        h('div', null, h('b', null, String(top.draws)), h('span', null, 'ড্র')),
         h('div', null, h('b', null, String(top.goals)), h('span', null, 'গোল'))),
       h('div', { class: 'hero-actions' },
-        h('button', { class: 'btn', onclick: function () { openCard(leaders); } }, icon('down'), 'সোশ্যাল মিডিয়া কার্ড')));
+        h('button', { class: 'btn', onclick: function () { openCard(leaders); } }, icon('down'), 'বিজয়ী কার্ড'),
+        active.length > 1 ? h('button', { class: 'btn ghost', onclick: function () { openBoardCard(active); } }, 'লিডারবোর্ড কার্ড') : null));
   }
   function viewBoard() {
     var r = range(S.period, S.offset);
     var rows = ranking(r.start, r.end);
-    var active = rows.filter(function (x) { return x.wins > 0; });
+    var active = rows.filter(function (x) { return x.wins > 0 || x.draws > 0; });
     var root = h('div', { class: 'stack' }, periodBar(), hero(active));
     if (active.length) {
       var max = active[0].wins;
       var list = h('div', { class: 'card list' },
-        h('div', { class: 'lhead', 'aria-hidden': 'true' }, h('span', null, '#'), h('span'), h('span', null, 'প্লেয়ার'), h('span', null, 'জয়'), h('span', null, 'গোল')));
+        h('div', { class: 'lhead', 'aria-hidden': 'true' }, h('span', null, '#'), h('span'), h('span', null, 'প্লেয়ার'), h('span', null, 'জয়'), h('span', null, 'ড্র'), h('span', null, 'গোল')));
       active.forEach(function (x) {
         var bar = h('div', { class: 'bar' }, h('i'));
         bar.firstChild.style.width = Math.round(x.wins / max * 100) + '%';
-        list.append(h('button', { class: 'row' + (x.rank === 1 ? ' first' : ''), onclick: function () { openSheet('profile', x.id); } },
+        list.append(h('button', { class: 'row' + (x.rank === 1 ? ' first' : '') + (x.rank <= 3 ? ' m' + x.rank : ''), onclick: function () { openSheet('profile', x.id); } },
           h('span', { class: 'rank' }, String(x.rank)), avatar(x.p),
           h('div', { class: 'nm' }, h('strong', null, x.p.name), bar),
-          h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num dim' }, String(x.goals))));
+          h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num mid' }, String(x.draws)), h('span', { class: 'num dim' }, String(x.goals))));
       });
       root.append(list);
       var idle = rows.length - active.length;
-      if (idle > 0) root.append(h('p', { class: 'muted small' }, 'আরও ' + idle + ' জন প্লেয়ারের এই সময়ে কোনো জয় নেই।'));
+      if (idle > 0) root.append(h('p', { class: 'muted small' }, 'আরও ' + idle + ' জন প্লেয়ারের এই সময়ে কোনো ম্যাচ নেই।'));
     }
     return root;
   }
@@ -707,7 +837,8 @@ button.item:last-child { border-bottom: 0; }
   function hallCard(per, e) {
     var leaders = e.winners.map(function (w) {
       var p = S.players.get(w.id);
-      return p ? { id: w.id, name: p.name, photo: p.photo || null, wins: w.wins, goals: w.goals } : null;
+      var dr = 0; S.wins.forEach(function (m) { if (m.playerId === w.id && m.type === 'draw' && m.ts >= e.start && m.ts < e.end) dr++; });
+      return p ? { id: w.id, name: p.name, photo: p.photo || null, wins: w.wins, draws: dr, goals: w.goals } : null;
     }).filter(Boolean);
     if (leaders.length) startCard(per, offsetOf(per, e.start), leaders);
   }
@@ -724,11 +855,12 @@ button.item:last-child { border-bottom: 0; }
         h('button', { class: 'btn sm danger-solid', onclick: function () { removeWin(w.id); } }, 'মুছুন'),
         h('button', { class: 'btn sm ghost', onclick: function () { S.confirm = null; refresh(); } }, 'থাক'));
     } else {
-      right = h('button', { class: 'iconbtn', 'aria-label': 'এই জয় মুছুন', onclick: function () { S.confirm = key; refresh(); } }, icon('trash'));
+      right = h('button', { class: 'iconbtn', 'aria-label': 'এই ম্যাচ মুছুন', onclick: function () { S.confirm = key; refresh(); } }, icon('trash'));
     }
     return h('div', { class: 'item' },
       showPlayer ? avatar(p, 40) : null,
       h('div', { class: 'grow' }, showPlayer ? h('strong', null, p.name) : null, h('span', null, fmtDayW.format(w.ts))),
+      h('span', { class: 'kindpill ' + (w.type === 'draw' ? 'draw' : 'win') }, w.type === 'draw' ? 'ড্র' : 'জয়'),
       h('span', { class: 'goalpill', title: 'গোল' }, w.goals + ' গোল'),
       right);
   }
@@ -738,26 +870,55 @@ button.item:last-child { border-bottom: 0; }
       return h('div', { class: 'card emptybox' }, h('h2', null, 'জয় লেখার আগে প্লেয়ার লাগবে'),
         h('button', { class: 'btn', onclick: function () { openSheet('new'); } }, 'প্লেয়ার যোগ করুন'));
     }
-    var chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'প্লেয়ার বাছুন' });
-    sortedPlayers().forEach(function (e) {
-      chips.append(h('button', { class: 'chip', 'aria-pressed': S.pick === e[0] ? 'true' : 'false', onclick: function () { S.pick = e[0]; renderView(); } },
-        avatar(e[1], 44), h('span', { class: 't' }, e[1].name)));
-    });
+    if (S.pick && !S.players.has(S.pick)) S.pick = null;
+    var chips = h('div', { class: 'chips scroll', role: 'group', 'aria-label': 'প্লেয়ার বাছুন' });
+    var cnt = h('div', { class: 'cnt' });
+    var picked = h('div', { class: 'picked', hidden: true });
+    var subBtn;
+    function showPicked() {
+      picked.textContent = '';
+      var pp = S.pick && S.players.get(S.pick);
+      if (!pp) { picked.hidden = true; return; }
+      picked.hidden = false;
+      picked.append(avatar(pp, 32), h('span', null, 'বাছাই করা: ' + pp.name));
+    }
+    function pickPlayer(id) {
+      S.pick = id;
+      chips.querySelectorAll('.chip').forEach(function (bt) { bt.setAttribute('aria-pressed', bt.getAttribute('data-id') === id ? 'true' : 'false'); });
+      showPicked();
+      if (subBtn) subBtn.disabled = !!S.busy;
+    }
+    function fillChips() {
+      chips.textContent = '';
+      var list = sortedPlayers().filter(function (e) { return matchPlayer(e[1], S.qAdd); });
+      list.forEach(function (e) {
+        chips.append(h('button', { class: 'chip', 'data-id': e[0], 'aria-pressed': S.pick === e[0] ? 'true' : 'false', onclick: function () { pickPlayer(e[0]); } },
+          avatar(e[1], 44), h('span', { class: 't' }, e[1].name)));
+      });
+      if (!list.length) chips.append(h('p', { class: 'muted small' }, 'কোনো প্লেয়ার পাওয়া যায়নি।'));
+      cnt.textContent = S.qAdd.trim() ? list.length + ' জন পাওয়া গেছে' : 'মোট ' + S.players.size + ' জন প্লেয়ার';
+    }
+    chips.addEventListener('scroll', function () { S.chipScroll = chips.scrollTop; });
+    var sbox = searchBox('add', function () { return S.qAdd; }, function (v) { S.qAdd = v; }, fillChips, 'প্লেয়ারের নাম বা নম্বর লিখে খুঁজুন');
+    fillChips(); showPicked();
     var dateIn = h('input', { type: 'date', id: 'winDate', value: S.date, max: dateStr(new Date()), 'aria-label': 'তারিখ',
       onchange: function (ev) { if (ev.target.value) S.date = ev.target.value; } });
+    var kindSeg = h('div', { class: 'seg kind', role: 'group', 'aria-label': 'ম্যাচের ফল' },
+      h('button', { 'aria-pressed': S.kind === 'win' ? 'true' : 'false', onclick: function () { S.kind = 'win'; renderView(); } }, '🏆 জয়'),
+      h('button', { 'aria-pressed': S.kind === 'draw' ? 'true' : 'false', onclick: function () { S.kind = 'draw'; renderView(); } }, '🤝 ড্র'));
     var form = h('section', { class: 'card panel' },
-      h('h2', null, 'কে জিতল?'), chips,
+      h('h2', null, S.kind === 'draw' ? 'কার ম্যাচ ড্র হলো?' : 'কে জিতল?'), kindSeg, sbox, cnt, picked, chips,
       h('div', null, h('span', { class: 'fieldlbl' }, 'গোল'),
         h('div', { class: 'goalrow' },
           h('button', { class: 'iconbtn', 'aria-label': 'গোল কমান', disabled: S.goals <= 0, onclick: function () { S.goals = Math.max(0, S.goals - 1); renderView(); } }, icon('minus')),
           h('span', { class: 'goalnum', 'aria-live': 'polite' }, String(S.goals)),
           h('button', { class: 'iconbtn', 'aria-label': 'গোল বাড়ান', disabled: S.goals >= 30, onclick: function () { S.goals = Math.min(30, S.goals + 1); renderView(); } }, icon('plus')))),
       h('label', { class: 'field' }, 'তারিখ', dateIn),
-      h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : 'জয় যোগ করুন'));
+      (subBtn = h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : (S.kind === 'draw' ? 'ড্র যোগ করুন' : 'জয় যোগ করুন'))));
     var root = h('div', { class: 'stack' }, form);
     var recent = S.wins.slice().sort(function (a, b) { return b.ts - a.ts || b.createdAt - a.createdAt; }).slice(0, 8);
     if (recent.length) {
-      root.append(h('div', { class: 'card' }, h('div', { class: 'cardhead' }, h('h3', { class: 'h3' }, 'সাম্প্রতিক জয়')),
+      root.append(h('div', { class: 'card' }, h('div', { class: 'cardhead' }, h('h3', { class: 'h3' }, 'সাম্প্রতিক ম্যাচ')),
         h('div', { class: 'recent' }, recent.map(function (w) { return winItem(w, true); }))));
     }
     return root;
@@ -769,10 +930,10 @@ button.item:last-child { border-bottom: 0; }
     try {
       var ts = dateToTs(S.date);
       var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-      var entry = { id: id, playerId: S.pick, goals: S.goals, ts: ts, createdAt: Date.now() };
+      var entry = { id: id, type: S.kind === 'draw' ? 'draw' : 'win', playerId: S.pick, goals: S.goals, ts: ts, createdAt: Date.now() };
       await S.db.doc('months/' + monthKey(ts)).set({ entries: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
       var p = S.players.get(S.pick);
-      toast((p ? p.name : 'প্লেয়ার') + '-এর জয় যোগ হয়েছে' + (S.goals ? ' · ' + S.goals + ' গোল' : ''));
+      toast((p ? p.name : 'প্লেয়ার') + (S.kind === 'draw' ? '-এর ড্র যোগ হয়েছে' : '-এর জয় যোগ হয়েছে') + (S.goals ? ' · ' + S.goals + ' গোল' : ''));
       S.pick = null; S.goals = 0;
     } catch (e) { writeFail(e); }
     S.busy = false; renderView();
@@ -783,11 +944,23 @@ button.item:last-child { border-bottom: 0; }
     if (!w) return;
     try {
       await S.db.doc('months/' + w.month).update({ entries: firebase.firestore.FieldValue.arrayRemove(w.raw) });
-      toast('জয়টি মুছে ফেলা হয়েছে');
+      toast('ম্যাচটি মুছে ফেলা হয়েছে');
     } catch (e) { writeFail(e); }
   }
 
   /* ---------- players ---------- */
+  function matchPlayer(p, q) {
+    q = String(q || '').trim().toLowerCase();
+    if (!q) return true;
+    var name = String(p.name || '').toLowerCase(), num = String(p.number || '');
+    return q.split(/\s+/).every(function (w) { return name.indexOf(w) !== -1 || (num && num === w.replace(/^#/, '')); });
+  }
+  function searchBox(sid, getQ, setQ, onChange, placeholder) {
+    var clr = h('button', { class: 'clr', 'aria-label': 'মুছুন', hidden: !getQ(), onclick: function () { setQ(''); q.value = ''; clr.hidden = true; onChange(); q.focus(); } }, '✕');
+    var q = h('input', { type: 'text', class: 'searchin', 'data-sid': sid, placeholder: placeholder, value: getQ(), autocomplete: 'off', autocapitalize: 'none', autocorrect: 'off', spellcheck: 'false', enterkeyhint: 'search', 'aria-label': 'প্লেয়ার খুঁজুন',
+      oninput: function (ev) { setQ(ev.target.value); clr.hidden = !ev.target.value; onChange(); } });
+    return h('div', { class: 'searchbox' }, q, clr);
+  }
   function sortedPlayers() {
     return Array.from(S.players.entries()).sort(function (a, b) { return (a[1].name || '').localeCompare(b[1].name || '', 'bn'); });
   }
@@ -795,27 +968,39 @@ button.item:last-child { border-bottom: 0; }
     var all = ranking(-Infinity, Infinity);
     var byId = {}; all.forEach(function (r) { byId[r.id] = r; });
     var grid = h('div', { class: 'pgrid' });
-    if (S.canWrite) {
-      var plus = h('span', { class: 'plus' }); plus.append(icon('plus'));
-      grid.append(h('button', { class: 'card pcard add', onclick: function () { openSheet('new'); } }, plus, 'নতুন প্লেয়ার'));
+    var cnt = h('div', { class: 'cnt' });
+    function fillGrid() {
+      grid.textContent = '';
+      if (S.canWrite && !S.qPl.trim()) {
+        var plus = h('span', { class: 'plus' }); plus.append(icon('plus'));
+        grid.append(h('button', { class: 'card pcard add', onclick: function () { openSheet('new'); } }, plus, 'নতুন প্লেয়ার'));
+      }
+      var list = sortedPlayers().filter(function (e) { return matchPlayer(e[1], S.qPl); });
+      list.forEach(function (e) {
+        var st = byId[e[0]] || { wins: 0, goals: 0 };
+        grid.append(h('button', { class: 'card pcard', onclick: function () { openSheet('profile', e[0]); } },
+          avatar(e[1]),
+          h('div', { class: 'pinfo' },
+            h('strong', null, e[1].name),
+            h('span', null, (e[1].number ? '#' + e[1].number + ' · ' : '') + st.wins + ' জয় · ' + st.goals + ' গোল'),
+            h('span', { class: 'mini', 'aria-hidden': 'true' }, badgesFor(e[0]).filter(function (x) { return x.on; }).slice(0, 5).map(function (x) { return x.b.e; }).join(' ')))));
+      });
+      if (!list.length && S.players.size) grid.append(h('p', { class: 'muted' }, 'কোনো প্লেয়ার পাওয়া যায়নি।'));
+      cnt.textContent = S.qPl.trim() ? list.length + ' জন পাওয়া গেছে' : 'মোট ' + S.players.size + ' জন প্লেয়ার';
     }
-    sortedPlayers().forEach(function (e) {
-      var st = byId[e[0]] || { wins: 0, goals: 0 };
-      grid.append(h('button', { class: 'card pcard', onclick: function () { openSheet('profile', e[0]); } },
-        avatar(e[1]),
-        h('div', { class: 'pinfo' },
-          h('strong', null, e[1].name),
-          h('span', null, (e[1].number ? '#' + e[1].number + ' · ' : '') + st.wins + ' জয় · ' + st.goals + ' গোল'),
-          h('span', { class: 'mini', 'aria-hidden': 'true' }, badgesFor(e[0]).filter(function (x) { return x.on; }).slice(0, 5).map(function (x) { return x.b.e; }).join(' ')))));
-    });
-    return h('div', { class: 'stack' }, grid,
-      !S.players.size && !S.canWrite ? h('p', { class: 'muted' }, 'এখনো কোনো প্লেয়ার যোগ হয়নি।') : null);
+    fillGrid();
+    var kids = [];
+    if (S.players.size > 6) kids.push(searchBox('pl', function () { return S.qPl; }, function (v) { S.qPl = v; }, fillGrid, 'প্লেয়ারের নাম বা নম্বর লিখে খুঁজুন'), cnt);
+    kids.push(grid);
+    if (!S.players.size && !S.canWrite) kids.push(h('p', { class: 'muted' }, 'এখনো কোনো প্লেয়ার যোগ হয়নি।'));
+    return h('div', { class: 'stack' }, kids);
   }
 
   /* ---------- sheet ---------- */
   function openSheet(mode, id) {
     S.sheet = { mode: mode, id: id || null };
     S.confirm = null;
+    if (mode === 'login') S.lg = { email: '', pw: '', busy: false, show: false, err: '' };
     if (mode === 'new') S.draft = { name: '', number: '', photo: null, busy: false };
     renderSheet();
     $('#scrim').hidden = false;
@@ -826,9 +1011,9 @@ button.item:last-child { border-bottom: 0; }
     S.card = null; S.sheet = null; S.confirm = null; $('#scrim').hidden = true;
   }
   function statsFor(id, period) {
-    var r = range(period, 0), wins = 0, goals = 0;
-    S.wins.forEach(function (w) { if (w.playerId === id && w.ts >= r.start && w.ts < r.end) { wins++; goals += w.goals || 0; } });
-    return { wins: wins, goals: goals };
+    var r = range(period, 0), wins = 0, draws = 0, goals = 0;
+    S.wins.forEach(function (w) { if (w.playerId === id && w.ts >= r.start && w.ts < r.end) { if (w.type === 'draw') draws++; else wins++; goals += w.goals || 0; } });
+    return { wins: wins, draws: draws, goals: goals };
   }
   function renderSheet() {
     var sh = $('#sheet');
@@ -837,6 +1022,7 @@ button.item:last-child { border-bottom: 0; }
     var m = S.sheet.mode;
     var closeBtn = h('button', { class: 'iconbtn', 'aria-label': 'বন্ধ করুন', onclick: closeSheet }, icon('close'));
     if (m === 'card') { sh.append(cardSheet(closeBtn)); return; }
+    if (m === 'login') { sh.append(loginSheet(closeBtn)); return; }
     if (m === 'install') {
       sh.append(h('div', { class: 'sheet-head' }, h('h2', null, 'ফোনে অ্যাপের মতো রাখুন'), closeBtn),
         h('ol', { class: 'steps' },
@@ -854,15 +1040,15 @@ button.item:last-child { border-bottom: 0; }
     var pro = h('div', { class: 'pro' }, avatar(p, 104),
       h('div', null, h('h2', null, p.name), p.number ? h('p', { class: 'no' }, '#' + p.number) : null));
     var tbl = h('table', { class: 'tbl' },
-      h('thead', null, h('tr', null, h('th', null, 'সময়'), h('th', null, 'জয়'), h('th', null, 'গোল'))),
+      h('thead', null, h('tr', null, h('th', null, 'সময়'), h('th', null, 'জয়'), h('th', null, 'ড্র'), h('th', null, 'গোল'))),
       h('tbody', null, [['এই সপ্তাহ', 'week'], ['এই মাস', 'month'], ['সব সময়', 'all']].map(function (x) {
         var s = statsFor(id, x[1]);
-        return h('tr', null, h('td', null, x[0]), h('td', { class: 'n' }, String(s.wins)), h('td', { class: 'n' }, String(s.goals)));
+        return h('tr', null, h('td', null, x[0]), h('td', { class: 'n' }, String(s.wins)), h('td', { class: 'n' }, String(s.draws)), h('td', { class: 'n' }, String(s.goals)));
       })));
     var wins = S.wins.filter(function (w) { return w.playerId === id; }).sort(function (a, b) { return b.ts - a.ts; }).slice(0, 15);
-    var hist = h('div', null, h('h3', { class: 'h3' }, 'জয়ের তালিকা'));
+    var hist = h('div', null, h('h3', { class: 'h3' }, 'ম্যাচের তালিকা'));
     if (wins.length) hist.append(h('div', { class: 'recent' }, wins.map(function (w) { return winItem(w, false); })));
-    else hist.append(h('p', { class: 'muted small' }, 'এখনো কোনো জয় লেখা হয়নি।'));
+    else hist.append(h('p', { class: 'muted small' }, 'এখনো কোনো ম্যাচ লেখা হয়নি।'));
     var bl = badgesFor(id).sort(function (a, b) { return (b.on ? 1 : 0) - (a.on ? 1 : 0); });
     var got = bl.filter(function (x) { return x.on; }).length;
     var bsec = h('div', null, h('h3', { class: 'h3' }, 'ব্যাজ (' + got + '/' + bl.length + ')'),
@@ -875,7 +1061,7 @@ button.item:last-child { border-bottom: 0; }
     if (S.canWrite) {
       var key = 'player:' + id, act = h('div', { class: 'actions' });
       if (S.confirm === key) {
-        act.append(h('p', { class: 'small full' }, 'এই প্লেয়ার ও তার সব জয়ের হিসাব মুছে যাবে।'),
+        act.append(h('p', { class: 'small full' }, 'এই প্লেয়ার ও তার সব ম্যাচের হিসাব মুছে যাবে।'),
           h('button', { class: 'btn danger-solid', onclick: function () { deletePlayer(id); } }, 'হ্যাঁ, মুছুন'),
           h('button', { class: 'btn ghost', onclick: function () { S.confirm = null; renderSheet(); } }, 'থাক'));
       } else {
@@ -1001,82 +1187,215 @@ button.item:last-child { border-bottom: 0; }
     while (x.measureText(txt).width > maxW && px > 30) { px -= 2; x.font = weight + ' ' + px + 'px ' + family; }
     return px;
   }
+  function gg(x, x0, y0, x1, y1) {
+    var g = x.createLinearGradient(x0, y0, x1, y1);
+    g.addColorStop(0, '#F8E7AE'); g.addColorStop(0.5, '#E7C26A'); g.addColorStop(1, '#B58B33');
+    return g;
+  }
+  function crownPath(x, cx, cy, w) {
+    var hh = w * 0.72;
+    x.beginPath();
+    x.moveTo(cx - w / 2, cy + hh); x.lineTo(cx - w / 2, cy + hh * 0.22); x.lineTo(cx - w / 4, cy + hh * 0.62);
+    x.lineTo(cx, cy); x.lineTo(cx + w / 4, cy + hh * 0.62); x.lineTo(cx + w / 2, cy + hh * 0.22); x.lineTo(cx + w / 2, cy + hh);
+    x.closePath();
+  }
+  function crown(x, cx, cy, w) {
+    x.save();
+    x.shadowColor = 'rgba(231,194,106,0.65)'; x.shadowBlur = 40;
+    crownPath(x, cx, cy, w); x.fillStyle = gg(x, cx - w / 2, cy, cx + w / 2, cy + w * 0.72); x.fill();
+    x.shadowBlur = 0;
+    [[cx - w / 2, cy + w * 0.16], [cx, cy], [cx + w / 2, cy + w * 0.16]].forEach(function (p) {
+      x.beginPath(); x.arc(p[0], p[1], w * 0.055, 0, 7); x.fillStyle = '#FFF3C4'; x.fill();
+    });
+    x.fillStyle = 'rgba(11,17,23,0.35)'; x.fillRect(cx - w / 2, cy + w * 0.72 - w * 0.12, w, w * 0.06);
+    x.restore();
+  }
+  function sparkle(x, cx, cy, r, a, col) {
+    x.save(); x.translate(cx, cy); x.fillStyle = col; x.globalAlpha = a;
+    x.beginPath(); x.moveTo(0, -r); x.quadraticCurveTo(0, 0, r, 0); x.quadraticCurveTo(0, 0, 0, r); x.quadraticCurveTo(0, 0, -r, 0); x.quadraticCurveTo(0, 0, 0, -r);
+    x.fill(); x.restore();
+  }
+  function cardBg(x, W, H, focusY) {
+    var g = x.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#070C11'); g.addColorStop(0.45, '#0F1822'); g.addColorStop(1, '#070C11');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    for (var i = 0; i < W; i += 90) { x.fillStyle = 'rgba(255,255,255,0.018)'; x.fillRect(i, 0, 45, H); }
+    for (var r = -4; r <= 4; r++) {
+      x.beginPath(); x.moveTo(W / 2, -80); x.lineTo(W / 2 + r * 330 - 70, H * 0.85); x.lineTo(W / 2 + r * 330 + 70, H * 0.85); x.closePath();
+      var rg0 = x.createLinearGradient(0, 0, 0, H * 0.85);
+      rg0.addColorStop(0, 'rgba(124,200,207,0.10)'); rg0.addColorStop(1, 'rgba(124,200,207,0)');
+      x.fillStyle = rg0; x.fill();
+    }
+    var rg = x.createRadialGradient(W / 2, focusY, 20, W / 2, focusY, W * 0.78);
+    rg.addColorStop(0, 'rgba(124,200,207,0.30)'); rg.addColorStop(0.45, 'rgba(231,194,106,0.08)'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = rg; x.fillRect(0, 0, W, H);
+    var seed = 7, rnd = function () { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    for (var k = 0; k < 46; k++) {
+      var px = rnd() * W, py = rnd() * H, big = rnd() > 0.82;
+      if (big && px > 170 && px < W - 170) px = px < W / 2 ? px * 0.16 : W - (W - px) * 0.16;
+      if (big) sparkle(x, px, py, 12 + rnd() * 14, 0.5 + rnd() * 0.4, rnd() > 0.5 ? '#F8E7AE' : '#BFEFF3');
+      else { x.globalAlpha = 0.15 + rnd() * 0.35; x.fillStyle = '#E7C26A'; x.beginPath(); x.arc(px, py, 1.5 + rnd() * 2.5, 0, 7); x.fill(); x.globalAlpha = 1; }
+    }
+    var vg = x.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.8);
+    vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.5)');
+    x.fillStyle = vg; x.fillRect(0, 0, W, H);
+    var tb = x.createLinearGradient(0, 0, W, 0);
+    tb.addColorStop(0, '#A8CB45'); tb.addColorStop(0.5, '#E7C26A'); tb.addColorStop(1, '#7CC8CF');
+    x.fillStyle = tb; x.fillRect(0, 0, W, 12); x.fillRect(0, H - 12, W, 12);
+  }
+  function ribbon(x, W, cy, txt, NUM, size) {
+    if ('letterSpacing' in x) x.letterSpacing = '7px';
+    var px = fitFont(x, txt, 760, size, 800, NUM);
+    var tw = x.measureText(txt).width, pw = tw + 150, ph = px * 1.55;
+    x.save(); x.shadowColor = 'rgba(231,194,106,0.45)'; x.shadowBlur = 36;
+    rr(x, (W - pw) / 2, cy - ph / 2, pw, ph, ph / 2); x.fillStyle = gg(x, 0, cy - ph / 2, 0, cy + ph / 2); x.fill(); x.restore();
+    x.fillStyle = '#0B1117'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(txt, W / 2 + 3, cy + px * 0.04);
+    x.textBaseline = 'alphabetic';
+    sparkle(x, (W - pw) / 2 - 36, cy, 18, 0.95, '#F8E7AE'); sparkle(x, (W + pw) / 2 + 36, cy, 18, 0.95, '#F8E7AE');
+    if ('letterSpacing' in x) x.letterSpacing = '0px';
+  }
+  function footer(x, W, y, NUM) {
+    x.textAlign = 'center'; x.fillStyle = '#6F8091';
+    if ('letterSpacing' in x) x.letterSpacing = '5px';
+    x.font = '700 24px ' + NUM;
+    var host = ''; try { host = location.protocol.indexOf('http') === 0 ? location.host : ''; } catch (e) { host = ''; }
+    x.fillText('SYLHET NET BREAKERS' + (host ? '  ·  ' + host.toUpperCase() : ''), W / 2, y);
+    if ('letterSpacing' in x) x.letterSpacing = '0px';
+  }
+  function glass(x, px, py, w, hh, r, accent) {
+    rr(x, px, py, w, hh, r);
+    var g = x.createLinearGradient(0, py, 0, py + hh);
+    g.addColorStop(0, 'rgba(255,255,255,0.11)'); g.addColorStop(1, 'rgba(255,255,255,0.03)');
+    x.fillStyle = g; x.fill();
+    x.lineWidth = 2; x.strokeStyle = 'rgba(255,255,255,0.16)'; x.stroke();
+    if (accent) { x.save(); rr(x, px, py, w, hh, r); x.clip(); x.fillStyle = accent; x.fillRect(px, py, w, 7); x.restore(); }
+  }
+  function medal(x, cx, cy, r, rank, NUM) {
+    var cols = rank === 1 ? ['#F8E7AE', '#B58B33'] : rank === 2 ? ['#EEF3F7', '#8393A3'] : rank === 3 ? ['#F0B48A', '#9A5A32'] : null;
+    x.beginPath(); x.arc(cx, cy, r, 0, 7);
+    if (cols) { var g = x.createLinearGradient(cx, cy - r, cx, cy + r); g.addColorStop(0, cols[0]); g.addColorStop(1, cols[1]); x.fillStyle = g; }
+    else x.fillStyle = 'rgba(255,255,255,0.10)';
+    x.fill();
+    x.fillStyle = cols ? '#0B1117' : '#94A4B1'; x.font = '800 ' + Math.round(r * 1.2) + 'px ' + NUM;
+    x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(String(rank), cx, cy + r * 0.06); x.textBaseline = 'alphabetic';
+  }
   async function drawCard(card) {
     var story = card.fmt === 'story';
     var W = 1080, H = story ? 1920 : 1350;
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var x = cv.getContext('2d');
-    var L = card.leaders[card.idx];
     var NUM = '"Barlow Condensed","Arial Narrow",sans-serif';
     var BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
+    var board = card.kind === 'board';
+    cardBg(x, W, H, story ? 980 : 700);
 
-    var g = x.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#0B1117'); g.addColorStop(0.5, '#111A23'); g.addColorStop(1, '#0B1117');
-    x.fillStyle = g; x.fillRect(0, 0, W, H);
-    for (var i = 0; i < W; i += 88) { x.fillStyle = 'rgba(255,255,255,0.02)'; x.fillRect(i, 0, 44, H); }
-    var rg = x.createRadialGradient(W / 2, H * 0.45, 40, W / 2, H * 0.45, W * 0.8);
-    rg.addColorStop(0, 'rgba(124,200,207,0.20)'); rg.addColorStop(1, 'rgba(124,200,207,0)');
-    x.fillStyle = rg; x.fillRect(0, 0, W, H);
-    bolt(x, 40, H * 0.46, 1.9, -0.25, 0.16);
-    bolt(x, W - 40, H * 0.30, 1.6, 0.3, 0.12);
-    x.fillStyle = '#A8CB45'; x.fillRect(0, 0, W, 10);
+    var logoSize = board ? (story ? 280 : 200) : (story ? 300 : 230), logoY = story ? 215 : 34;
+    try {
+      var logo = await loadImg(LOGO);
+      x.save(); x.shadowColor = 'rgba(124,200,207,0.55)'; x.shadowBlur = 60;
+      x.drawImage(logo, (W - logoSize) / 2, logoY, logoSize, logoSize); x.restore();
+    } catch (e) { /* skip logo */ }
 
-    var logoSize = story ? 420 : 300, logoY = story ? 100 : 36;
-    try { var logo = await loadImg(LOGO); x.drawImage(logo, (W - logoSize) / 2, logoY, logoSize, logoSize); } catch (e) { /* skip logo */ }
-
-    var kY = story ? 660 : 436, rY = story ? 728 : 492;
-    var P = story ? 620 : 450, pY = story ? 800 : 536;
-    var nY = story ? 1520 : 1066, sY = story ? 1708 : 1214, lY = story ? 1766 : 1264;
-    x.textAlign = 'center'; x.textBaseline = 'alphabetic';
-    if ('letterSpacing' in x) x.letterSpacing = '4px';
-    x.fillStyle = '#7CC8CF';
-    fitFont(x, card.title, 940, story ? 108 : 96, 800, NUM);
-    x.fillText(card.title, W / 2, kY);
-    x.fillStyle = '#ECE8D3';
-    fitFont(x, card.rangeTxt, 900, story ? 44 : 40, 600, NUM);
-    x.fillText(card.rangeTxt, W / 2, rY);
-    if ('letterSpacing' in x) x.letterSpacing = '0px';
-
-    var px0 = (W - P) / 2;
-    x.save(); rr(x, px0, pY, P, P, 44); x.clip();
-    if (L.photo) {
-      try { var im = await loadImg(L.photo); x.drawImage(im, px0, pY, P, P); }
-      catch (e) { x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P); }
+    if (board) {
+      var rowsN = card.rows.length;
+      var tY = story ? 600 : 292, rgY = story ? 690 : 392;
+      ribbon(x, W, tY, card.title, NUM, story ? 56 : 50);
+      x.textAlign = 'center'; x.fillStyle = '#ECE8D3';
+      if ('letterSpacing' in x) x.letterSpacing = '4px';
+      fitFont(x, card.rangeTxt, 900, story ? 44 : 38, 600, NUM); x.fillText(card.rangeTxt, W / 2, rgY);
+      var hy = rgY + (story ? 70 : 58), RH = story ? 170 : 132, GAP = story ? 18 : 14, y0 = hy + 22;
+      x.fillStyle = '#6F8091'; x.font = '700 ' + (story ? 28 : 24) + 'px ' + NUM; x.textAlign = 'center';
+      if ('letterSpacing' in x) x.letterSpacing = '1px';
+      var cxs = [782, 880, 980];
+      ['WIN', 'DRAW', 'GOAL'].forEach(function (t, i) { x.fillText(t, cxs[i], hy); });
+      if ('letterSpacing' in x) x.letterSpacing = '0px';
+      var imgs = await Promise.all(card.rows.map(function (r) { return r.photo ? loadImg(r.photo).catch(function () { return null; }) : Promise.resolve(null); }));
+      card.rows.forEach(function (r, i) {
+        var ry = y0 + i * (RH + GAP), top = r.rank === 1;
+        glass(x, 48, ry, 984, RH, 30, top ? gg(x, 48, 0, 1032, 0) : null);
+        if (top) { x.save(); rr(x, 48, ry, 984, RH, 30); x.lineWidth = 3; x.strokeStyle = 'rgba(231,194,106,0.7)'; x.stroke(); x.restore(); }
+        medal(x, 112, ry + RH / 2 + 3, story ? 40 : 34, r.rank, NUM);
+        var as = story ? 112 : 92, ax = 176, ay = ry + (RH - as) / 2 + 3;
+        x.save(); rr(x, ax, ay, as, as, 26); x.clip();
+        if (imgs[i]) x.drawImage(imgs[i], ax, ay, as, as);
+        else { x.fillStyle = '#1C2631'; x.fillRect(ax, ay, as, as); x.fillStyle = '#7CC8CF'; x.font = '800 ' + Math.round(as * 0.5) + 'px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(r.name), ax + as / 2, ay + as / 2 + 4); x.textBaseline = 'alphabetic'; }
+        x.restore();
+        x.fillStyle = '#ECE8D3'; x.textAlign = 'left';
+        fitFont(x, r.name, 440, story ? 54 : 46, 800, BN); x.fillText(r.name, ax + as + 26, ry + RH / 2 + (story ? 18 : 15));
+        x.textAlign = 'center'; x.font = '800 ' + (story ? 84 : 70) + 'px ' + NUM;
+        x.fillStyle = '#A8CB45'; x.fillText(String(r.wins), cxs[0], ry + RH / 2 + (story ? 30 : 25));
+        x.fillStyle = '#E7C26A'; x.fillText(String(r.draws), cxs[1], ry + RH / 2 + (story ? 30 : 25));
+        x.fillStyle = '#7CC8CF'; x.fillText(String(r.goals), cxs[2], ry + RH / 2 + (story ? 30 : 25));
+      });
+      footer(x, W, story ? 1742 : H - 40, NUM);
     } else {
-      x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P);
-      x.fillStyle = '#7CC8CF'; x.font = '800 ' + Math.round(P * 0.5) + 'px ' + BN;
-      x.textBaseline = 'middle'; x.fillText(initial(L.name), W / 2, pY + P / 2 + 8); x.textBaseline = 'alphabetic';
+      var L = card.leaders[card.idx];
+      var tY2 = story ? 620 : 330, rY = story ? 712 : 424;
+      var P = story ? 540 : 410, pY = story ? 850 : 548;
+      var nY = story ? 1488 : 1050, tiY = story ? 1560 : 1102, tiH = story ? 190 : 172;
+      ribbon(x, W, tY2, card.title, NUM, story ? 58 : 52);
+      x.textAlign = 'center'; x.fillStyle = '#ECE8D3';
+      if ('letterSpacing' in x) x.letterSpacing = '4px';
+      fitFont(x, card.rangeTxt, 900, story ? 44 : 38, 600, NUM); x.fillText(card.rangeTxt, W / 2, rY);
+      if ('letterSpacing' in x) x.letterSpacing = '0px';
+
+      var px0 = (W - P) / 2;
+      x.save(); x.shadowColor = 'rgba(231,194,106,0.5)'; x.shadowBlur = 80; rr(x, px0, pY, P, P, 56); x.fillStyle = '#10181F'; x.fill(); x.restore();
+      x.save(); rr(x, px0, pY, P, P, 56); x.clip();
+      if (L.photo) {
+        try { var im = await loadImg(L.photo); x.drawImage(im, px0, pY, P, P); }
+        catch (e) { x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P); }
+      } else {
+        x.fillStyle = '#1C2631'; x.fillRect(px0, pY, P, P);
+        x.fillStyle = '#7CC8CF'; x.font = '800 ' + Math.round(P * 0.5) + 'px ' + BN;
+        x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(L.name), W / 2, pY + P / 2 + 8); x.textBaseline = 'alphabetic';
+      }
+      var sh = x.createLinearGradient(0, pY + P * 0.6, 0, pY + P); sh.addColorStop(0, 'rgba(7,12,17,0)'); sh.addColorStop(1, 'rgba(7,12,17,0.55)');
+      x.fillStyle = sh; x.fillRect(px0, pY, P, P);
+      x.restore();
+      rr(x, px0, pY, P, P, 56); x.lineWidth = 14; x.strokeStyle = gg(x, px0, pY, px0 + P, pY + P); x.stroke();
+      rr(x, px0 + 14, pY + 14, P - 28, P - 28, 44); x.lineWidth = 2; x.strokeStyle = 'rgba(11,17,23,0.55)'; x.stroke();
+      crown(x, W / 2, pY - (story ? 98 : 78), story ? 190 : 150);
+
+      x.textAlign = 'center'; x.fillStyle = '#ECE8D3';
+      x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 20;
+      fitFont(x, L.name, 900, story ? 100 : 86, 800, BN);
+      x.fillText(L.name, W / 2, nY); x.restore();
+      x.fillStyle = gg(x, W / 2 - 120, 0, W / 2 + 120, 0); x.fillRect(W / 2 - 120, nY + 24, 240, 6);
+
+      var tw = 300, gap = 24, tx0 = (W - (tw * 3 + gap * 2)) / 2;
+      var tiles = [['WIN', L.wins, '#A8CB45'], ['DRAW', L.draws || 0, '#E7C26A'], ['GOAL', L.goals, '#7CC8CF']];
+      tiles.forEach(function (t, i) {
+        var tx = tx0 + i * (tw + gap);
+        glass(x, tx, tiY, tw, tiH, 30, t[2]);
+        x.textAlign = 'center'; x.fillStyle = t[2]; x.font = '800 ' + (story ? 120 : 104) + 'px ' + NUM;
+        x.fillText(String(t[1]), tx + tw / 2, tiY + tiH * 0.62);
+        x.fillStyle = '#94A4B1'; x.font = '700 ' + (story ? 34 : 30) + 'px ' + NUM;
+        if ('letterSpacing' in x) x.letterSpacing = '6px';
+        var lab = t[0] + ((t[1] === 1) ? '' : 'S'); x.fillText(lab, tx + tw / 2 + 3, tiY + tiH - (story ? 26 : 22));
+        if ('letterSpacing' in x) x.letterSpacing = '0px';
+      });
+      footer(x, W, story ? 1790 : H - 36, NUM);
     }
-    x.restore();
-    rr(x, px0, pY, P, P, 44); x.lineWidth = 10; x.strokeStyle = '#A8CB45'; x.stroke();
-
-    x.fillStyle = '#ECE8D3';
-    fitFont(x, L.name, 900, story ? 96 : 84, 800, BN);
-    x.fillText(L.name, W / 2, nY);
-
-    var cx1 = W * 0.3, cx2 = W * 0.7;
-    x.fillStyle = '#A8CB45'; x.font = '800 ' + (story ? 170 : 140) + 'px ' + NUM; x.fillText(String(L.wins), cx1, sY);
-    x.fillStyle = '#7CC8CF'; x.fillText(String(L.goals), cx2, sY);
-    x.fillStyle = '#94A4B1'; x.font = '700 ' + (story ? 44 : 38) + 'px ' + NUM;
-    if ('letterSpacing' in x) x.letterSpacing = '6px';
-    x.fillText(L.wins === 1 ? 'WIN' : 'WINS', cx1, lY);
-    x.fillText(L.goals === 1 ? 'GOAL' : 'GOALS', cx2, lY);
-    if ('letterSpacing' in x) x.letterSpacing = '0px';
-    x.fillStyle = '#3A4A5C'; x.fillRect(W / 2 - 1.5, sY - (story ? 120 : 100), 3, story ? 160 : 140);
-
     return new Promise(function (res, rej) {
       cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png');
     });
   }
   function openCard(leaders) {
-    startCard(S.period, S.offset, leaders.map(function (r) { return { id: r.id, name: r.p.name, photo: r.p.photo || null, wins: r.wins, goals: r.goals }; }));
+    startCard(S.period, S.offset, leaders.map(function (r) { return { id: r.id, name: r.p.name, photo: r.p.photo || null, wins: r.wins, draws: r.draws || 0, goals: r.goals }; }));
   }
-  function startCard(period, offset, leaders) {
-    var title = period === 'week' ? 'PLAYER OF THE WEEK' : period === 'month' ? 'PLAYER OF THE MONTH' : 'ALL-TIME BEST';
+  function openBoardCard(active) {
+    var rs = range(S.period, S.offset);
+    var rows = active.slice(0, 5).map(function (r) { return { rank: r.rank, name: r.p.name, photo: r.p.photo || null, wins: r.wins, draws: r.draws, goals: r.goals }; });
+    startCard(S.period, S.offset, [], 'board', rows);
+  }
+  function startCard(period, offset, leaders, kind, rows) {
+    var title = kind === 'board' ? 'LEADERBOARD' : period === 'week' ? 'PLAYER OF THE WEEK' : period === 'month' ? 'PLAYER OF THE MONTH' : 'ALL-TIME BEST';
     var rs = range(period, offset);
-    var key = period === 'all' ? 'all-time' : period + '-' + dateStr(new Date(rs.start));
+    var key = (kind === 'board' ? 'board-' : '') + (period === 'all' ? 'all-time' : period + '-' + dateStr(new Date(rs.start)));
     S.card = {
-      leaders: leaders,
+      leaders: leaders, kind: kind || 'player', rows: rows || [],
       idx: 0, fmt: 'post', title: title, rangeTxt: rangeLabelEn(period, offset), key: key,
       blob: null, url: null, loading: false, err: false
     };
@@ -1101,7 +1420,7 @@ button.item:last-child { border-bottom: 0; }
   function cardSheet(closeBtn) {
     var c = S.card, wrap = h('div', { class: 'form' });
     wrap.append(h('div', { class: 'sheet-head' }, h('h2', null, 'সোশ্যাল মিডিয়া কার্ড'), closeBtn));
-    if (c.leaders.length > 1) {
+    if (c.kind !== 'board' && c.leaders.length > 1) {
       var chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'কার কার্ড' });
       c.leaders.forEach(function (l, i) {
         chips.append(h('button', { class: 'chip', 'aria-pressed': c.idx === i ? 'true' : 'false', onclick: function () { c.idx = i; buildCard(); } },
@@ -1115,7 +1434,7 @@ button.item:last-child { border-bottom: 0; }
     var pv = h('div', { class: 'preview' });
     if (c.loading) pv.append(h('p', { class: 'muted' }, 'কার্ড তৈরি হচ্ছে…'));
     else if (c.err) pv.append(h('p', { class: 'muted' }, 'কার্ড বানানো যায়নি, আবার চেষ্টা করুন।'));
-    else if (c.url) pv.append(h('img', { src: c.url, alt: c.title + ': ' + c.leaders[c.idx].name }));
+    else if (c.url) pv.append(h('img', { src: c.url, alt: c.title + (c.kind === 'board' ? '' : ': ' + c.leaders[c.idx].name) }));
     wrap.append(pv);
     wrap.append(h('div', { class: 'actions' },
       h('button', { class: 'btn', disabled: !c.blob || c.loading, onclick: saveCard }, icon('down'), 'PNG ডাউনলোড'),
@@ -1149,7 +1468,10 @@ button.item:last-child { border-bottom: 0; }
       return;
     }
     if (!(S.loaded.p && S.loaded.w)) { v.append(h('p', { class: 'muted' }, 'লোড হচ্ছে…')); return; }
+    var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
     v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : viewPlayers());
+    var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
+    if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
   function refresh() {
     if (!S.canWrite && S.tab === 'add') S.tab = 'board';
@@ -1206,14 +1528,53 @@ button.item:last-child { border-bottom: 0; }
       var out = [];
       snap.docs.forEach(function (d) {
         (d.data().entries || []).forEach(function (x) {
-          out.push({ id: x.id, playerId: x.playerId, goals: Number(x.goals) || 0, ts: Number(x.ts) || 0, createdAt: Number(x.createdAt) || 0, month: d.id, raw: x });
+          out.push({ id: x.id, type: x.type === 'draw' ? 'draw' : 'win', playerId: x.playerId, goals: Number(x.goals) || 0, ts: Number(x.ts) || 0, createdAt: Number(x.createdAt) || 0, month: d.id, raw: x });
         });
       });
       S.wins = out;
       S.loaded.w = true; refresh();
     }, function (e) { console.error(e); S.loaded.w = true; refresh(); });
   }
-  async function login() {
+  function loginSheet(closeBtn) {
+    var g = S.lg;
+    var em = h('input', { type: 'email', placeholder: 'ইমেইল', autocomplete: 'username', autocapitalize: 'none', value: g.email });
+    var pw = h('input', { type: g.show ? 'text' : 'password', placeholder: 'পাসওয়ার্ড', autocomplete: 'current-password', value: g.pw });
+    em.oninput = function () { g.email = em.value; };
+    pw.oninput = function () { g.pw = pw.value; };
+    var go = function () { g.email = em.value; g.pw = pw.value; emailLogin(); };
+    pw.onkeydown = function (e) { if (e.key === 'Enter') go(); };
+    var eye = h('button', { type: 'button', class: 'show', onclick: function () { g.email = em.value; g.pw = pw.value; g.show = !g.show; renderSheet(); } }, g.show ? 'লুকান' : 'দেখুন');
+    var f = h('div', { class: 'lgform' },
+      em, h('div', { class: 'pwrow' }, pw, eye),
+      g.err ? h('p', { class: 'err' }, g.err) : null,
+      h('button', { class: 'btn', disabled: g.busy, onclick: go }, g.busy ? 'অপেক্ষা করুন...' : 'লগইন'),
+      h('button', { class: 'link-btn', onclick: function () { g.email = em.value; resetPw(); } }, 'পাসওয়ার্ড ভুলে গেছেন?'));
+    return h('div', null,
+      h('div', { class: 'sheet-head' }, h('h2', null, 'অ্যাডমিন লগইন'), closeBtn),
+      f, h('p', { class: 'sep muted small' }, 'অথবা'),
+      h('button', { class: 'btn ghost', onclick: loginGoogle }, 'Google দিয়ে লগইন'));
+  }
+  function authMsg(c) {
+    if (c === 'auth/invalid-email') return 'ইমেইল ঠিক নয়।';
+    if (c === 'auth/too-many-requests') return 'অনেকবার ভুল হয়েছে। একটু পরে চেষ্টা করুন।';
+    if (c === 'auth/network-request-failed') return 'ইন্টারনেট নেই।';
+    if (c === 'auth/user-disabled') return 'এই অ্যাকাউন্ট বন্ধ করা আছে।';
+    return 'ইমেইল বা পাসওয়ার্ড ভুল।';
+  }
+  async function emailLogin() {
+    var g = S.lg, em = String(g.email || '').trim().toLowerCase();
+    if (!em || !g.pw) { g.err = 'ইমেইল ও পাসওয়ার্ড দিন।'; renderSheet(); return; }
+    g.busy = true; g.err = ''; renderSheet();
+    try { await S.auth.signInWithEmailAndPassword(em, g.pw); g.pw = ''; }
+    catch (e) { g.busy = false; g.err = authMsg(e && e.code); if (S.sheet && S.sheet.mode === 'login') renderSheet(); }
+  }
+  async function resetPw() {
+    var em = String(S.lg.email || '').trim().toLowerCase();
+    if (!em) { S.lg.err = 'আগে ইমেইল লিখুন।'; renderSheet(); return; }
+    try { await S.auth.sendPasswordResetEmail(em); } catch (e) { /* same message either way */ }
+    S.lg.err = ''; toast('ইমেইল থাকলে রিসেট লিংক পাঠানো হয়েছে।');
+  }
+  async function loginGoogle() {
     var provider = new firebase.auth.GoogleAuthProvider();
     try { await S.auth.signInWithPopup(provider); }
     catch (e) {
@@ -1240,8 +1601,9 @@ button.item:last-child { border-bottom: 0; }
     S.auth.onAuthStateChanged(async function (u) {
       S.user = u; S.canWrite = false;
       if (u && u.email) {
-        try { var a = await S.db.doc('admins/' + u.email).get(); S.canWrite = a.exists; } catch (e) { S.canWrite = false; }
+        try { var a = await S.db.doc('admins/' + u.email.toLowerCase()).get(); S.canWrite = a.exists; } catch (e) { S.canWrite = false; }
         if (!S.canWrite) toast('এই ইমেইল অ্যাডমিন তালিকায় নেই।');
+        else if (S.sheet && S.sheet.mode === 'login') closeSheet();
       }
       refresh();
     });
