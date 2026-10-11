@@ -491,6 +491,19 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .pzt span { position: absolute; left: 4px; top: 2px; font-size: 12px; font-weight: 800; color: #fff; text-shadow: 0 1px 3px #000; }
 .pzpeek { position: absolute; inset: 0; border-radius: 14px; background-size: cover; background-position: center; border: 3px solid #E7C26A; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
 .pzpeek.on { opacity: 1; }
+
+.mmg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+.mmc { position: relative; aspect-ratio: 3 / 4; border-radius: 12px; border: 2px solid #E7C26A; background: linear-gradient(160deg, #1E4F63, #173A4C); padding: 0; overflow: hidden; perspective: 600px; }
+.mmb { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 30px; opacity: 0.9; }
+.mmf { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: #14232C; opacity: 0; transition: opacity 0.18s; padding: 4px; }
+.mmf b { font-size: 11px; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mmc.up .mmf { opacity: 1; }
+.mmc.done { border-color: #2E8B57; box-shadow: 0 0 12px rgba(46,139,87,0.5); }
+.shcv { aspect-ratio: 4 / 3; height: auto; }
+.hlrow { display: flex; align-items: center; justify-content: space-around; gap: 6px; margin: 12px 0; }
+.hls { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; flex: 1; }
+.hls b { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hlv { font-size: 40px; font-weight: 800; color: #F6DD8E; font-family: var(--f-display); line-height: 1; }
 </style>
 </head>
 <body>
@@ -576,7 +589,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    funTab: 'spin', roast: { cur: null }, game: { mode: null, res: null }, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', roast: { cur: null }, game: { mode: null, res: null }, mm: null, sh: null, hl: null, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
@@ -1305,12 +1318,13 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (score > gBest(m)) gSetBest(m, score);
     var nm = String(pname()).trim().slice(0, 20); if (!nm) return 'noname';
     try {
-      await S.db.doc('scores/' + devId()).set({ name: nm, g: bestOf('g'), p: bestOf('p'), q: bestOf('q'), ts: firebase.firestore.FieldValue.serverTimestamp() });
+      var sd = { name: nm, g: bestOf('g'), p: bestOf('p'), q: bestOf('q'), ts: firebase.firestore.FieldValue.serverTimestamp() }; ['m', 's', 'h'].forEach(function (k) { var v = bestOf(k); if (v > 0) sd[k] = v; });
+      await S.db.doc('scores/' + devId()).set(sd);
       try { localStorage.setItem('nb-pname', nm); } catch (e) { /* ignore */ }
       return 'ok';
     } catch (e) { console.error(e); return 'err'; }
   }
-  var GM = { g: ['🕵️', 'প্লেয়ার চিনো', 'ঝাপসা, সাদা-কালো, জুম! ৩টা জীবন, সময় কম।'], p: ['🧩', 'ছবি পাজল', 'স্লাইড করে ছবি মেলাও। কম চালে, কম সময়ে।'], q: ['🧠', 'ক্লাব কুইজ', 'ক্লাবের আসল রেকর্ড থেকে ১০টা প্রশ্ন।'] };
+  var GM = { g: ['🕵️', 'প্লেয়ার চিনো', 'ঝাপসা, সাদা-কালো, জুম! ৩টা জীবন, সময় কম।'], p: ['🧩', 'ছবি পাজল', 'স্লাইড করে ছবি মেলাও। কম চালে, কম সময়ে।'], q: ['🧠', 'ক্লাব কুইজ', 'ক্লাবের আসল রেকর্ড থেকে ১০টা প্রশ্ন।'], m: ['🃏', 'মেমোরি ম্যাচ', 'প্লেয়ারদের জোড়া মেলাও। কম চালে, কম সময়ে!'], s: ['⚽', 'পেনাল্টি শুটআউট', '৫টা শট। টাইমিং ঠিক রাখো, টপ কর্নারে মারলে বেশি পয়েন্ট!'], h: ['📈', 'কে বেশি?', 'কার রেকর্ড বেশি? একটা ভুল হলেই শেষ!'] };
   function finishGame(m, score, extra) {
     var G = S.game; G.res = { m: m, score: Math.round(score), status: 'saving', extra: extra || '' }; G.mode = 'res'; S.guess.run = false;
     renderView();
@@ -1331,12 +1345,12 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   function startMode(m) {
     S.game.res = null;
-    if (m === 'g') chStart(); else if (m === 'p') { S.game.mode = 'pzpick'; renderView(); } else qzStart();
+    if (m === 'g') chStart(); else if (m === 'p') { S.game.mode = 'pzpick'; renderView(); } else if (m === 'm') mmStart(); else if (m === 's') shStart(); else if (m === 'h') hlStart(); else qzStart();
   }
   function scoreBoard() {
-    var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, t: (x.g || 0) + (x.p || 0) + (x.q || 0) }; }).sort(function (a, b) { return b.t - a.t; });
+    var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, m: x.m || 0, s: x.s || 0, h: x.h || 0, t: (x.g || 0) + (x.q || 0) + (x.m || 0) + (x.s || 0) + (x.h || 0) }; }).sort(function (a, b) { return b.t - a.t; });
     var me = devId(), box = h('section', { class: 'card panel' }, h('h2', null, '🏆 টপ স্কোরার'),
-      h('p', { class: 'muted small' }, 'তিন গেমের সেরা স্কোরের যোগফল। সর্বোচ্চ ৩০০০।'));
+      h('p', { class: 'muted small' }, 'সব গেমের সেরা স্কোরের যোগফল। সর্বোচ্চ ৫০০০।'));
     if (S.scoreErr) { box.append(h('p', { class: 'notice' }, 'লিডারবোর্ড এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
     if (!rows.length) { box.append(h('p', { class: 'muted' }, 'এখনো কেউ খেলেনি। প্রথম হোন! 🚀')); return box; }
     var list = h('div', { class: 'lboard' }), myPos = -1;
@@ -1344,7 +1358,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     rows.slice(0, 10).forEach(function (r, i) {
       var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : String(i + 1);
       list.append(h('div', { class: 'lrow' + (r.id === me ? ' mine' : '') }, h('span', { class: 'lrk' }, medal),
-        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · 🧩 ' + r.p + ' · 🧠 ' + r.q)), h('span', { class: 'ltot' }, String(r.t))));
+        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · 🧠 ' + r.q + ' · 🃏 ' + r.m + ' · ⚽ ' + r.s + ' · 📈 ' + r.h)), h('span', { class: 'ltot' }, String(r.t))));
     });
     box.append(list);
     if (myPos >= 10) box.append(h('p', { class: 'small' }, 'আপনার অবস্থান: ' + (myPos + 1) + ' (' + rows[myPos].t + ' পয়েন্ট)'));
@@ -1559,6 +1573,154 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     return box;
   }
 
+  /* ----- game 4: memory match ----- */
+  function mmStart() {
+    if (S.players.size < 4) { toast('মেমোরি ম্যাচের জন্য অন্তত ৪ জন প্লেয়ার লাগবে'); return; }
+    var ids = Array.from(S.players.entries()), withP = shuffle(ids.filter(function (e) { return e[1].photo; })), noP = shuffle(ids.filter(function (e) { return !e[1].photo; }));
+    var pick = withP.concat(noP).slice(0, 8).map(function (e) { return e[0]; }), cards = [];
+    pick.forEach(function (id) { cards.push({ pid: id, open: false, done: false }); cards.push({ pid: id, open: false, done: false }); });
+    S.mm = { cards: shuffle(cards), moves: 0, first: -1, lock: false, t0: 0, n: pick.length, found: 0, secs: 0 };
+    S.game.mode = 'mm'; S.guess.run = true; renderView();
+  }
+  function viewMem() {
+    var m = S.mm, grid = h('div', { class: 'mmg' }), els = [];
+    var info = h('p', { class: 'muted small', id: 'mminfo' }, 'চাল: ' + m.moves + ' · সময়: ' + m.secs + ' সে');
+    function paint() { els.forEach(function (el, i) { var c = m.cards[i]; el.className = 'mmc' + (c.open || c.done ? ' up' : '') + (c.done ? ' done' : ''); }); info.textContent = 'চাল: ' + m.moves + ' · সময়: ' + m.secs + ' সে'; }
+    m.cards.forEach(function (c, i) {
+      var p = S.players.get(c.pid);
+      var el = h('button', { class: 'mmc', 'aria-label': 'কার্ড', onclick: function () {
+        if (m.lock || c.open || c.done) return;
+        if (!m.t0) { m.t0 = Date.now(); m.timer = setInterval(function () { if (!$('#mminfo')) { clearInterval(m.timer); return; } m.secs = Math.round((Date.now() - m.t0) / 1000); info.textContent = 'চাল: ' + m.moves + ' · সময়: ' + m.secs + ' সে'; }, 500); }
+        c.open = true;
+        if (m.first < 0) { m.first = i; paint(); return; }
+        var f = m.cards[m.first]; m.moves++;
+        if (f.pid === c.pid) { f.done = c.done = true; f.open = c.open = false; m.first = -1; m.found++; paint(); if (m.found === m.n) { clearInterval(m.timer); m.secs = Math.round((Date.now() - m.t0) / 1000); S.guess.run = false; var sc = 1000 - 25 * Math.max(0, m.moves - m.n) - 2 * m.secs; setTimeout(function () { finishGame('m', Math.max(50, Math.min(1000, sc)), '🃏 ' + m.moves + ' চাল · ⏱️ ' + m.secs + ' সেকেন্ড'); }, 700); } }
+        else { m.lock = true; paint(); setTimeout(function () { f.open = c.open = false; m.first = -1; m.lock = false; paint(); }, 800); }
+      } }, h('span', { class: 'mmb' }, '⚽'), h('span', { class: 'mmf' }, avatar(p, 54), h('b', null, p.name)));
+      els.push(el); grid.append(el);
+    });
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🃏 মেমোরি ম্যাচ'), h('p', { class: 'muted small' }, 'কার্ড উল্টে একই প্লেয়ারের জোড়া মেলাও। কম চালে, কম সময়ে শেষ করলে বেশি স্কোর।'), info, grid,
+      h('button', { class: 'link-btn', onclick: function () { clearInterval(m.timer); S.guess.run = false; S.game.mode = null; renderView(); } }, '✖ ছেড়ে দিন'));
+    setTimeout(paint, 0);
+    return box;
+  }
+
+  /* ----- game 5: penalty shootout ----- */
+  function shStart() {
+    S.sh = { i: 0, score: 0, goals: 0, phase: 'x', px: 0.5, py: 0.5, t0: performance.now(), res: null, ball: null, keeper: 0.5, msg: '', anim: 0 };
+    S.game.mode = 'sh'; S.guess.run = true; renderView(); setTimeout(shLoop, 0);
+  }
+  function shDraw() {
+    var z = S.sh, cv = $('#shcv'); if (!cv) return false;
+    var x = cv.getContext('2d'), W = 320, H = 240, gx = 30, gy = 22, gw = 260, gh = 120;
+    x.clearRect(0, 0, W, H);
+    var gr = x.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#0E2A33'); gr.addColorStop(0.55, '#14343C'); gr.addColorStop(0.56, '#2C6B3A'); gr.addColorStop(1, '#1F5230'); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    x.fillStyle = 'rgba(255,255,255,0.08)'; for (var i = 0; i <= 13; i++) { x.fillRect(gx + i * 20, gy, 1, gh); } for (var j = 0; j <= 6; j++) { x.fillRect(gx, gy + j * 20, gw, 1); }
+    x.strokeStyle = '#F4F1E4'; x.lineWidth = 5; x.beginPath(); x.moveTo(gx, gy + gh); x.lineTo(gx, gy); x.lineTo(gx + gw, gy); x.lineTo(gx + gw, gy + gh); x.stroke();
+    x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(gx - 6, gy + gh, gw + 12, 2);
+    // keeper
+    var kx = gx + z.keeper * gw, ky = gy + gh - 34; x.fillStyle = '#F2B134'; x.fillRect(kx - 12, ky, 24, 34); x.fillStyle = '#FFD9B0'; x.beginPath(); x.arc(kx, ky - 8, 9, 0, 7); x.fill();
+    x.strokeStyle = '#F2B134'; x.lineWidth = 6; x.beginPath(); x.moveTo(kx - 12, ky + 8); x.lineTo(kx - 26, ky - 4); x.moveTo(kx + 12, ky + 8); x.lineTo(kx + 26, ky - 4); x.stroke();
+    // aim
+    if (z.phase === 'x' || z.phase === 'y') {
+      x.strokeStyle = '#E7C26A'; x.lineWidth = 3; var ax = gx + z.px * gw;
+      x.beginPath(); x.moveTo(ax, gy - 6); x.lineTo(ax, gy + gh + 6); x.stroke();
+      if (z.phase === 'y') { var ay = gy + (1 - z.py) * gh; x.beginPath(); x.moveTo(gx - 6, ay); x.lineTo(gx + gw + 6, ay); x.stroke(); x.beginPath(); x.arc(ax, ay, 9, 0, 7); x.stroke(); }
+    }
+    // ball
+    var b = z.ball || { x: W / 2, y: 212, r: 11 }; x.fillStyle = '#fff'; x.beginPath(); x.arc(b.x, b.y, b.r, 0, 7); x.fill(); x.strokeStyle = '#222'; x.lineWidth = 2; x.stroke();
+    x.fillStyle = '#222'; x.beginPath(); x.arc(b.x, b.y, b.r * 0.38, 0, 7); x.fill();
+    return true;
+  }
+  function shLoop() {
+    var z = S.sh; if (!z || !$('#shcv')) return;
+    var t = (performance.now() - z.t0) / 1000, sp = 1.5 + z.i * 0.45;
+    if (z.phase === 'x') z.px = 0.5 + 0.5 * Math.sin(t * sp * 2.2);
+    else if (z.phase === 'y') z.py = 0.5 + 0.5 * Math.sin(t * sp * 2.7);
+    else if (z.phase === 'fly') {
+      var k = Math.min(1, (performance.now() - z.fly0) / 420), tx = 30 + z.fx * 260, ty = 22 + (1 - z.fy) * 120;
+      z.ball = { x: 160 + (tx - 160) * k, y: 212 + (ty - 212) * k, r: 11 - 4 * k };
+      z.keeper = z.k0 + (z.kc - z.k0) * Math.min(1, k * 1.2);
+      if (k >= 1) { shResolve(); return; }
+    }
+    shDraw();
+    if (z.phase !== 'done') requestAnimationFrame(shLoop);
+  }
+  function shTap() {
+    var z = S.sh; if (!z) return;
+    if (z.phase === 'x') { z.fx = z.px; z.phase = 'y'; z.t0 = performance.now(); }
+    else if (z.phase === 'y') {
+      z.fy = z.py; z.phase = 'fly'; z.fly0 = performance.now(); z.k0 = z.keeper;
+      z.kc = [0.2, 0.5, 0.8][rand(3)];
+    }
+    var b = $('#shbtn'); if (b) b.textContent = z.phase === 'y' ? '⬆️ উচ্চতা ঠিক করো!' : '…';
+  }
+  function shResolve() {
+    var z = S.sh, x = z.fx, y = z.fy, res, pts = 0;
+    if (x < 0.05 || x > 0.95 || y > 0.95 || y < 0.04) { res = '🚫 বাইরে!'; }
+    else if (Math.abs(x - z.kc) < 0.17 && y < 0.75) { res = '🧤 সেভ!'; }
+    else { pts = y >= 0.75 ? 200 : 150; res = y >= 0.75 ? '🔥 টপ কর্নারে গোল!' : '⚽ গোল!'; z.goals++; }
+    z.score += pts; z.res = res; z.phase = 'done'; z.last = pts; shDraw(); renderView();
+  }
+  function viewShoot() {
+    var z = S.sh, last = z.i >= 4;
+    var box = h('section', { class: 'card panel' }, h('h2', null, '⚽ পেনাল্টি শুটআউট'),
+      h('p', { class: 'muted small' }, 'শট ' + (z.i + 1) + '/5 · পয়েন্ট ' + z.score + ' · গোল ' + z.goals), h('div', { class: 'gwrap' }, h('canvas', { id: 'shcv', width: 320, height: 240, class: 'gcv shcv' })));
+    if (z.phase === 'done') {
+      box.append(h('p', { class: 'qtext' }, z.res + (z.last ? ' +' + z.last : '')),
+        h('button', { class: 'btn block', onclick: function () { if (last) { S.guess.run = false; finishGame('s', z.score, '⚽ ' + z.goals + '/5 গোল'); } else { z.i++; z.phase = 'x'; z.ball = null; z.keeper = 0.5; z.t0 = performance.now(); z.res = null; renderView(); setTimeout(shLoop, 0); } } }, last ? '🏁 ফলাফল দেখুন' : 'পরের শট ▶️'));
+    } else {
+      box.append(h('p', { class: 'muted small' }, z.phase === 'x' ? 'দাগ ডানে-বামে ঘুরছে, ঠিক জায়গায় থামাও!' : 'এবার উপর-নিচ। উপরে (কিন্তু বারের নিচে!) মারলে কিপার ধরতে পারে না।'),
+        h('button', { class: 'btn block', id: 'shbtn', onclick: shTap }, z.phase === 'x' ? '🎯 দিক ঠিক করো' : '⬆️ উচ্চতা ঠিক করো!'));
+    }
+    box.append(h('button', { class: 'link-btn', onclick: function () { S.guess.run = false; S.game.mode = null; renderView(); } }, '✖ ছেড়ে দিন'));
+    setTimeout(shDraw, 0);
+    return box;
+  }
+
+  /* ----- game 6: higher or lower ----- */
+  var HL_ST = [['goals', 'গোল', '⚽'], ['wins', 'জয়', '🏆'], ['draws', 'ড্র', '🤝'], ['r', 'কার্ড রেটিং', '🃏'], ['hat', 'হ্যাটট্রিক', '🎩']];
+  function hlVal(id, k) { return k === 'r' ? ratingFor(id) : allStats(id)[k]; }
+  function hlNext(keepA) {
+    var z = S.hl, ids = Array.from(S.players.keys());
+    for (var tr = 0; tr < 60; tr++) {
+      var st = HL_ST[rand(HL_ST.length)], a = keepA && tr < 30 ? z.b : ids[rand(ids.length)], b = ids[rand(ids.length)];
+      if (a === b) continue;
+      if (hlVal(a, st[0]) === hlVal(b, st[0])) continue;
+      z.st = st; z.a = a; z.b = b; z.picked = null; return true;
+    }
+    return false;
+  }
+  function hlStart() {
+    S.hl = { streak: 0, over: false }; if (!hlNext(false)) { toast('এখনো পর্যাপ্ত আলাদা রেকর্ড নেই। কিছু ম্যাচ যোগ হলে আবার চেষ্টা করুন।'); return; }
+    S.game.mode = 'hl'; S.guess.run = true; renderView();
+  }
+  function hlPick(higher) {
+    var z = S.hl; if (z.picked !== null) return;
+    var va = hlVal(z.a, z.st[0]), vb = hlVal(z.b, z.st[0]); z.picked = higher; z.ok = higher ? vb > va : vb < va;
+    if (z.ok) z.streak++; else z.over = true;
+    renderView();
+  }
+  function viewHL() {
+    var z = S.hl, pa = S.players.get(z.a), pb = S.players.get(z.b), va = hlVal(z.a, z.st[0]), vb = hlVal(z.b, z.st[0]), done = z.picked !== null;
+    function side(p, val, show) { return h('div', { class: 'hls' }, avatar(p, 84), h('b', null, p.name), h('span', { class: 'hlv' }, show ? String(val) : '?')); }
+    var box = h('section', { class: 'card panel' }, h('h2', null, '📈 কে বেশি?'),
+      h('p', { class: 'muted small' }, 'স্ট্রিক: ' + z.streak + ' · প্রতিটা সঠিক উত্তরে ১০০ পয়েন্ট (সর্বোচ্চ ১০০০)'),
+      h('p', { class: 'qtext' }, z.st[2] + ' ' + pb.name + '-এর ' + z.st[1] + ' কি ' + pa.name + '-এর চেয়ে বেশি না কম?'),
+      h('div', { class: 'hlrow' }, side(pa, va, true), h('span', { class: 'vs' }, 'VS'), side(pb, vb, done)));
+    if (!done) {
+      box.append(h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: function () { hlPick(true); } }, '⬆️ বেশি'), h('button', { class: 'btn ghost', onclick: function () { hlPick(false); } }, '⬇️ কম')));
+    } else {
+      box.append(h('p', { class: 'qtext' }, z.ok ? '✅ ঠিক! স্ট্রিক ' + z.streak : '❌ ভুল! ' + pb.name + '-এর ' + z.st[1] + ' ছিল ' + vb),
+        h('button', { class: 'btn block', onclick: function () {
+          if (z.over || z.streak >= 10) { S.guess.run = false; finishGame('h', z.streak * 100, '📈 টানা ' + z.streak + 'টা সঠিক'); }
+          else if (!hlNext(true)) { S.guess.run = false; finishGame('h', z.streak * 100, '📈 টানা ' + z.streak + 'টা সঠিক'); }
+          else renderView();
+        } }, z.over || z.streak >= 10 ? '🏁 ফলাফল দেখুন' : 'পরেরটা ▶️'));
+    }
+    return box;
+  }
+
   function viewGuess() {
     var G = S.game, withPhoto = Array.from(S.players.values()).filter(function (p) { return p.photo; }).length;
     var root = h('div', { class: 'stack' });
@@ -1566,12 +1728,15 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (G.mode === 'pz') { root.append(viewPuzzle()); return root; }
     if (G.mode === 'qz') { root.append(viewQuiz()); return root; }
     if (G.mode === 'pzpick') { root.append(viewPzPick()); return root; }
+    if (G.mode === 'mm') { root.append(viewMem()); return root; }
+    if (G.mode === 'sh') { root.append(viewShoot()); return root; }
+    if (G.mode === 'hl') { root.append(viewHL()); return root; }
     if (G.mode === 'res' && G.res) { root.append(resultBox(), scoreBoard()); return root; }
-    var hub = h('section', { class: 'card panel' }, h('h2', null, '🎮 গেম জোন'), h('p', { class: 'muted small' }, 'তিনটা গেম, প্রতিটায় সর্বোচ্চ ১০০০। তিনটার সেরা স্কোর মিলিয়ে লিডারবোর্ডে টপ স্কোরার!'));
+    var hub = h('section', { class: 'card panel' }, h('h2', null, '🎮 গেম জোন'), h('p', { class: 'muted small' }, 'পাঁচটা গেম, প্রতিটায় সর্বোচ্চ ১০০০। সব গেমের সেরা স্কোর মিলিয়ে লিডারবোর্ডে টপ স্কোরার!'));
     var okG = S.players.size >= 4 && withPhoto >= 1, okQ = S.players.size >= 4;
     var modes = h('div', { class: 'gmodes' });
-    ['g', 'p', 'q'].forEach(function (m) {
-      var dis = (m === 'g' && !okG) || (m === 'p' && !withPhoto) || (m === 'q' && !okQ);
+    ['g', 'q', 'm', 's', 'h'].forEach(function (m) {
+      var dis = (m === 'g' && !okG) || (m === 'p' && !withPhoto) || ((m === 'q' || m === 'm') && !okQ) || (m === 'h' && S.players.size < 3);
       modes.append(h('button', { class: 'gm', disabled: dis, onclick: function () { startMode(m); } }, h('span', { class: 'gme' }, GM[m][0]), h('span', { class: 'gmt' }, GM[m][1]), h('span', { class: 'gmd' }, GM[m][2]), h('span', { class: 'gmb' }, '🏅 সেরা: ' + bestOf(m))));
     });
     hub.append(modes);
