@@ -431,6 +431,42 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .vrow strong { font-family: var(--f-display); display: block; line-height: 1.3; }
 .vrow .bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); margin-top: 4px; }
 .vrow .bar i { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--aqua), var(--gold)); }
+
+.periodbar:has(.funseg) { display: block; }
+.funseg { display: flex; overflow-x: auto; max-width: 100%; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.funseg::-webkit-scrollbar { display: none; }
+.funseg button { white-space: nowrap; padding: 8px 13px; flex: 0 0 auto; }
+.tcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.tcard { border: 0; border-radius: 16px; padding: 10px 6px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--f-display); cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.3); min-width: 0; }
+.tcard .r { font-size: 28px; font-weight: 800; line-height: 1; }
+.tcard .tn { font-size: 10px; letter-spacing: 0.16em; font-weight: 800; opacity: 0.8; }
+.tcard .nm { font-weight: 800; font-size: 14px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tcard.bronze { background: linear-gradient(160deg, #F5CFA6, #C98954 60%, #955629); color: #2F1A08; }
+.tcard.silver { background: linear-gradient(160deg, #F7F9FB, #C8D0D9 60%, #8C97A4); color: #1E2833; }
+.tcard.gold { background: linear-gradient(160deg, #FBEBB8, #E7C26A 55%, #B88A2C); color: #2A1E05; }
+.tcard.legend { background: linear-gradient(160deg, #4B3A9C, #233C9A 60%, #101C54); color: #FFEFB8; box-shadow: 0 6px 20px rgba(110,90,230,0.45); }
+.tierline { margin: 8px 0 0; }
+.gwrap { display: flex; justify-content: center; margin: 12px 0 8px; }
+.gcv { width: min(320px, 100%); aspect-ratio: 1; border-radius: 20px; border: 3px solid #E7C26A; background: #10222B; }
+.gbarw { height: 8px; border-radius: 6px; background: rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 12px; }
+.gbarw i { display: block; height: 100%; width: 100%; background: var(--grad-gold); }
+.gopts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.gopt { min-height: 48px; border-radius: 12px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.05); color: var(--ink); font-family: var(--f-display); font-weight: 700; font-size: 16px; padding: 8px; }
+.gopt.ok { background: #2E8B57; border-color: #2E8B57; color: #fff; }
+.gopt.bad { background: #B8433A; border-color: #B8433A; color: #fff; }
+.pchips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.pchips .chip.on { outline: 2px solid #E7C26A; background: rgba(231,194,106,0.18); }
+.moment { padding: 0; overflow: hidden; }
+.moment img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; }
+.moment .mbody { padding: 12px 14px 14px; }
+.moment.best { outline: 2px solid #E7C26A; }
+.bestbadge { margin: 0; padding: 8px 14px; background: var(--grad-gold); color: #2A1E05; font-weight: 800; font-size: 14px; }
+.mcap { margin: 0 0 2px; font-weight: 700; font-size: 17px; }
+.reacts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.react { border: 1px solid var(--line-2); background: rgba(255,255,255,0.05); color: var(--ink); border-radius: 999px; padding: 7px 12px; font-size: 15px; font-weight: 700; min-height: 38px; }
+.react.on { background: rgba(231,194,106,0.22); border-color: #E7C26A; }
+.momprev { width: 100%; border-radius: 14px; margin: 10px 0; }
+.lbname { text-align: left; flex: 1; }
 </style>
 </head>
 <body>
@@ -516,7 +552,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     tab: 'board', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    funTab: 'spin', roast: { cur: null }, spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', roast: { cur: null }, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false }
   };
@@ -1072,6 +1108,13 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var wins = x ? x.wins : 0, draws = x ? x.draws : 0, goals = x ? x.goals : 0, m = wins + draws;
     return { wins: wins, draws: draws, goals: goals, matches: m, avg: m ? goals / m : 0, hat: f.hat, streak: f.streak, champs: f.wChamp + f.mChamp };
   }
+  var TIERS = [
+    { min: 88, k: 'legend', n: 'LEGEND', bn: 'লিজেন্ড', g: ['#4B3A9C', '#233C9A', '#101C54'], ink: '#FFEFB8', sub: '#D9C58A', line: 'rgba(255,226,150,0.55)', div: 'rgba(255,226,150,0.35)', pill: '#E7C26A', pillInk: '#1D1440' },
+    { min: 75, k: 'gold', n: 'GOLD', bn: 'গোল্ড', g: null, ink: '#2A1E05', sub: '#5A4410', line: 'rgba(90,64,12,0.45)', div: 'rgba(42,30,5,0.35)', pill: '#2A1E05', pillInk: '#F6DD8E' },
+    { min: 65, k: 'silver', n: 'SILVER', bn: 'সিলভার', g: ['#F7F9FB', '#C8D0D9', '#8C97A4'], ink: '#1E2833', sub: '#475463', line: 'rgba(40,52,66,0.4)', div: 'rgba(30,40,51,0.3)', pill: '#1E2833', pillInk: '#E6EBF0' },
+    { min: 0, k: 'bronze', n: 'BRONZE', bn: 'ব্রোঞ্জ', g: ['#F5CFA6', '#C98954', '#955629'], ink: '#2F1A08', sub: '#5E3818', line: 'rgba(70,36,10,0.45)', div: 'rgba(47,26,8,0.35)', pill: '#2F1A08', pillInk: '#F5CFA6' }
+  ];
+  function tierOf(r) { for (var i = 0; i < TIERS.length; i++) if (r >= TIERS[i].min) return TIERS[i]; return TIERS[TIERS.length - 1]; }
   function rand(n) { try { var a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; } catch (e) { return Math.floor(Math.random() * n); } }
 
   /* ---------- fun tab ---------- */
@@ -1211,10 +1254,241 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     }
     return root;
   }
+  /* ---------- fun: cards collection ---------- */
+  function viewCards() {
+    var ids = sortedPlayers().map(function (e) { return e[0]; });
+    var list = ids.map(function (id) { return { id: id, r: ratingFor(id) }; }).sort(function (a, b) { return b.r - a.r; });
+    var grid = h('div', { class: 'tcards' });
+    list.forEach(function (e) {
+      var p = S.players.get(e.id), t = tierOf(e.r);
+      grid.append(h('button', { class: 'tcard ' + t.k, onclick: function () { openFifa(e.id); } },
+        h('span', { class: 'r' }, String(e.r)), h('span', { class: 'tn' }, t.n), avatar(p, 56), h('span', { class: 'nm' }, p.name)));
+    });
+    var counts = { legend: 0, gold: 0, silver: 0, bronze: 0 }; list.forEach(function (e) { counts[tierOf(e.r).k]++; });
+    return h('section', { class: 'card panel' }, h('h2', null, '🃏 কার্ড কালেকশন'),
+      h('p', { class: 'muted small' }, 'রেটিং বাড়লেই কার্ড আপগ্রেড হয়: ব্রোঞ্জ → সিলভার (৬৫+) → গোল্ড (৭৫+) → লিজেন্ড (৮৮+)। কার্ডে চাপ দিলে শেয়ার করা যাবে।'),
+      h('p', { class: 'small tierline' }, '👑 ' + counts.legend + ' লিজেন্ড · 🥇 ' + counts.gold + ' গোল্ড · 🥈 ' + counts.silver + ' সিলভার · 🥉 ' + counts.bronze + ' ব্রোঞ্জ'), grid);
+  }
+
+  /* ---------- fun: guess the player ---------- */
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = rand(i + 1), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function guessBest() { try { return +localStorage.getItem('nb-guess-best') || 0; } catch (e) { return 0; } }
+  function guessStart() {
+    var g = S.guess, pool = shuffle(Array.from(S.players.entries()).filter(function (e) { return e[1].photo; }).map(function (e) { return e[0]; }));
+    g.rounds = pool.slice(0, 5); g.i = 0; g.score = 0; g.state = 'play'; guessRound();
+  }
+  function guessRound() {
+    var g = S.guess, t = g.rounds[g.i];
+    var others = shuffle(Array.from(S.players.keys()).filter(function (id) { return id !== t; })).slice(0, 3);
+    g.target = t; g.opts = shuffle(others.concat([t])); g.picked = null; g.run = true; g.img = null; g.prog = 0; g.pts = 0;
+    renderView();
+  }
+  function guessPaint(cv, img, prog) {
+    var sm = Math.max(6, Math.round(6 + 314 * prog * prog)), tmp = document.createElement('canvas'); tmp.width = tmp.height = sm;
+    tmp.getContext('2d').drawImage(img, 0, 0, sm, sm);
+    var x = cv.getContext('2d'); x.imageSmoothingEnabled = false; x.clearRect(0, 0, 320, 320); x.drawImage(tmp, 0, 0, sm, sm, 0, 0, 320, 320);
+  }
+  function guessTick(t0) {
+    var g = S.guess, cv = $('#gcv'); if (!cv || !g.run || !g.img) return;
+    g.prog = Math.min(1, (performance.now() - t0) / 12000); guessPaint(cv, g.img, g.prog);
+    var bar = $('#gbar'); if (bar) bar.style.width = Math.round((1 - g.prog) * 100) + '%';
+    if (g.prog < 1) requestAnimationFrame(function () { guessTick(t0); });
+  }
+  function guessPick(id) {
+    var g = S.guess; if (!g.run) return;
+    g.run = false; g.picked = id;
+    g.pts = id === g.target ? Math.round(110 - 100 * g.prog) : 0; g.score += g.pts;
+    if (g.i === g.rounds.length - 1) { try { if (g.score > guessBest()) localStorage.setItem('nb-guess-best', String(g.score)); } catch (e) { /* ignore */ } }
+    renderView();
+  }
+  function viewGuess() {
+    var g = S.guess, withPhoto = Array.from(S.players.values()).filter(function (p) { return p.photo; }).length;
+    var box = h('section', { class: 'card panel' }, h('h2', null, '🕵️ প্লেয়ার চিনো'));
+    if (S.players.size < 4 || withPhoto < 1) { box.append(h('p', { class: 'muted' }, 'এই খেলার জন্য কমপক্ষে ৪ জন প্লেয়ার আর অন্তত একজনের ছবি লাগবে।')); return box; }
+    if (g.state === 'idle') {
+      box.append(h('p', { class: 'muted small' }, 'ঝাপসা ছবি ধীরে ধীরে পরিষ্কার হবে। যত তাড়াতাড়ি চিনবেন তত বেশি পয়েন্ট! ৫ রাউন্ড।'),
+        h('p', { class: 'small' }, '🏅 আপনার সেরা স্কোর: ' + guessBest()),
+        h('button', { class: 'btn block', onclick: guessStart }, '▶️ খেলা শুরু'));
+      return box;
+    }
+    if (g.state === 'end' || (g.i >= g.rounds.length)) {
+      var best = guessBest(), msg = g.score >= 400 ? '🔥 তুমি তো ক্লাবের আসল ফ্যান!' : g.score >= 200 ? '👍 মোটামুটি চেনো সবাইকে' : '😅 আরেকটু ভালো করে দেখো সবাইকে!';
+      box.append(h('p', { class: 'qtext' }, 'স্কোর: ' + g.score + ' / ' + (g.rounds.length * 110)), h('p', { class: 'muted' }, msg), h('p', { class: 'small' }, '🏅 সেরা স্কোর: ' + best),
+        h('button', { class: 'btn block', onclick: function () { g.state = 'idle'; guessStart(); } }, '🔁 আবার খেলুন'));
+      return box;
+    }
+    var p = S.players.get(g.target), done = g.picked !== null;
+    var cv = h('canvas', { id: 'gcv', width: 320, height: 320, class: 'gcv' });
+    var bar = h('div', { class: 'gbarw' }, h('i', { id: 'gbar' }));
+    box.append(h('p', { class: 'muted small' }, 'রাউন্ড ' + (g.i + 1) + '/' + g.rounds.length + ' · পয়েন্ট ' + g.score), h('div', { class: 'gwrap' }, cv), done ? null : bar);
+    var opts = h('div', { class: 'gopts' });
+    g.opts.forEach(function (id) {
+      var cls = 'gopt';
+      if (done) { if (id === g.target) cls += ' ok'; else if (id === g.picked) cls += ' bad'; }
+      opts.append(h('button', { class: cls, disabled: done, onclick: function () { guessPick(id); } }, S.players.get(id).name));
+    });
+    box.append(opts);
+    if (done) {
+      box.append(h('p', { class: 'qtext' }, g.picked === g.target ? '✅ ঠিক! +' + g.pts + ' পয়েন্ট' : '❌ ভুল! এটা ছিল ' + p.name),
+        h('button', { class: 'btn block', onclick: function () { if (g.i + 1 >= g.rounds.length) { g.i++; g.state = 'end'; renderView(); } else { g.i++; guessRound(); } } }, g.i + 1 >= g.rounds.length ? '🏁 ফলাফল দেখুন' : 'পরের রাউন্ড ▶️'));
+    }
+    setTimeout(function () {
+      var c = $('#gcv'); if (!c) return;
+      loadImg(p.photo).then(function (img) {
+        g.img = img;
+        if (g.run) { var t0 = performance.now(); guessTick(t0); } else guessPaint(c, img, 1);
+      }).catch(function () { /* ignore */ });
+    }, 0);
+    return box;
+  }
+
+  /* ---------- fun: goal predictor ---------- */
+  function weekTop(ws) {
+    var p = ws.split('-').map(Number), a = new Date(p[0], p[1] - 1, p[2]), b = new Date(a); b.setDate(a.getDate() + 7);
+    var g = {}, mx = 0;
+    S.wins.forEach(function (w) { if (w.ts >= +a && w.ts < +b) { g[w.playerId] = (g[w.playerId] || 0) + (w.goals || 0); } });
+    Object.keys(g).forEach(function (k) { if (g[k] > mx) mx = g[k]; });
+    return { ids: mx > 0 ? Object.keys(g).filter(function (k) { return g[k] === mx; }) : [], goals: mx, over: Date.now() >= +b };
+  }
+  function pname() { if (S.pname) return S.pname; try { S.pname = localStorage.getItem('nb-pname') || ''; } catch (e) { /* ignore */ } return S.pname; }
+  async function submitPred() {
+    var nm = String(pname()).trim().slice(0, 20), pid = S.pickP, wk = weekKey();
+    if (!nm) { toast('আপনার নাম লিখুন'); return; }
+    if (!pid || !S.players.has(pid)) { toast('একজন প্লেয়ার বাছুন'); return; }
+    S.predBusy = true; renderView();
+    try {
+      await S.db.doc('predictions/' + wk + '_' + devId()).set({ week: wk, playerId: pid, name: nm, ts: firebase.firestore.FieldValue.serverTimestamp() });
+      try { localStorage.setItem('nb-pname', nm); } catch (e) { /* ignore */ }
+      toast('ভবিষ্যদ্বাণী লক হয়ে গেছে 🎯');
+    } catch (e) {
+      console.error(e);
+      toast(e && e.code === 'permission-denied' ? 'এই সপ্তাহে আপনি আগেই দিয়েছেন (অথবা rules আপডেট দরকার)' : 'সেভ হয়নি, আবার চেষ্টা করুন।');
+    }
+    S.predBusy = false; renderView();
+  }
+  function viewPredict() {
+    var wk = weekKey(), me = devId(), mine = null, box = h('section', { class: 'card panel' }, h('h2', null, '🎯 গোলদাতা প্রেডিক্ট'),
+      h('p', { class: 'muted small' }, 'এই সপ্তাহে (' + rangeLabel('week', 0) + ') কে সবচেয়ে বেশি গোল করবে? একবার দিলে বদলানো যাবে না। সপ্তাহ শেষে ঠিক হলে ১ পয়েন্ট!'));
+    if (S.predErr) { box.append(h('p', { class: 'notice' }, 'প্রেডিক্ট এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
+    S.preds.forEach(function (x) { if (x.id === wk + '_' + me) mine = x; });
+    var root = h('div', { class: 'stack' }, box);
+    if (mine && S.players.has(mine.playerId)) {
+      var mp = S.players.get(mine.playerId);
+      box.append(h('div', { class: 'winrow' }, avatar(mp, 64), h('div', null, h('h3', null, mp.name), h('p', { class: 'muted small' }, '🔒 আপনার ভবিষ্যদ্বাণী লক করা (' + mine.name + ')'))));
+    } else {
+      var nin = h('input', { type: 'text', maxlength: 20, placeholder: 'আপনার নাম (লিডারবোর্ডে দেখাবে)', value: pname(), class: 'sel' });
+      nin.oninput = function () { S.pname = nin.value; };
+      var chips = h('div', { class: 'pchips' });
+      sortedPlayers().forEach(function (e) {
+        chips.append(h('button', { class: 'chip' + (S.pickP === e[0] ? ' on' : ''), onclick: function () { S.pickP = e[0]; renderView(); } }, avatar(e[1], 44), h('span', { class: 't' }, e[1].name)));
+      });
+      box.append(nin, chips, h('button', { class: 'btn block', disabled: S.predBusy, onclick: submitPred }, S.predBusy ? 'অপেক্ষা করুন...' : '🔒 পাকা করুন'));
+    }
+    /* crowd */
+    var cur = S.preds.filter(function (x) { return x.week === wk && S.players.has(x.playerId); });
+    if (cur.length) {
+      var cnt = {}; cur.forEach(function (x) { cnt[x.playerId] = (cnt[x.playerId] || 0) + 1; });
+      var arr = Object.keys(cnt).map(function (k) { return { id: k, n: cnt[k] }; }).sort(function (a, b) { return b.n - a.n; }).slice(0, 5);
+      var res = h('div', { class: 'vres' });
+      arr.forEach(function (r, i) {
+        var bar = h('div', { class: 'bar' }, h('i')); bar.firstChild.style.width = Math.round(r.n / arr[0].n * 100) + '%';
+        res.append(h('div', { class: 'vrow' }, h('span', { class: 'trank' }, String(i + 1)), avatar(S.players.get(r.id), 38), h('div', { class: 'vmid' }, h('b', null, S.players.get(r.id).name), bar), h('span', { class: 'vn' }, r.n + ' জন')));
+      });
+      root.append(h('section', { class: 'card panel' }, h('h2', null, '👥 সবাই কী ভাবছে?'), h('p', { class: 'muted small' }, 'এই সপ্তাহে মোট ' + cur.length + ' জন ভবিষ্যদ্বাণী করেছেন'), res));
+    }
+    /* last result + leaderboard */
+    var weeks = {}; S.preds.forEach(function (x) { if (x.week && x.week < wk) weeks[x.week] = 1; });
+    var pts = {}, resRows = [];
+    Object.keys(weeks).sort().forEach(function (w) {
+      var top = weekTop(w); if (!top.over || !top.ids.length) return;
+      resRows.push({ w: w, top: top });
+      S.preds.forEach(function (x) {
+        if (x.week !== w) return;
+        var k = String(x.name || '').trim().toLowerCase(); if (!k) return;
+        var o = pts[k] || (pts[k] = { name: x.name, p: 0, n: 0 }); o.n++; if (top.ids.indexOf(x.playerId) >= 0) o.p++;
+      });
+    });
+    if (resRows.length) {
+      var lw = resRows[resRows.length - 1], names = lw.top.ids.filter(function (i) { return S.players.has(i); }).map(function (i) { return S.players.get(i).name; }).join(', ');
+      var lbd = Object.keys(pts).map(function (k) { return pts[k]; }).sort(function (a, b) { return b.p - a.p || a.n - b.n; }).slice(0, 10);
+      var tb = h('div', { class: 'cmp' });
+      lbd.forEach(function (o, i) { tb.append(h('div', { class: 'cmprow' }, h('b', null, (i + 1) + '.'), h('span', { class: 'lbname' }, o.name), h('b', { class: 'win' }, o.p + ' / ' + o.n))); });
+      root.append(h('section', { class: 'card panel' }, h('h2', null, '🏆 প্রেডিক্টর লিডারবোর্ড'),
+        h('p', { class: 'muted small' }, 'গত সপ্তাহে সবচেয়ে বেশি গোল (' + lw.top.goals + 'টা): ' + names), tb));
+    }
+    return root;
+  }
+
+  /* ---------- fun: moments wall ---------- */
+  function fitImg(file, max) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader(); fr.onerror = function () { rej(new Error('read')); };
+      fr.onload = function () {
+        var img = new Image(); img.onerror = function () { rej(new Error('image')); };
+        img.onload = function () {
+          var sc = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+          c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          var q = 0.72, d = c.toDataURL('image/jpeg', q); while (d.length > 600000 && q > 0.4) { q -= 0.1; d = c.toDataURL('image/jpeg', q); }
+          res(d);
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  var REACTS = [['fire', '🔥'], ['lol', '😂'], ['clap', '👏'], ['love', '😍']];
+  async function reactTo(mid, code) {
+    try { await S.db.doc('reacts/' + mid + '_' + devId()).set({ m: mid, e: code, ts: firebase.firestore.FieldValue.serverTimestamp() }); }
+    catch (e) { console.error(e); toast(e && e.code === 'permission-denied' ? 'রিঅ্যাকশন এখনো চালু হয়নি (rules আপডেট দরকার)' : 'রিঅ্যাকশন যায়নি, আবার চেষ্টা করুন।'); }
+  }
+  async function saveMoment() {
+    var m = S.mom; if (!m.img || m.busy) return;
+    m.busy = true; renderView();
+    try { await S.db.collection('moments').add({ img: m.img, cap: String(m.cap || '').trim().slice(0, 80), ts: Date.now() }); m.img = null; m.cap = ''; m.open = false; toast('ছবি যোগ হয়েছে 📸'); }
+    catch (e) { console.error(e); toast(writeFail(e)); }
+    m.busy = false; renderView();
+  }
+  function viewMoments() {
+    var m = S.mom, me = devId();
+    var box = h('section', { class: 'card panel' }, h('h2', null, '📸 আজকের মুহূর্ত'),
+      h('p', { class: 'muted small' }, 'ম্যাচের সেরা ছবি। 🔥😂👏😍 দিয়ে রিঅ্যাক্ট করুন, সপ্তাহের সবচেয়ে বেশি রিঅ্যাকশন পাওয়া ছবি হবে "সেরা মুহূর্ত"।'));
+    if (m.err) { box.append(h('p', { class: 'notice' }, 'ছবির ওয়াল এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
+    if (S.canWrite) {
+      if (!m.open) box.append(h('button', { class: 'btn ghost block', onclick: function () { m.open = true; renderView(); } }, '➕ নতুন ছবি যোগ করুন'));
+      else {
+        var fin = h('input', { type: 'file', accept: 'image/*', class: 'vh', id: 'momIn', onchange: async function (ev) { var f = ev.target.files && ev.target.files[0]; if (!f) return; try { m.img = await fitImg(f, 1000); renderView(); } catch (e) { toast('ছবিটি পড়া যায়নি।'); } } });
+        var cin = h('input', { type: 'text', maxlength: 80, placeholder: 'ক্যাপশন (যেমন: Abid-র সেই গোল!)', value: m.cap, class: 'sel' }); cin.oninput = function () { m.cap = cin.value; };
+        box.append(fin, m.img ? h('img', { src: m.img, class: 'momprev', alt: '' }) : null,
+          h('label', { class: 'btn ghost block', for: 'momIn' }, m.img ? '🔄 অন্য ছবি' : '🖼️ ছবি বাছুন'), cin,
+          h('div', { class: 'btnrow' }, h('button', { class: 'btn', disabled: !m.img || m.busy, onclick: saveMoment }, m.busy ? 'অপেক্ষা করুন...' : 'পোস্ট করুন'), h('button', { class: 'btn ghost', onclick: function () { m.open = false; m.img = null; renderView(); } }, 'বাতিল')));
+      }
+    }
+    var root = h('div', { class: 'stack' }, box);
+    if (!m.list.length) { root.append(h('div', { class: 'card emptybox' }, h('p', { class: 'muted' }, 'এখনো কোনো ছবি নেই।'))); return root; }
+    var tally = {}, mineR = {};
+    m.reacts.forEach(function (r) { tally[r.m] = tally[r.m] || { total: 0 }; tally[r.m].total++; tally[r.m][r.e] = (tally[r.m][r.e] || 0) + 1; if (r.id === r.m + '_' + me) mineR[r.m] = r.e; });
+    var weekAgo = Date.now() - 7 * 86400000, bestId = null, bestN = 0;
+    m.list.forEach(function (x) { var n = (tally[x.id] || { total: 0 }).total; if (x.ts >= weekAgo && n > bestN) { bestN = n; bestId = x.id; } });
+    m.list.forEach(function (x) {
+      var t = tally[x.id] || { total: 0 }, row = h('div', { class: 'reacts' });
+      REACTS.forEach(function (rc) {
+        row.append(h('button', { class: 'react' + (mineR[x.id] === rc[0] ? ' on' : ''), onclick: function () { if (mineR[x.id] !== rc[0]) reactTo(x.id, rc[0]); } }, rc[1] + ' ' + (t[rc[0]] || 0)));
+      });
+      var card = h('article', { class: 'card moment' + (x.id === bestId ? ' best' : '') },
+        x.id === bestId ? h('p', { class: 'bestbadge' }, '🏅 সপ্তাহের সেরা মুহূর্ত') : null,
+        h('img', { src: x.img, alt: x.cap || 'ম্যাচের ছবি', loading: 'lazy' }),
+        h('div', { class: 'mbody' }, x.cap ? h('p', { class: 'mcap' }, x.cap) : null, h('p', { class: 'muted small' }, fmtDay.format(x.ts)), row,
+          S.canWrite ? h('button', { class: 'link-btn', onclick: function () { if (window.confirm('এই ছবিটা মুছে ফেলবেন?')) S.db.doc('moments/' + x.id).delete().catch(function (e) { toast(writeFail(e)); }); } }, '🗑️ মুছুন') : null));
+      root.append(card);
+    });
+    return root;
+  }
+
   function funSeg() {
-    var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'মজা' });
-    [['spin', '🎡 স্পিন'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
-      seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.funTab = x[0]; renderView(); } }, x[1]));
+    var seg = h('div', { class: 'seg funseg', role: 'group', 'aria-label': 'মজা' });
+    [['spin', '🎡 স্পিন'], ['pred', '🎯 প্রেডিক্ট'], ['moment', '📸 মুহূর্ত'], ['guess', '🕵️ চিনো'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
+      seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.guess.run = false; S.funTab = x[0]; renderView(); } }, x[1]));
     });
     return h('div', { class: 'periodbar' }, seg);
   }
@@ -1223,6 +1497,10 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (S.players.size < 2) { root.append(h('div', { class: 'card emptybox' }, h('h2', null, 'আরও প্লেয়ার লাগবে'), h('p', { class: 'muted' }, 'মজার সেকশন চালাতে অন্তত ২ জন প্লেয়ার যোগ করুন।'))); return root; }
     if (S.funTab === 'cmp') root.append(viewCompare());
     else if (S.funTab === 'roast') root.append(viewRoast());
+    else if (S.funTab === 'pred') root.append(viewPredict());
+    else if (S.funTab === 'moment') root.append(viewMoments());
+    else if (S.funTab === 'guess') root.append(viewGuess());
+    else if (S.funTab === 'card') root.append(viewCards());
     else root.append(viewSpin());
     return root;
   }
@@ -1736,31 +2014,33 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       });
       footer(x, W, story ? 1742 : H - 40, NUM);
     } else if (card.kind === 'fifa') {
-      var F = card.fifa, dy = story ? 285 : 0;
+      var F = card.fifa, dy = story ? 285 : 0, TR = tierOf(F.rating);
       x.save(); x.translate(0, dy);
       var cx0 = 130, cw = 820, cy0 = 228, ch = 1040;
       x.save(); x.shadowColor = 'rgba(0,0,0,0.45)'; x.shadowBlur = 50; x.shadowOffsetY = 18;
-      rr(x, cx0, cy0, cw, ch, 80); x.fillStyle = gg(x, cx0, cy0, cx0 + cw, cy0 + ch); x.fill(); x.restore();
-      rr(x, cx0 + 14, cy0 + 14, cw - 28, ch - 28, 68); x.lineWidth = 3; x.strokeStyle = 'rgba(90,64,12,0.45)'; x.stroke();
+      rr(x, cx0, cy0, cw, ch, 80); var tgr = x.createLinearGradient(cx0, cy0, cx0 + cw, cy0 + ch); if (TR.g) { tgr.addColorStop(0, TR.g[0]); tgr.addColorStop(0.55, TR.g[1]); tgr.addColorStop(1, TR.g[2]); x.fillStyle = tgr; } else x.fillStyle = gg(x, cx0, cy0, cx0 + cw, cy0 + ch); x.fill(); x.restore();
+      rr(x, cx0 + 14, cy0 + 14, cw - 28, ch - 28, 68); x.lineWidth = 3; x.strokeStyle = TR.line; x.stroke();
       var sh2 = x.createLinearGradient(0, cy0, 0, cy0 + ch * 0.5); sh2.addColorStop(0, 'rgba(255,255,255,0.35)'); sh2.addColorStop(1, 'rgba(255,255,255,0)');
       rr(x, cx0, cy0, cw, ch, 80); x.fillStyle = sh2; x.fill();
-      var DK = '#2A1E05';
+      var DK = TR.ink;
       x.textAlign = 'center'; x.fillStyle = DK; x.font = '800 190px ' + NUM; x.fillText(String(F.rating), 290, cy0 + 215);
       x.font = '700 44px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '8px'; x.fillText('RATING', 296, cy0 + 268); if ('letterSpacing' in x) x.letterSpacing = '0px';
       if (F.number) { x.font = '800 92px ' + NUM; x.fillText('#' + F.number, 290, cy0 + 392); }
+      rr(x, 290 - 105, cy0 + 440, 210, 56, 28); x.fillStyle = TR.pill; x.fill();
+      x.fillStyle = TR.pillInk; x.font = '800 32px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '6px'; x.textBaseline = 'middle'; x.fillText(TR.n, 293, cy0 + 470); x.textBaseline = 'alphabetic'; if ('letterSpacing' in x) x.letterSpacing = '0px'; x.fillStyle = DK;
       var fpx = 500, fpy = cy0 + 60, fps = 380;
       x.save(); rr(x, fpx, fpy, fps, fps, 48); x.clip();
       if (F.photo) { try { var fim = await loadImg(F.photo); x.drawImage(fim, fpx, fpy, fps, fps); } catch (e) { x.fillStyle = '#2B5666'; x.fillRect(fpx, fpy, fps, fps); } }
       else { x.fillStyle = '#2B5666'; x.fillRect(fpx, fpy, fps, fps); x.fillStyle = '#BFF1F6'; x.font = '800 190px ' + BN; x.textBaseline = 'middle'; x.fillText(initial(F.name), fpx + fps / 2, fpy + fps / 2 + 8); x.textBaseline = 'alphabetic'; }
       x.restore(); rr(x, fpx, fpy, fps, fps, 48); x.lineWidth = 8; x.strokeStyle = DK; x.stroke();
       x.fillStyle = DK; fitFont(x, F.name, 700, 80, 800, BN); x.fillText(F.name, W / 2, cy0 + 548);
-      x.font = '700 44px ' + BN; x.fillStyle = '#5A4410'; x.fillText(F.title, W / 2, cy0 + 612);
-      x.fillStyle = 'rgba(42,30,5,0.35)'; x.fillRect(cx0 + 90, cy0 + 650, cw - 180, 4);
+      x.font = '700 44px ' + BN; x.fillStyle = TR.sub; x.fillText(F.title, W / 2, cy0 + 612);
+      x.fillStyle = TR.div; x.fillRect(cx0 + 90, cy0 + 650, cw - 180, 4);
       var st = [['WIN', F.a.wins], ['DRAW', F.a.draws], ['GOAL', F.a.goals], ['HAT-TRICK', F.a.hat], ['STREAK', F.a.streak], ['TITLES', F.a.champs]];
       st.forEach(function (s, i) {
         var col = i % 3, row = Math.floor(i / 3), sx = 270 + col * 270, sy = cy0 + 760 + row * 150;
         x.fillStyle = DK; x.font = '800 96px ' + NUM; x.fillText(String(s[1]), sx, sy);
-        x.font = '700 30px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillStyle = '#5A4410'; x.fillText(s[0], sx + 2, sy + 42); if ('letterSpacing' in x) x.letterSpacing = '0px';
+        x.font = '700 30px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillStyle = TR.sub; x.fillText(s[0], sx + 2, sy + 42); if ('letterSpacing' in x) x.letterSpacing = '0px';
       });
       x.restore();
       footer(x, W, story ? 1790 : H - 36, NUM);
@@ -1795,12 +2075,12 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         if (cur) ln.push(cur); ln = ln.slice(0, 3);
         var lh = fz * 1.3; ph3 = Math.max(ph3, ln.length * lh + 50);
         if (!story) py3 = 1100; 
-        glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
+        x.save(); x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 30; rr(x, 70, py3, W - 140, ph3, 36); x.fillStyle = 'rgba(28,10,48,0.82)'; x.fill(); x.restore(); glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
         x.fillStyle = '#F8E7AE'; x.textAlign = 'center'; x.textBaseline = 'middle';
         ln.forEach(function (t, k) { x.fillText(t, W / 2, py3 + ph3 / 2 + (k - (ln.length - 1) / 2) * lh + 4); });
         x.textBaseline = 'alphabetic';
       } else {
-        glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
+        x.save(); x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 30; rr(x, 70, py3, W - 140, ph3, 36); x.fillStyle = 'rgba(28,10,48,0.82)'; x.fill(); x.restore(); glass(x, 70, py3, W - 140, ph3, 36, gg(x, 70, 0, W - 70, 0));
         x.fillStyle = '#F8E7AE'; fitFont(x, SP.e + ' ' + lbl, W - 220, story ? 84 : 76, 800, BN);
         x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(SP.e + ' ' + lbl, W / 2, py3 + ph3 / 2 + 8); x.textBaseline = 'alphabetic';
       }
@@ -2010,6 +2290,16 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       S.wins = out;
       S.loaded.w = true; refresh();
     }, function (e) { console.error(e); S.loaded.w = true; refresh(); });
+    function funRefresh() { if (S.tab === 'fun' && !S.spin.busy && !S.guess.run) renderView(); }
+    db.collection('predictions').onSnapshot(function (snap) {
+      S.preds = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.predErr = false; funRefresh();
+    }, function (e) { console.error(e); S.predErr = true; funRefresh(); });
+    db.collection('moments').orderBy('ts', 'desc').limit(30).onSnapshot(function (snap) {
+      S.mom.list = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.mom.err = false; funRefresh();
+    }, function (e) { console.error(e); S.mom.err = true; funRefresh(); });
+    db.collection('reacts').orderBy('ts', 'desc').limit(2000).onSnapshot(function (snap) {
+      S.mom.reacts = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); funRefresh();
+    }, function (e) { console.error(e); });
   }
   function loginSheet(closeBtn) {
     var g = S.lg;
