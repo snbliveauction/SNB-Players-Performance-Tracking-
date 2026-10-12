@@ -457,7 +457,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .pchips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
 .pchips .chip.on { outline: 2px solid #E7C26A; background: rgba(231,194,106,0.18); }
 .moment { padding: 0; overflow: hidden; }
-.moment img { display: block; width: 100%; height: auto; max-height: 520px; object-fit: cover; }
+.moment img { display: block; width: 100%; aspect-ratio: 4 / 3; height: auto; max-height: 520px; object-fit: cover; background: #0C1A22; }
 .moment .mbody { padding: 12px 14px 14px; }
 .moment.best { outline: 2px solid #E7C26A; }
 .bestbadge { margin: 0; padding: 8px 14px; background: var(--grad-gold); color: #2A1E05; font-weight: 800; font-size: 14px; }
@@ -1325,6 +1325,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     score = Math.max(0, Math.min(1000, Math.round(score)));
     if (score > gBest(m)) gSetBest(m, score);
     var nm = String(pname()).trim().slice(0, 20); if (!nm) return 'noname';
+    var cur = myScoreDoc(); if (cur && cur.name === nm && (cur[m] || 0) >= bestOf(m)) return 'ok';
     try {
       var sd = { name: nm, g: bestOf('g'), p: bestOf('p'), q: bestOf('q'), ts: firebase.firestore.FieldValue.serverTimestamp() }; ['m', 's', 'h'].forEach(function (k) { var v = bestOf(k); if (v > 0) sd[k] = v; });
       await S.db.doc('scores/' + devId()).set(sd);
@@ -1357,7 +1358,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   function scoreBoard() {
     var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, m: x.m || 0, s: x.s || 0, h: x.h || 0, t: (x.g || 0) + (x.q || 0) + (x.m || 0) + (x.s || 0) + (x.h || 0) }; }).sort(function (a, b) { return b.t - a.t; });
-    var me = devId(), box = h('section', { class: 'card panel' }, h('h2', null, '🏆 টপ স্কোরার'),
+    var me = devId(), box = h('section', { class: 'card panel', id: 'scoreboard' }, h('h2', null, '🏆 টপ স্কোরার'),
       h('p', { class: 'muted small' }, 'সব গেমের সেরা স্কোরের যোগফল। সর্বোচ্চ ৫০০০।'));
     if (S.scoreErr) { box.append(h('p', { class: 'notice' }, 'লিডারবোর্ড এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
     if (!rows.length) { box.append(h('p', { class: 'muted' }, 'এখনো কেউ খেলেনি। প্রথম হোন! 🚀')); return box; }
@@ -2057,6 +2058,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     return h('div', { class: 'periodbar' }, seg);
   }
   function viewFun() {
+    listenFun();
     var root = h('div', { class: 'stack' }, funSeg());
     if (S.players.size < 2) { root.append(h('div', { class: 'card emptybox' }, h('h2', null, 'আরও প্লেয়ার লাগবে'), h('p', { class: 'muted' }, 'মজার সেকশন চালাতে অন্তত ২ জন প্লেয়ার যোগ করুন।'))); return root; }
     if (S.funTab === 'cmp') root.append(viewCompare());
@@ -2797,7 +2799,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (!S.canWrite && S.tab === 'add') S.tab = 'board';
     renderHeader();
     renderTabs();
-    renderView();
+    if (!(S.tab === 'fun' && (S.guess.run || S.spin.busy))) renderView();
     if (S.sheet && S.sheet.mode === 'profile') renderSheet();
   }
 
@@ -2840,7 +2842,10 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   /* ---------- data ---------- */
   function listen() {
     var db = S.db;
+    var lastSig = {};
     db.collection('players').onSnapshot(function (snap) {
+      var sg = sigOf(snap.docs, function (d) { var x = d.data(); return d.id + '|' + x.name + '|' + x.number + '|' + (x.photo ? x.photo.length + x.photo.slice(-24) : ''); });
+      if (S.loaded.p && lastSig.p === sg) return; lastSig.p = sg;
       S.players = new Map(snap.docs.map(function (d) { return [d.id, d.data()]; }));
       S.loaded.p = true; refresh();
     }, function (e) { console.error(e); S.loaded.p = true; refresh(); });
@@ -2851,21 +2856,55 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
           out.push({ id: x.id, type: x.type === 'draw' ? 'draw' : 'win', playerId: x.playerId, goals: Number(x.goals) || 0, ts: Number(x.ts) || 0, createdAt: Number(x.createdAt) || 0, month: d.id, raw: x });
         });
       });
+      var sg = JSON.stringify(out.map(function (x) { return [x.id, x.type, x.playerId, x.goals, x.ts]; }));
+      if (S.loaded.w && lastSig.w === sg) return; lastSig.w = sg;
       S.wins = out;
       S.loaded.w = true; refresh();
     }, function (e) { console.error(e); S.loaded.w = true; refresh(); });
-    function funRefresh() { if (S.tab === 'fun' && !S.spin.busy && !S.guess.run) renderView(); }
-    db.collection('predictions').onSnapshot(function (snap) {
-      S.preds = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.predErr = false; funRefresh();
+  }
+
+  /* ---------- fun data: lazy, de-duplicated and throttled (no screen jumping) ---------- */
+  var FR = { t: 0, last: 0 };
+  function sigOf(arr, f) { return arr.map(f).join('~'); }
+  function funBusy() { var a = document.activeElement; return !!(document.hidden || S.spin.busy || S.guess.run || S.sheet || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))); }
+  function funRefresh() {
+    if (S.tab !== 'fun' || FR.t) return;
+    FR.t = setTimeout(function () { FR.t = 0; softFun(); }, Math.max(700, 3500 - (Date.now() - FR.last)));
+  }
+  function softFun() {
+    if (S.tab !== 'fun') return;
+    if (funBusy()) { FR.t = setTimeout(function () { FR.t = 0; softFun(); }, 2500); return; }
+    FR.last = Date.now();
+    if (S.funTab === 'guess') {
+      var gm = S.game.mode, sb = document.getElementById('scoreboard');
+      if (gm === null || gm === 'res' || gm === 'shmenu') { if (sb) sb.replaceWith(scoreBoard()); else if (gm === null) renderView(); }
+      return;
+    }
+    var y = window.scrollY; renderView(); window.scrollTo(0, y);
+  }
+  function listenFun() {
+    var db = S.db; if (!db || S.funOn) return; S.funOn = true;
+    var last = {};
+    function changed(k, sg) { if (last[k] === sg) return false; last[k] = sg; return true; }
+    db.collection('predictions').limit(1500).onSnapshot(function (snap) {
+      var arr = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; });
+      if (!changed('p', sigOf(arr, function (x) { return x.id + x.playerId + x.name; })) && !S.predErr) return;
+      S.preds = arr; S.predErr = false; funRefresh();
     }, function (e) { console.error(e); S.predErr = true; funRefresh(); });
-    db.collection('scores').limit(500).onSnapshot(function (snap) {
-      S.scores = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.scoreErr = false; funRefresh();
+    db.collection('scores').limit(300).onSnapshot(function (snap) {
+      var arr = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; });
+      if (!changed('s', sigOf(arr, function (x) { return [x.id, x.name, x.g, x.p, x.q, x.m, x.s, x.h].join(','); })) && !S.scoreErr) return;
+      S.scores = arr; S.scoreErr = false; funRefresh();
     }, function (e) { console.error(e); S.scoreErr = true; funRefresh(); });
     db.collection('moments').orderBy('ts', 'desc').limit(30).onSnapshot(function (snap) {
-      S.mom.list = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.mom.err = false; funRefresh();
+      var arr = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; });
+      if (!changed('m', sigOf(arr, function (x) { return x.id + '|' + (x.cap || '') + '|' + x.ts + '|' + (x.img ? x.img.length : 0); })) && !S.mom.err) return;
+      S.mom.list = arr; S.mom.err = false; funRefresh();
     }, function (e) { console.error(e); S.mom.err = true; funRefresh(); });
-    db.collection('reacts').orderBy('ts', 'desc').limit(2000).onSnapshot(function (snap) {
-      S.mom.reacts = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); funRefresh();
+    db.collection('reacts').orderBy('ts', 'desc').limit(800).onSnapshot(function (snap) {
+      var arr = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; });
+      if (!changed('r', sigOf(arr, function (x) { return x.id + x.e; }))) return;
+      S.mom.reacts = arr; funRefresh();
     }, function (e) { console.error(e); });
   }
   function loginSheet(closeBtn) {
