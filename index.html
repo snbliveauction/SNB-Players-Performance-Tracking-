@@ -334,6 +334,8 @@ body {
 .seg button { border-radius: 9px; }
 .seg button[aria-pressed="true"] { background: var(--grad-gold); color: #2A1E05; box-shadow: 0 3px 10px rgba(231,194,106,0.3); }
 .iconbtn { background: rgba(255,255,255,0.05); border-color: var(--line); }
+select { width: 100%; font: inherit; color: var(--ink); padding: 12px; border: 1px solid var(--line-2); border-radius: 12px; background: rgba(0,0,0,0.3); }
+select option { color: #111; }
 input[type="text"], input[type="date"], input[type="email"], input[type="password"] { background: rgba(0,0,0,0.3); border-color: var(--line-2); border-radius: 12px; }
 input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rgba(124,200,207,0.22); }
 
@@ -556,6 +558,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
     right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>',
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"/></svg>',
     camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
     down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>'
@@ -986,7 +989,9 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         h('button', { class: 'btn sm danger-solid', onclick: function () { removeWin(w.id); } }, 'মুছুন'),
         h('button', { class: 'btn sm ghost', onclick: function () { S.confirm = null; refresh(); } }, 'থাক'));
     } else {
-      right = h('button', { class: 'iconbtn', 'aria-label': 'এই ম্যাচ মুছুন', onclick: function () { S.confirm = key; refresh(); } }, icon('trash'));
+      right = h('div', { class: 'actions' },
+        h('button', { class: 'iconbtn', 'aria-label': 'এই ম্যাচ এডিট করুন', onclick: function () { openEditWin(w.id); } }, icon('edit')),
+        h('button', { class: 'iconbtn', 'aria-label': 'এই ম্যাচ মুছুন', onclick: function () { S.confirm = key; refresh(); } }, icon('trash')));
     }
     return h('div', { class: 'item' },
       showPlayer ? avatar(p, 40) : null,
@@ -1078,6 +1083,64 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       await S.db.doc('months/' + w.month).update({ entries: firebase.firestore.FieldValue.arrayRemove(w.raw) });
       toast('ম্যাচটি মুছে ফেলা হয়েছে');
     } catch (e) { writeFail(e); }
+  }
+
+  function openEditWin(id) {
+    var w = S.wins.filter(function (x) { return x.id === id; })[0];
+    if (!w) return;
+    var back = S.sheet && S.sheet.mode === 'profile' ? S.sheet.id : null;
+    S.ed = { id: id, kind: w.type === 'draw' ? 'draw' : w.type === 'loss' ? 'loss' : 'win', pid: w.playerId, goals: w.goals || 0, date: dateStr(new Date(w.ts)), busy: false, back: back };
+    openSheet('ewin', id);
+  }
+  function editWinSheet(closeBtn) {
+    var e = S.ed;
+    function again() { renderSheet(); }
+    var kindSeg = h('div', { class: 'seg kind', role: 'group', 'aria-label': 'ম্যাচের ফল' },
+      [['win', '🏆 জয়'], ['draw', '🤝 ড্র'], ['loss', '❌ হার']].map(function (k) {
+        return h('button', { 'aria-pressed': e.kind === k[0] ? 'true' : 'false', onclick: function () { e.kind = k[0]; again(); } }, k[1]);
+      }));
+    var sel = h('select', { id: 'edPlayer', onchange: function (ev) { e.pid = ev.target.value; } },
+      sortedPlayers().map(function (x) { return h('option', { value: x[0], selected: x[0] === e.pid }, x[1].name + (x[1].number ? ' #' + x[1].number : '')); }));
+    sel.value = e.pid;
+    var dateIn = h('input', { type: 'date', value: e.date, max: dateStr(new Date()), 'aria-label': 'তারিখ', onchange: function (ev) { if (ev.target.value) e.date = ev.target.value; } });
+    return h('div', { class: 'form' },
+      h('div', { class: 'sheet-head' }, h('h2', null, 'ম্যাচ এডিট'), closeBtn),
+      kindSeg,
+      h('label', { class: 'field' }, 'প্লেয়ার', sel),
+      h('div', null, h('span', { class: 'fieldlbl' }, 'গোল'),
+        h('div', { class: 'goalrow' },
+          h('button', { class: 'iconbtn', 'aria-label': 'গোল কমান', disabled: e.goals <= 0, onclick: function () { e.goals = Math.max(0, e.goals - 1); again(); } }, icon('minus')),
+          h('span', { class: 'goalnum' }, String(e.goals)),
+          h('button', { class: 'iconbtn', 'aria-label': 'গোল বাড়ান', disabled: e.goals >= 30, onclick: function () { e.goals = Math.min(30, e.goals + 1); again(); } }, icon('plus')))),
+      h('label', { class: 'field' }, 'তারিখ', dateIn),
+      h('div', { class: 'actions' },
+        h('button', { class: 'btn', disabled: e.busy, onclick: saveEditWin }, e.busy ? 'সেভ হচ্ছে…' : 'সেভ করুন'),
+        h('button', { class: 'btn ghost', onclick: closeSheet }, 'থাক')));
+  }
+  async function saveEditWin() {
+    var e = S.ed; if (!e || e.busy || !S.db) return;
+    var w = S.wins.filter(function (x) { return x.id === e.id; })[0];
+    if (!w) { closeSheet(); return; }
+    e.busy = true; renderSheet();
+    try {
+      var ts = dateToTs(e.date), nm = monthKey(ts), om = w.month;
+      var upd = Object.assign({}, w.raw, { id: w.id, type: e.kind, playerId: e.pid, goals: e.goals, ts: ts, createdAt: w.createdAt || (w.raw && w.raw.createdAt) || Date.now() });
+      var oref = S.db.doc('months/' + om), nref = S.db.doc('months/' + nm);
+      await S.db.runTransaction(async function (tx) {
+        var od = await tx.get(oref);
+        var nd = nm === om ? od : await tx.get(nref);
+        var oe = ((od.exists && od.data().entries) || []).filter(function (x) { return x.id !== w.id; });
+        if (nm === om) { oe.push(upd); tx.set(oref, { entries: oe }, { merge: true }); }
+        else {
+          tx.set(oref, { entries: oe }, { merge: true });
+          var ne = ((nd.exists && nd.data().entries) || []).filter(function (x) { return x.id !== w.id; });
+          ne.push(upd); tx.set(nref, { entries: ne }, { merge: true });
+        }
+      });
+      toast('ম্যাচ ঠিক করা হয়েছে');
+      var back = e.back; S.ed = null;
+      if (back && S.players.has(back)) openSheet('profile', back); else closeSheet();
+    } catch (er) { e.busy = false; writeFail(er); if (S.sheet && S.sheet.mode === 'ewin') renderSheet(); }
   }
 
   /* ---------- players ---------- */
@@ -2263,6 +2326,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         h('button', { class: 'btn ghost', onclick: closeSheet }, 'বুঝেছি'));
       return;
     }
+    if (m === 'ewin') { if (!S.ed) { closeSheet(); return; } sh.append(editWinSheet(closeBtn)); return; }
     if (m === 'new' || m === 'edit') { sh.append(formSheet(m, closeBtn)); return; }
     var id = S.sheet.id, p = S.players.get(id);
     if (!p) { closeSheet(); return; }
