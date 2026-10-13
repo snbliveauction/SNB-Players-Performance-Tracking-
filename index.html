@@ -152,7 +152,7 @@ label.btn:focus-within { outline: 2px solid var(--aqua); outline-offset: 2px; }
 /* ranked list */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
 .list { overflow: hidden; }
-.lhead, .row { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) 38px 38px 42px; gap: 10px; align-items: center; padding: 10px 14px; }
+.lhead, .row { display: grid; grid-template-columns: 30px 44px minmax(0, 1fr) 34px 34px 34px 40px; gap: 10px; align-items: center; padding: 10px 14px; }
 .lhead { font-size: 12px; letter-spacing: 0.05em; color: var(--muted); background: var(--surface-2); border-bottom: 1px solid var(--line); }
 .lhead span:nth-child(n+4) { text-align: right; }
 .num { font-size: 24px; }
@@ -259,6 +259,8 @@ button.item:last-child { border-bottom: 0; }
 .kindpill { font-size: 13px; font-weight: 700; padding: 2px 9px; border-radius: 8px; white-space: nowrap; }
 .kindpill.win { background: var(--lime-soft); color: var(--lime); }
 .kindpill.draw { background: #33290F; color: var(--gold); }
+.kindpill.loss { background: #3A1B1B; color: #F08A80; }
+.num.loss { color: #E8776B; }
 .hero-stats div:nth-child(2) b { color: var(--gold); }
 .hero-stats { gap: 22px; flex-wrap: wrap; }
 
@@ -287,7 +289,7 @@ button.item:last-child { border-bottom: 0; }
 }
 @media (max-width: 420px) {
   .tab { font-size: 14px; }
-  .lhead, .row { gap: 10px; padding-inline: 10px; grid-template-columns: 24px 40px minmax(0, 1fr) 30px 30px 34px; }
+  .lhead, .row { gap: 10px; padding-inline: 10px; grid-template-columns: 22px 38px minmax(0, 1fr) 26px 26px 26px 32px; }
   .row .av { --s: 40px; }
   .hero h2 { font-size: 25px; }
   .hero-stats b { font-size: 50px; }
@@ -667,19 +669,19 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var m = new Map();
     S.wins.forEach(function (w) {
       if (w.ts >= start && w.ts < end) {
-        var a = m.get(w.playerId) || { wins: 0, draws: 0, goals: 0 };
-        if (w.type === 'draw') a.draws++; else a.wins++;
+        var a = m.get(w.playerId) || { wins: 0, draws: 0, losses: 0, goals: 0 };
+        if (w.type === 'draw') a.draws++; else if (w.type === 'loss') a.losses++; else a.wins++;
         a.goals += (w.goals || 0);
         m.set(w.playerId, a);
       }
     });
     var rows = [];
     S.players.forEach(function (p, id) {
-      var a = m.get(id) || { wins: 0, draws: 0, goals: 0 };
-      rows.push({ id: id, p: p, wins: a.wins, draws: a.draws, goals: a.goals });
+      var a = m.get(id) || { wins: 0, draws: 0, losses: 0, goals: 0 };
+      rows.push({ id: id, p: p, wins: a.wins, draws: a.draws, losses: a.losses || 0, goals: a.goals });
     });
     rows.sort(function (a, b) {
-      return b.wins - a.wins || b.draws - a.draws || b.goals - a.goals || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
+      return b.wins - a.wins || b.draws - a.draws || b.goals - a.goals || a.losses - b.losses || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
     });
     rows.forEach(function (r, i) {
       r.rank = i + 1;
@@ -710,7 +712,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     ['week', 'month'].forEach(function (per) {
       var groups = {};
       S.wins.forEach(function (w) {
-        if (!S.players.has(w.playerId) || w.type === 'draw') return;
+        if (!S.players.has(w.playerId) || w.type !== 'win') return;
         var k = periodStart(per, w.ts);
         var g = groups[k] || (groups[k] = {});
         var a = g[w.playerId] || (g[w.playerId] = { wins: 0, goals: 0 });
@@ -741,13 +743,14 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (c && c.w === S.wins && c.p === S.players) return c.f;
     var hall = buildHall(), f = {}, topGoals = 0;
     S.players.forEach(function (p, id) {
-      f[id] = { wins: 0, draws: 0, goals: 0, hat: 0, weeks: {}, streak: 0, wChamp: hall.tally.week[id] || 0, mChamp: hall.tally.month[id] || 0, top: false };
+      f[id] = { wins: 0, draws: 0, losses: 0, goals: 0, hat: 0, weeks: {}, streak: 0, wChamp: hall.tally.week[id] || 0, mChamp: hall.tally.month[id] || 0, top: false };
     });
     S.wins.forEach(function (w) {
       var a = f[w.playerId]; if (!a) return;
       a.goals += (w.goals || 0);
       if ((w.goals || 0) >= 3) a.hat++;
       if (w.type === 'draw') { a.draws++; return; }
+      if (w.type === 'loss') { a.losses++; return; }
       a.wins++;
       a.weeks[periodStart('week', w.ts)] = 1;
     });
@@ -869,6 +872,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return e2;
     }
     var top = active[0];
+    if (!(top.wins > 0 || top.draws > 0)) { var e3 = h('section', { class: 'hero empty' }, h('p', { class: 'kicker' }, kicker(S.period, S.offset)), h('p', { class: 'muted' }, 'এই সময়ে এখনো কারও জয় বা ড্র নেই।')); return e3; }
     var leaders = active.filter(function (r) { return r.wins === top.wins && r.draws === top.draws && r.goals === top.goals; });
     var faces = h('div', { class: 'faces' });
     leaders.slice(0, 4).forEach(function (r) { faces.append(avatar(r.p, leaders.length === 1 ? 112 : 72)); });
@@ -888,19 +892,19 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   function viewBoard() {
     var r = range(S.period, S.offset);
     var rows = ranking(r.start, r.end);
-    var active = rows.filter(function (x) { return x.wins > 0 || x.draws > 0; });
+    var active = rows.filter(function (x) { return x.wins > 0 || x.draws > 0 || x.losses > 0; });
     var root = h('div', { class: 'stack' }, periodBar(), hero(active));
     if (active.length) {
       var max = active[0].wins;
       var list = h('div', { class: 'card list' },
-        h('div', { class: 'lhead', 'aria-hidden': 'true' }, h('span', null, '#'), h('span'), h('span', null, 'প্লেয়ার'), h('span', null, 'জয়'), h('span', null, 'ড্র'), h('span', null, 'গোল')));
+        h('div', { class: 'lhead', 'aria-hidden': 'true' }, h('span', null, '#'), h('span'), h('span', null, 'প্লেয়ার'), h('span', null, 'জয়'), h('span', null, 'ড্র'), h('span', null, 'হার'), h('span', null, 'গোল')));
       active.forEach(function (x) {
         var bar = h('div', { class: 'bar' }, h('i'));
-        bar.firstChild.style.width = Math.round(x.wins / max * 100) + '%';
+        bar.firstChild.style.width = Math.round(x.wins / (max || 1) * 100) + '%';
         list.append(h('button', { class: 'row' + (x.rank === 1 ? ' first' : '') + (x.rank <= 3 ? ' m' + x.rank : ''), onclick: function () { openSheet('profile', x.id); } },
           h('span', { class: 'rank' }, String(x.rank)), avatar(x.p),
           h('div', { class: 'nm' }, h('strong', null, x.p.name), ttlChip(x.id), bar),
-          h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num mid' }, String(x.draws)), h('span', { class: 'num dim' }, String(x.goals))));
+          h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num mid' }, String(x.draws)), h('span', { class: 'num loss' }, String(x.losses)), h('span', { class: 'num dim' }, String(x.goals))));
       });
       root.append(list);
       var idle = rows.length - active.length;
@@ -987,7 +991,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     return h('div', { class: 'item' },
       showPlayer ? avatar(p, 40) : null,
       h('div', { class: 'grow' }, showPlayer ? h('strong', null, p.name) : null, h('span', null, fmtDayW.format(w.ts))),
-      h('span', { class: 'kindpill ' + (w.type === 'draw' ? 'draw' : 'win') }, w.type === 'draw' ? 'ড্র' : 'জয়'),
+      h('span', { class: 'kindpill ' + (w.type === 'draw' ? 'draw' : w.type === 'loss' ? 'loss' : 'win') }, w.type === 'draw' ? 'ড্র' : w.type === 'loss' ? 'হার' : 'জয়'),
       h('span', { class: 'goalpill', title: 'গোল' }, w.goals + ' গোল'),
       right);
   }
@@ -1032,16 +1036,17 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       onchange: function (ev) { if (ev.target.value) S.date = ev.target.value; } });
     var kindSeg = h('div', { class: 'seg kind', role: 'group', 'aria-label': 'ম্যাচের ফল' },
       h('button', { 'aria-pressed': S.kind === 'win' ? 'true' : 'false', onclick: function () { S.kind = 'win'; renderView(); } }, '🏆 জয়'),
-      h('button', { 'aria-pressed': S.kind === 'draw' ? 'true' : 'false', onclick: function () { S.kind = 'draw'; renderView(); } }, '🤝 ড্র'));
+      h('button', { 'aria-pressed': S.kind === 'draw' ? 'true' : 'false', onclick: function () { S.kind = 'draw'; renderView(); } }, '🤝 ড্র'),
+      h('button', { 'aria-pressed': S.kind === 'loss' ? 'true' : 'false', onclick: function () { S.kind = 'loss'; renderView(); } }, '❌ হার'));
     var form = h('section', { class: 'card panel' },
-      h('h2', null, S.kind === 'draw' ? 'কার ম্যাচ ড্র হলো?' : 'কে জিতল?'), kindSeg, sbox, cnt, picked, chips,
+      h('h2', null, S.kind === 'draw' ? 'কার ম্যাচ ড্র হলো?' : S.kind === 'loss' ? 'কে হারল?' : 'কে জিতল?'), kindSeg, sbox, cnt, picked, chips,
       h('div', null, h('span', { class: 'fieldlbl' }, 'গোল'),
         h('div', { class: 'goalrow' },
           h('button', { class: 'iconbtn', 'aria-label': 'গোল কমান', disabled: S.goals <= 0, onclick: function () { S.goals = Math.max(0, S.goals - 1); renderView(); } }, icon('minus')),
           h('span', { class: 'goalnum', 'aria-live': 'polite' }, String(S.goals)),
           h('button', { class: 'iconbtn', 'aria-label': 'গোল বাড়ান', disabled: S.goals >= 30, onclick: function () { S.goals = Math.min(30, S.goals + 1); renderView(); } }, icon('plus')))),
       h('label', { class: 'field' }, 'তারিখ', dateIn),
-      (subBtn = h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : (S.kind === 'draw' ? 'ড্র যোগ করুন' : 'জয় যোগ করুন'))));
+      (subBtn = h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : (S.kind === 'draw' ? 'ড্র যোগ করুন' : S.kind === 'loss' ? 'হার যোগ করুন' : 'জয় যোগ করুন'))));
     var root = h('div', { class: 'stack' }, form);
     var recent = S.wins.slice().sort(function (a, b) { return b.ts - a.ts || b.createdAt - a.createdAt; }).slice(0, 8);
     if (recent.length) {
@@ -1057,10 +1062,10 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     try {
       var ts = dateToTs(S.date);
       var id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-      var entry = { id: id, type: S.kind === 'draw' ? 'draw' : 'win', playerId: S.pick, goals: S.goals, ts: ts, createdAt: Date.now() };
+      var entry = { id: id, type: S.kind === 'draw' ? 'draw' : S.kind === 'loss' ? 'loss' : 'win', playerId: S.pick, goals: S.goals, ts: ts, createdAt: Date.now() };
       await S.db.doc('months/' + monthKey(ts)).set({ entries: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
       var p = S.players.get(S.pick);
-      toast((p ? p.name : 'প্লেয়ার') + (S.kind === 'draw' ? '-এর ড্র যোগ হয়েছে' : '-এর জয় যোগ হয়েছে') + (S.goals ? ' · ' + S.goals + ' গোল' : ''));
+      toast((p ? p.name : 'প্লেয়ার') + (S.kind === 'draw' ? '-এর ড্র যোগ হয়েছে' : S.kind === 'loss' ? '-এর হার যোগ হয়েছে' : '-এর জয় যোগ হয়েছে') + (S.goals ? ' · ' + S.goals + ' গোল' : ''));
       S.pick = null; S.goals = 0;
     } catch (e) { writeFail(e); }
     S.busy = false; renderView();
@@ -1128,30 +1133,34 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   function titleFor(id) {
     var f = buildFacts()[id];
     if (!f) return { e: '⚽', n: 'মাঠের যোদ্ধা' };
-    var m = f.wins + f.draws;
+    var m = f.wins + f.draws + f.losses;
     if (!m) return { e: '😴', n: 'ঘুমন্ত সিংহ' };
     if (f.top) return { e: '👟', n: 'গোলের রাজা' };
     if (f.wChamp > 0) return { e: '🏆', n: 'সপ্তাহের চ্যাম্পিয়ন' };
     if (f.streak >= 3) return { e: '🔥', n: 'টানা জয়ের ঝড়' };
     if (f.hat > 0) return { e: '🎩', n: 'হ্যাটট্রিক হিরো' };
     if (f.draws >= 2 && f.draws >= f.wins) return { e: '🤝', n: 'ড্রয়ের রাজা' };
-    if (m >= 2 && f.goals / m >= 3) return { e: '⚡', n: 'গোল মেশিন' };
+    if (m >= 2 && f.goals / m >= 3 && f.wins >= f.losses) return { e: '⚡', n: 'গোল মেশিন' };
     if (f.wins >= 5) return { e: '💪', n: 'জয়ের কারিগর' };
+    if (f.losses >= 3 && f.losses >= f.wins * 2) return { e: '🥲', n: 'হার না মানা যোদ্ধা' };
     if (f.wins >= 1) return { e: '⭐', n: 'উঠতি তারকা' };
     return { e: '🛡️', n: 'শান্ত যোদ্ধা' };
   }
   function ttlChip(id) { var t = titleFor(id); return h('span', { class: 'ttl' }, t.e + ' ' + t.n); }
   function ratingFor(id) {
     var f = buildFacts()[id]; if (!f) return 55;
-    var v = 55 + f.wins * 3 + f.draws + f.goals * 1.2 + f.hat * 3 + (f.wChamp + f.mChamp) * 4 + Math.min(f.streak, 6);
-    return Math.max(55, Math.min(99, Math.round(v)));
+    var m = f.wins + f.draws + f.losses; if (!m) return 55;
+    var ppm = (f.wins * 3 + f.draws + 4.5) / (m + 3); /* points per match, pulled toward average for few matches */
+    var gpm = Math.min(3, f.goals / m);
+    var v = 45 + ppm * 8 + gpm * 3.5 + Math.min(m, 30) * 0.3 + Math.min(f.hat, 3) * 2 + Math.min(f.wChamp + f.mChamp, 3) * 2 + Math.min(f.streak, 5);
+    return Math.max(45, Math.min(99, Math.round(v)));
   }
   function allStats(id) {
     var r = ranking(-Infinity, Infinity), x = null;
     r.forEach(function (e) { if (e.id === id) x = e; });
     var f = buildFacts()[id] || { hat: 0, streak: 0, wChamp: 0, mChamp: 0 };
-    var wins = x ? x.wins : 0, draws = x ? x.draws : 0, goals = x ? x.goals : 0, m = wins + draws;
-    return { wins: wins, draws: draws, goals: goals, matches: m, avg: m ? goals / m : 0, hat: f.hat, streak: f.streak, champs: f.wChamp + f.mChamp };
+    var wins = x ? x.wins : 0, draws = x ? x.draws : 0, losses = x ? x.losses : 0, goals = x ? x.goals : 0, m = wins + draws + losses;
+    return { wins: wins, draws: draws, losses: losses, goals: goals, matches: m, avg: m ? goals / m : 0, hat: f.hat, streak: f.streak, champs: f.wChamp + f.mChamp };
   }
   var TIERS = [
     { min: 88, k: 'legend', n: 'LEGEND', bn: 'লিজেন্ড', g: ['#4B3A9C', '#233C9A', '#101C54'], ink: '#FFEFB8', sub: '#D9C58A', line: 'rgba(255,226,150,0.55)', div: 'rgba(255,226,150,0.35)', pill: '#E7C26A', pillInk: '#1D1440' },
@@ -1267,6 +1276,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   var ROAST_NOWIN = ['{n} এখনো জয়ের স্বাদ পায়নি, ওর কাছে জয় মানে গল্পের বই!', '{n} এর জন্য আজ শুধু একটা দোয়া: একটা জয় দাও আল্লাহ!'];
   var ROAST_DRAW = ['{n} ড্রয়ের বাদশা! জেতেও না, হারেও না, শুধু সময় নষ্ট!', '{n} এর স্লোগান: "জিতব না, হারবও না, ড্র করেই যাব!"'];
   var ROAST_HAT = ['{n} একটা হ্যাটট্রিক করেই এমন চলে যেন বিশ্বকাপ জিতেছে!', '{n} এর হ্যাটট্রিকের গল্প এখনো প্রতিদিন শুনতে হয়!'];
+  var ROAST_LOSS = ['{n} এত হেরেছে যে হারও এখন ওর বন্ধু হয়ে গেছে!', '{n} হার মানে না, শুধু হেরে যায়, এই যা পার্থক্য!', '{n} এর লিখিত স্লোগান: "অংশগ্রহণই আসল, জেতা নয়!"'];
   var ROAST_TOP = ['{n} এখন এত ভালো খেলছে যে সবার ভয়, পরের মাসে আবার না ট্রান্সফার চায়!', '{n} এর ফর্ম দেখে বাকিরা ভাবছে: এটা মানুষ নাকি মেশিন!'];
   var AWARDS = [['🏅', 'সবচেয়ে বেশি অজুহাত দেওয়ার পুরস্কার'], ['🥇', 'সেরা অভিনেতা (ফাউল খাওয়ার নাটকে)'], ['😴', 'মাঠে ঘুমানোর রেকর্ড হোল্ডার'], ['🍗', 'বিরিয়ানি খাওয়ায় বিশ্বচ্যাম্পিয়ন'], ['🤥', 'মিথ্যা বলায় গোল্ড মেডেল'], ['📱', 'রিল দেখা মাস্টার'], ['🧴', 'চুল ঠিক রাখার ওস্তাদ'], ['🎙️', 'রেফারির সাথে তর্কের সম্রাট'], ['🐢', 'ধীরগতির কিং'], ['🎯', 'আকাশে শট মারার রেকর্ডধারী'], ['🥳', 'বেশি লাফালাফির পুরস্কার'], ['🕵️', 'লাথি মারায় এক্সপার্ট']];
   function roastLine(id) {
@@ -1274,6 +1284,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (a.matches > 0 && a.goals === 0) pool = pool.concat(ROAST_ZERO, ROAST_ZERO);
     if (a.wins === 0) pool = pool.concat(ROAST_NOWIN, ROAST_NOWIN);
     if (a.draws > a.wins && a.draws > 0) pool = pool.concat(ROAST_DRAW, ROAST_DRAW);
+    if (a.losses > a.wins && a.losses > 1) pool = pool.concat(ROAST_LOSS, ROAST_LOSS);
     if (a.hat > 0) pool = pool.concat(ROAST_HAT, ROAST_HAT);
     if (a.wins >= 3 && a.goals >= 5) pool = pool.concat(ROAST_TOP, ROAST_TOP);
     return pool[rand(pool.length)].replace(/\{n\}/g, n);
@@ -1311,7 +1322,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     });
     var counts = { legend: 0, gold: 0, silver: 0, bronze: 0 }; list.forEach(function (e) { counts[tierOf(e.r).k]++; });
     return h('section', { class: 'card panel' }, h('h2', null, '🃏 কার্ড কালেকশন'),
-      h('p', { class: 'muted small' }, 'রেটিং বাড়লেই কার্ড আপগ্রেড হয়: ব্রোঞ্জ → সিলভার (৬৫+) → গোল্ড (৭৫+) → লিজেন্ড (৮৮+)। কার্ডে চাপ দিলে শেয়ার করা যাবে।'),
+      h('p', { class: 'muted small' }, 'জিতলে আর গোল দিলে রেটিং বাড়ে, হারলে কমে। তাই শুধু বেশি খেললেই লিজেন্ড হওয়া যায় না: ব্রোঞ্জ → সিলভার (৬৫+) → গোল্ড (৭৫+) → লিজেন্ড (৮৮+)। কার্ডে চাপ দিলে শেয়ার করা যাবে।'),
       h('p', { class: 'small tierline' }, '👑 ' + counts.legend + ' লিজেন্ড · 🥇 ' + counts.gold + ' গোল্ড · 🥈 ' + counts.silver + ' সিলভার · 🥉 ' + counts.bronze + ' ব্রোঞ্জ'), grid);
   }
 
@@ -1527,7 +1538,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     }
     var gens = [
       topBy('goals', 'সব সময়ের সর্বোচ্চ গোলদাতা কে?'), topBy('wins', 'এখন পর্যন্ত সবচেয়ে বেশি ম্যাচ কে জিতেছে?'), topBy('draws', 'সবচেয়ে বেশি ড্র কে করেছে?'), topBy('hat', 'সবচেয়ে বেশি হ্যাটট্রিক কার?'),
-      numQ('মোট কয়টা গোল করেছে?', 'goals', 1), numQ('কয়টা ম্যাচ জিতেছে?', 'wins', 1), numQ('কয়টা ম্যাচ ড্র করেছে?', 'draws', 1), numQ('এর কার্ড রেটিং কত?', 'r', 2), numQ('মোট কয়টা ম্যাচ খেলেছে (জয় + ড্র)?', 'm', 1),
+      numQ('মোট কয়টা গোল করেছে?', 'goals', 1), numQ('কয়টা ম্যাচ জিতেছে?', 'wins', 1), numQ('কয়টা ম্যাচ ড্র করেছে?', 'draws', 1), numQ('কয়টা ম্যাচ হেরেছে?', 'losses', 1), numQ('এর কার্ড রেটিং কত?', 'r', 2), numQ('মোট কয়টা ম্যাচ খেলেছে (জয় + ড্র)?', 'm', 1),
       function () {
         var h1 = ids.filter(function (i) { return st[i].a.hat > 0; }), h0 = ids.filter(function (i) { return st[i].a.hat === 0; });
         if (!h1.length || h0.length < 3) return null; var c = h1[rand(h1.length)];
@@ -2114,11 +2125,11 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return s;
     }
     var A = allStats(c.a), B = allStats(c.b), pa = S.players.get(c.a), pb = S.players.get(c.b);
-    var rows = [['জয়', A.wins, B.wins], ['ড্র', A.draws, B.draws], ['গোল', A.goals, B.goals], ['গড় গোল', +A.avg.toFixed(1), +B.avg.toFixed(1)], ['হ্যাটট্রিক', A.hat, B.hat], ['সেরা (সপ্তাহ/মাস)', A.champs, B.champs], ['রেটিং', ratingFor(c.a), ratingFor(c.b)]];
+    var rows = [['জয়', A.wins, B.wins], ['ড্র', A.draws, B.draws], ['হার', A.losses, B.losses, 'low'], ['গোল', A.goals, B.goals], ['গড় গোল', +A.avg.toFixed(1), +B.avg.toFixed(1)], ['হ্যাটট্রিক', A.hat, B.hat], ['সেরা (সপ্তাহ/মাস)', A.champs, B.champs], ['রেটিং', ratingFor(c.a), ratingFor(c.b)]];
     var sa = 0, sb = 0;
     var tbl = h('div', { class: 'cmp' });
     rows.forEach(function (r) {
-      var wa = r[1] > r[2], wb = r[2] > r[1];
+      var wa = r[3] ? r[1] < r[2] : r[1] > r[2], wb = r[3] ? r[2] < r[1] : r[2] > r[1];
       if (wa) sa++; if (wb) sb++;
       tbl.append(h('div', { class: 'cmprow' }, h('b', { class: wa ? 'win' : '' }, String(r[1])), h('span', null, r[0]), h('b', { class: wb ? 'win' : '' }, String(r[2]))));
     });
@@ -2230,9 +2241,9 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     S.card = null; S.sheet = null; S.confirm = null; $('#scrim').hidden = true;
   }
   function statsFor(id, period) {
-    var r = range(period, 0), wins = 0, draws = 0, goals = 0;
-    S.wins.forEach(function (w) { if (w.playerId === id && w.ts >= r.start && w.ts < r.end) { if (w.type === 'draw') draws++; else wins++; goals += w.goals || 0; } });
-    return { wins: wins, draws: draws, goals: goals };
+    var r = range(period, 0), wins = 0, draws = 0, losses = 0, goals = 0;
+    S.wins.forEach(function (w) { if (w.playerId === id && w.ts >= r.start && w.ts < r.end) { if (w.type === 'draw') draws++; else if (w.type === 'loss') losses++; else wins++; goals += w.goals || 0; } });
+    return { wins: wins, draws: draws, losses: losses, goals: goals };
   }
   function renderSheet() {
     var sh = $('#sheet');
@@ -2259,10 +2270,10 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var pro = h('div', { class: 'pro' }, avatar(p, 104),
       h('div', null, h('h2', null, p.name), p.number ? h('p', { class: 'no' }, '#' + p.number) : null, ttlChip(id)));
     var tbl = h('table', { class: 'tbl' },
-      h('thead', null, h('tr', null, h('th', null, 'সময়'), h('th', null, 'জয়'), h('th', null, 'ড্র'), h('th', null, 'গোল'))),
+      h('thead', null, h('tr', null, h('th', null, 'সময়'), h('th', null, 'জয়'), h('th', null, 'ড্র'), h('th', null, 'হার'), h('th', null, 'গোল'))),
       h('tbody', null, [['এই সপ্তাহ', 'week'], ['এই মাস', 'month'], ['সব সময়', 'all']].map(function (x) {
         var s = statsFor(id, x[1]);
-        return h('tr', null, h('td', null, x[0]), h('td', { class: 'n' }, String(s.wins)), h('td', { class: 'n' }, String(s.draws)), h('td', { class: 'n' }, String(s.goals)));
+        return h('tr', null, h('td', null, x[0]), h('td', { class: 'n' }, String(s.wins)), h('td', { class: 'n' }, String(s.draws)), h('td', { class: 'n' }, String(s.losses)), h('td', { class: 'n' }, String(s.goals)));
       })));
     var wins = S.wins.filter(function (w) { return w.playerId === id; }).sort(function (a, b) { return b.ts - a.ts; }).slice(0, 15);
     var hist = h('div', null, h('h3', { class: 'h3' }, 'ম্যাচের তালিকা'));
@@ -2602,7 +2613,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       x.fillStyle = DK; fitFont(x, F.name, 700, 80, 800, BN); x.fillText(F.name, W / 2, cy0 + 548);
       x.font = '700 44px ' + BN; x.fillStyle = TR.sub; x.fillText(F.title, W / 2, cy0 + 612);
       x.fillStyle = TR.div; x.fillRect(cx0 + 90, cy0 + 650, cw - 180, 4);
-      var st = [['WIN', F.a.wins], ['DRAW', F.a.draws], ['GOAL', F.a.goals], ['HAT-TRICK', F.a.hat], ['STREAK', F.a.streak], ['TITLES', F.a.champs]];
+      var st = [['WIN', F.a.wins], ['DRAW', F.a.draws], ['LOSS', F.a.losses || 0], ['GOAL', F.a.goals], ['HAT-TRICK', F.a.hat], ['TITLES', F.a.champs]];
       st.forEach(function (s, i) {
         var col = i % 3, row = Math.floor(i / 3), sx = 270 + col * 270, sy = cy0 + 760 + row * 150;
         x.fillStyle = DK; x.font = '800 96px ' + NUM; x.fillText(String(s[1]), sx, sy);
@@ -2853,7 +2864,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       var out = [];
       snap.docs.forEach(function (d) {
         (d.data().entries || []).forEach(function (x) {
-          out.push({ id: x.id, type: x.type === 'draw' ? 'draw' : 'win', playerId: x.playerId, goals: Number(x.goals) || 0, ts: Number(x.ts) || 0, createdAt: Number(x.createdAt) || 0, month: d.id, raw: x });
+          out.push({ id: x.id, type: x.type === 'draw' ? 'draw' : x.type === 'loss' ? 'loss' : 'win', playerId: x.playerId, goals: Number(x.goals) || 0, ts: Number(x.ts) || 0, createdAt: Number(x.createdAt) || 0, month: d.id, raw: x });
         });
       });
       var sg = JSON.stringify(out.map(function (x) { return [x.id, x.type, x.playerId, x.goals, x.ts]; }));
