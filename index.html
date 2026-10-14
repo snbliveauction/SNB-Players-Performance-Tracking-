@@ -1054,10 +1054,12 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       h('label', { class: 'field' }, 'তারিখ', dateIn),
       (subBtn = h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : (S.kind === 'draw' ? 'ড্র যোগ করুন' : S.kind === 'loss' ? 'হার যোগ করুন' : 'জয় যোগ করুন'))));
     var root = h('div', { class: 'stack' }, form);
-    var recent = S.wins.slice().sort(function (a, b) { return b.ts - a.ts || b.createdAt - a.createdAt; }).slice(0, 8);
+    var allRecent = S.wins.slice().sort(function (a, b) { return b.ts - a.ts || b.createdAt - a.createdAt; });
+    var recent = allRecent.slice(0, S.recentN || 8);
     if (recent.length) {
-      root.append(h('div', { class: 'card' }, h('div', { class: 'cardhead' }, h('h3', { class: 'h3' }, 'সাম্প্রতিক ম্যাচ')),
-        h('div', { class: 'recent' }, recent.map(function (w) { return winItem(w, true); }))));
+      root.append(h('div', { class: 'card' }, h('div', { class: 'cardhead' }, h('h3', { class: 'h3' }, 'সাম্প্রতিক ম্যাচ'), h('span', { class: 'muted small' }, recent.length + '/' + allRecent.length)),
+        h('div', { class: 'recent' }, recent.map(function (w) { return winItem(w, true); })),
+        allRecent.length > recent.length ? h('button', { class: 'btn ghost block', style: 'margin-top:12px', onclick: function () { S.recentN = (S.recentN || 8) + 20; renderView(); } }, 'আরো পুরনো ম্যাচ দেখুন') : null));
     }
     return root;
   }
@@ -2340,9 +2342,12 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         var s = statsFor(id, x[1]);
         return h('tr', null, h('td', null, x[0]), h('td', { class: 'n' }, String(s.wins)), h('td', { class: 'n' }, String(s.draws)), h('td', { class: 'n' }, String(s.losses)), h('td', { class: 'n' }, String(s.goals)));
       })));
-    var wins = S.wins.filter(function (w) { return w.playerId === id; }).sort(function (a, b) { return b.ts - a.ts; }).slice(0, 15);
+    var wins = S.wins.filter(function (w) { return w.playerId === id; }).sort(function (a, b) { return b.ts - a.ts; });
+    var winsAll = wins.length;
+    if (!S.sheet.all) wins = wins.slice(0, 15);
     var hist = h('div', null, h('h3', { class: 'h3' }, 'ম্যাচের তালিকা'));
     if (wins.length) hist.append(h('div', { class: 'recent' }, wins.map(function (w) { return winItem(w, false); })));
+    if (winsAll > wins.length) hist.append(h('button', { class: 'btn ghost block', style: 'margin-top:10px', onclick: function () { S.sheet.all = true; renderSheet(); } }, 'সব ম্যাচ দেখুন (' + winsAll + ')'));
     else hist.append(h('p', { class: 'muted small' }, 'এখনো কোনো ম্যাচ লেখা হয়নি।'));
     var bl = badgesFor(id).sort(function (a, b) { return (b.on ? 1 : 0) - (a.on ? 1 : 0); });
     var got = bl.filter(function (x) { return x.on; }).length;
