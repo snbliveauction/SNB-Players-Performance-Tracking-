@@ -410,6 +410,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .pro .ttl { font-size: 15px; margin-top: 4px; }
 .nm .ttl { display: block; margin-top: 0; }
 .tabs .tab { font-size: 14px; }
+@media (max-width: 480px) { .tabs .tab { font-size: 12.5px; padding-left: 3px; padding-right: 3px; white-space: nowrap; } .tabs .funic { display: none; } }
 .chips2 { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
 .chip2 { flex: none; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,0.04); font-size: 14px; white-space: nowrap; }
 .chip2[aria-pressed="true"] { background: var(--grad-gold); color: #2A1E05; border-color: transparent; font-weight: 700; }
@@ -465,6 +466,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .moment img { display: block; width: 100%; aspect-ratio: 4 / 3; height: auto; max-height: 520px; object-fit: cover; background: #0C1A22; }
 .moment .mbody { padding: 12px 14px 14px; }
 .moment.best { outline: 2px solid #E7C26A; }
+.linkbox { margin-top: 12px; padding: 12px; border-radius: 12px; background: rgba(124,200,207,0.12); border: 1px solid var(--aqua); }
 .bestbadge { margin: 0; padding: 8px 14px; background: var(--grad-gold); color: #2A1E05; font-weight: 800; font-size: 14px; }
 .mcap { margin: 0 0 2px; font-weight: 700; font-size: 17px; }
 .reacts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
@@ -825,6 +827,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (S.canWrite) tabs.push(['add', 'জয় যোগ']);
     tabs.push(['players', 'প্লেয়ার']);
     tabs.push(['hall', 'হল অফ ফেম']);
+    tabs.push(['moments', '📸 মুহূর্ত']);
     tabs.push(['fun', '🎉 মজা']);
     tabs.forEach(function (x) {
       var b = h('button', {
@@ -2087,15 +2090,48 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   async function saveMoment() {
     var m = S.mom; if (!m.img || m.busy) return;
     m.busy = true; renderView();
-    try { await S.db.collection('moments').add({ img: m.img, cap: String(m.cap || '').trim().slice(0, 80), ts: Date.now() }); m.img = null; m.cap = ''; m.open = false; toast('ছবি যোগ হয়েছে 📸'); }
+    try { var cap = String(m.cap || '').trim().slice(0, 80); var ref = await S.db.collection('moments').add({ img: m.img, cap: cap, ts: Date.now() }); m.img = null; m.cap = ''; m.open = false; m.link = { id: ref.id, cap: cap }; toast('ছবি যোগ হয়েছে 📸'); }
     catch (e) { console.error(e); toast(writeFail(e)); }
     m.busy = false; renderView();
   }
+  function momLink(id) { return location.origin + location.pathname + '#m=' + id; }
+  function copyText(t) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(t); } catch (e) { /* fall through */ }
+    return new Promise(function (res, rej) {
+      var ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0;top:0'; document.body.append(ta); ta.focus(); ta.select();
+      try { document.execCommand('copy') ? res() : rej(); } catch (e) { rej(e); } ta.remove();
+    });
+  }
+  async function shareMoment(id, cap) {
+    var url = momLink(id);
+    if (navigator.share) { try { await navigator.share({ title: 'Sylhet Net Breakers', text: cap || 'ম্যাচের মুহূর্ত 📸', url: url }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+    try { await copyText(url); toast('লিংক কপি হয়েছে 🔗'); } catch (e) { window.prompt('লিংকটি কপি করুন', url); }
+  }
+  function readHashMoment() {
+    var m = /[#&]m=([A-Za-z0-9_-]+)/.exec(location.hash || '');
+    if (!m) return false;
+    S.tab = 'moments'; S.mom.focus = m[1]; S.mom.fdoc = null; S.mom.fgone = false; S.mom.fstart = true;
+    var d = S.mom.list.filter(function (x) { return x.id === m[1]; })[0];
+    if (!d && S.db) {
+      S.db.doc('moments/' + m[1]).get().then(function (sn) {
+        if (sn.exists) { var x = sn.data(); x.id = sn.id; S.mom.fdoc = x; } else S.mom.fgone = true;
+        if (S.tab === 'moments') renderView();
+      }).catch(function () { S.mom.fgone = true; if (S.tab === 'moments') renderView(); });
+    }
+    return true;
+  }
   function viewMoments() {
+    listenFun();
     var m = S.mom, me = devId();
     var box = h('section', { class: 'card panel' }, h('h2', null, '📸 আজকের মুহূর্ত'),
-      h('p', { class: 'muted small' }, 'ম্যাচের সেরা ছবি। 🔥😂👏😍 দিয়ে রিঅ্যাক্ট করুন, সপ্তাহের সবচেয়ে বেশি রিঅ্যাকশন পাওয়া ছবি হবে "সেরা মুহূর্ত"।'));
+      h('p', { class: 'muted small' }, 'ম্যাচের সেরা ছবি। 🔥😂👏😍 দিয়ে রিঅ্যাক্ট করুন, সপ্তাহের সবচেয়ে বেশি রিঅ্যাকশন পাওয়া ছবি হবে "সেরা মুহূর্ত"। যেকোনো ছবির 🔗 বাটনে চাপলে সেই পোস্টের লিংক শেয়ার করা যাবে।'));
     if (m.err) { box.append(h('p', { class: 'notice' }, 'ছবির ওয়াল এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
+    if (m.link) {
+      var lk = m.link;
+      box.append(h('div', { class: 'linkbox' }, h('strong', null, '✅ পোস্ট হয়ে গেছে! লিংক তৈরি:'), h('p', { class: 'small', style: 'word-break:break-all;margin:6px 0' }, momLink(lk.id)),
+        h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: function () { shareMoment(lk.id, lk.cap); } }, '🔗 লিংক শেয়ার করুন'),
+          h('button', { class: 'btn ghost', onclick: function () { m.link = null; renderView(); } }, 'ঠিক আছে'))));
+    }
     if (S.canWrite) {
       if (!m.open) box.append(h('button', { class: 'btn ghost block', onclick: function () { m.open = true; renderView(); } }, '➕ নতুন ছবি যোগ করুন'));
       else {
@@ -2106,30 +2142,41 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
           h('div', { class: 'btnrow' }, h('button', { class: 'btn', disabled: !m.img || m.busy, onclick: saveMoment }, m.busy ? 'অপেক্ষা করুন...' : 'পোস্ট করুন'), h('button', { class: 'btn ghost', onclick: function () { m.open = false; m.img = null; renderView(); } }, 'বাতিল')));
       }
     }
-    var root = h('div', { class: 'stack' }, box);
-    if (!m.list.length) { root.append(h('div', { class: 'card emptybox' }, h('p', { class: 'muted' }, 'এখনো কোনো ছবি নেই।'))); return root; }
+    var root = h('div', { class: 'stack' });
     var tally = {}, mineR = {};
     m.reacts.forEach(function (r) { tally[r.m] = tally[r.m] || { total: 0 }; tally[r.m].total++; tally[r.m][r.e] = (tally[r.m][r.e] || 0) + 1; if (r.id === r.m + '_' + me) mineR[r.m] = r.e; });
     var weekAgo = Date.now() - 7 * 86400000, bestId = null, bestN = 0;
     m.list.forEach(function (x) { var n = (tally[x.id] || { total: 0 }).total; if (x.ts >= weekAgo && n > bestN) { bestN = n; bestId = x.id; } });
-    m.list.forEach(function (x) {
+    function mcard(x, focused) {
       var t = tally[x.id] || { total: 0 }, row = h('div', { class: 'reacts' });
       REACTS.forEach(function (rc) {
         row.append(h('button', { class: 'react' + (mineR[x.id] === rc[0] ? ' on' : ''), onclick: function () { if (mineR[x.id] !== rc[0]) reactTo(x.id, rc[0]); } }, rc[1] + ' ' + (t[rc[0]] || 0)));
       });
-      var card = h('article', { class: 'card moment' + (x.id === bestId ? ' best' : '') },
-        x.id === bestId ? h('p', { class: 'bestbadge' }, '🏅 সপ্তাহের সেরা মুহূর্ত') : null,
-        h('img', { src: x.img, alt: x.cap || 'ম্যাচের ছবি', loading: 'lazy' }),
+      row.append(h('button', { class: 'react', 'aria-label': 'লিংক শেয়ার', onclick: function () { shareMoment(x.id, x.cap); } }, '🔗 শেয়ার'));
+      return h('article', { class: 'card moment' + (x.id === bestId ? ' best' : ''), id: 'mom-' + x.id },
+        focused ? h('p', { class: 'bestbadge' }, '📌 শেয়ার করা পোস্ট') : (x.id === bestId ? h('p', { class: 'bestbadge' }, '🏅 সপ্তাহের সেরা মুহূর্ত') : null),
+        h('img', { src: x.img, alt: x.cap || 'ম্যাচের ছবি', loading: focused ? 'eager' : 'lazy' }),
         h('div', { class: 'mbody' }, x.cap ? h('p', { class: 'mcap' }, x.cap) : null, h('p', { class: 'muted small' }, fmtDay.format(x.ts)), row,
           S.canWrite ? h('button', { class: 'link-btn', onclick: function () { if (window.confirm('এই ছবিটা মুছে ফেলবেন?')) S.db.doc('moments/' + x.id).delete().catch(function (e) { toast(writeFail(e)); }); } }, '🗑️ মুছুন') : null));
-      root.append(card);
-    });
+    }
+    if (m.focus) {
+      var fx = m.list.filter(function (x) { return x.id === m.focus; })[0] || m.fdoc;
+      if (fx) {
+        root.append(mcard(fx, true), h('button', { class: 'btn ghost block', onclick: function () { m.focus = null; m.fdoc = null; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ } renderView(); } }, 'সব মুহূর্ত দেখুন'));
+        if (m.fstart) { m.fstart = false; window.scrollTo(0, 0); }
+      } else if (m.fgone) root.append(h('div', { class: 'card emptybox' }, h('p', { class: 'muted' }, 'এই পোস্টটি আর নেই (মুছে ফেলা হয়েছে)।')));
+      else root.append(h('div', { class: 'card emptybox' }, h('p', { class: 'muted' }, 'পোস্ট খোলা হচ্ছে…')));
+    }
+    root.append(box);
+    var rest = m.list.filter(function (x) { return x.id !== m.focus; });
+    if (!rest.length && !m.focus) { root.append(h('div', { class: 'card emptybox' }, h('p', { class: 'muted' }, 'এখনো কোনো ছবি নেই।'))); return root; }
+    rest.forEach(function (x) { root.append(mcard(x, false)); });
     return root;
   }
 
   function funSeg() {
     var seg = h('div', { class: 'seg funseg', role: 'group', 'aria-label': 'মজা' });
-    [['spin', '🎡 স্পিন'], ['pred', '🎯 প্রেডিক্ট'], ['moment', '📸 মুহূর্ত'], ['guess', '🎮 গেম'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
+    [['spin', '🎡 স্পিন'], ['pred', '🎯 প্রেডিক্ট'], ['guess', '🎮 গেম'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
       seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.guess.run = false; S.funTab = x[0]; renderView(); } }, x[1]));
     });
     return h('div', { class: 'periodbar' }, seg);
@@ -2141,7 +2188,6 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (S.funTab === 'cmp') root.append(viewCompare());
     else if (S.funTab === 'roast') root.append(viewRoast());
     else if (S.funTab === 'pred') root.append(viewPredict());
-    else if (S.funTab === 'moment') root.append(viewMoments());
     else if (S.funTab === 'guess') root.append(viewGuess());
     else if (S.funTab === 'card') root.append(viewCards());
     else root.append(viewSpin());
@@ -2872,7 +2918,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     if (!(S.loaded.p && S.loaded.w)) { v.append(h('p', { class: 'muted' }, 'লোড হচ্ছে…')); return; }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : viewPlayers());
+    v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
@@ -2949,14 +2995,14 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   function sigOf(arr, f) { return arr.map(f).join('~'); }
   function funBusy() { var a = document.activeElement; return !!(document.hidden || S.spin.busy || S.guess.run || S.sheet || (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))); }
   function funRefresh() {
-    if (S.tab !== 'fun' || FR.t) return;
+    if ((S.tab !== 'fun' && S.tab !== 'moments') || FR.t) return;
     FR.t = setTimeout(function () { FR.t = 0; softFun(); }, Math.max(700, 3500 - (Date.now() - FR.last)));
   }
   function softFun() {
-    if (S.tab !== 'fun') return;
+    if (S.tab !== 'fun' && S.tab !== 'moments') return;
     if (funBusy()) { FR.t = setTimeout(function () { FR.t = 0; softFun(); }, 2500); return; }
     FR.last = Date.now();
-    if (S.funTab === 'guess') {
+    if (S.tab === 'fun' && S.funTab === 'guess') {
       var gm = S.game.mode, sb = document.getElementById('scoreboard');
       if (gm === null || gm === 'res' || gm === 'shmenu') { if (sb) sb.replaceWith(scoreBoard()); else if (gm === null) renderView(); }
       return;
@@ -3044,6 +3090,8 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   function logout() { S.auth.signOut(); }
   async function init() {
     $('#logo').src = LOGO;
+    readHashMoment();
+    window.addEventListener('hashchange', function () { if (readHashMoment()) { renderTabs(); renderView(); } });
     renderHeader(); renderTabs(); renderView(); renderInstall();
     var cfg = window.NB_CONFIG && window.NB_CONFIG.firebase;
     if (!window.firebase || !cfg || !cfg.apiKey || String(cfg.apiKey).indexOf('PASTE') === 0) {
@@ -3054,6 +3102,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     try { S.db.settings({ experimentalForceLongPolling: true, useFetchStreams: false, merge: true }); } catch (e) { /* ignore */ }
     try { await S.db.enablePersistence({ synchronizeTabs: true }); } catch (e) { /* cache unavailable, fine */ }
     S.auth = firebase.auth();
+    if (S.mom.focus) readHashMoment();
     listen();
     S.auth.onAuthStateChanged(async function (u) {
       S.user = u; S.canWrite = false;
