@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sylhet Net Breakers</title>
-<meta name="description" content="Sylhet Net Breakers ক্লাবের জয় ও গোলের স্কোরবোর্ড। সপ্তাহ ও মাসের সেরা প্লেয়ার।">
+<title>SNB | Sylhet Netbreakers — eFootball Player Rankings & Club Records</title>
+<meta name="description" content="Sylhet Netbreakers (SNB) official eFootball platform: player performance, weekly rankings, Dream XI, club records and community highlights.">
 <meta name="theme-color" content="#0F151C">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Sylhet Net Breakers">
-<meta property="og:description" content="জয় ও গোলের স্কোরবোর্ড। সপ্তাহ ও মাসের সেরা প্লেয়ার।">
+<meta property="og:title" content="SNB | Sylhet Netbreakers eFootball Platform">
+<meta property="og:description" content="Explore SNB player rankings, performance records, Dream XI and club highlights.">
 <meta property="og:image" content="https://snb-players-performance-tracking.pages.dev/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -646,6 +646,68 @@ body {
   *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
 
+
+/* ---------- SNB platform upgrade: dashboard, navigation and accessibility ---------- */
+.wrap { max-width: 1040px; gap: 22px; }
+.top { gap: 18px; }
+.brand { padding: 8px 0 14px; }
+.brand h1 { font-size: clamp(30px, 5vw, 42px); }
+.tabs { display:flex; gap:6px; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:thin; padding:0 2px; border-bottom-color:rgba(124,200,207,.18); }
+.tab { flex:0 0 auto; min-width: max-content; padding:12px 15px 11px; border-radius:12px 12px 0 0; }
+.tab[aria-selected="true"] { background:linear-gradient(180deg,rgba(124,200,207,.12),rgba(124,200,207,.025)); }
+.home-hero { position:relative; overflow:hidden; padding:clamp(22px,5vw,42px); border:1px solid rgba(231,194,106,.28); border-radius:24px; background:radial-gradient(ellipse at 95% 0%,rgba(124,200,207,.16),transparent 38%),radial-gradient(ellipse at 0% 100%,rgba(231,194,106,.11),transparent 42%),linear-gradient(135deg,#172432,#0b121a 70%); box-shadow:0 18px 45px #0003; }
+.home-hero:after { content:'SNB'; position:absolute; right:2%; bottom:-30%; font:800 clamp(100px,20vw,230px)/1 'Barlow Condensed',sans-serif; letter-spacing:.04em; color:rgba(255,255,255,.025); pointer-events:none; }
+.home-kicker { color:var(--gold); font:700 13px/1.3 var(--f-num); letter-spacing:.2em; text-transform:uppercase; }
+.home-hero h2 { position:relative; z-index:1; max-width:720px; margin:10px 0 12px; font:800 clamp(34px,6vw,58px)/.98 var(--f-num); letter-spacing:.015em; text-transform:uppercase; }
+.home-hero p { position:relative; z-index:1; max-width:600px; color:#b6c4d0; line-height:1.8; }
+.home-actions { position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+.home-actions .btn { min-width:150px; }
+.home-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.home-metric { min-width:0; padding:17px; border:1px solid var(--line); border-radius:16px; background:linear-gradient(145deg,var(--surface),#111922); }
+.home-metric .metric-num { display:block; font:800 clamp(28px,4vw,38px)/1 var(--f-num); color:var(--gold); font-variant-numeric:tabular-nums; }
+.home-metric .metric-label { display:block; margin-top:7px; color:var(--muted); font-size:13px; }
+.home-section-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:6px 0 2px; }
+.home-section-head h2 { font-size:22px; }
+.home-section-head button { border:0; background:none; color:var(--aqua); font-size:13px; font-weight:700; }
+.home-two { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:14px; }
+.home-panel { min-width:0; padding:20px; border:1px solid var(--line); border-radius:18px; background:var(--surface); }
+.home-panel h3 { margin-bottom:12px; font-size:19px; }
+.home-player { display:flex; align-items:center; gap:12px; min-width:0; }
+.home-player .home-player-info { min-width:0; flex:1; }
+.home-player-info strong { display:block; overflow-wrap:anywhere; }
+.home-player-info small { display:block; color:var(--muted); }
+.home-empty { padding:18px; border:1px dashed var(--line-2); border-radius:14px; color:var(--muted); line-height:1.7; }
+.quick-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.quick-card { display:flex; flex-direction:column; align-items:flex-start; gap:7px; text-align:left; padding:18px; min-height:112px; border:1px solid var(--line); border-radius:16px; background:var(--surface); color:var(--ink); }
+.quick-card:hover { border-color:var(--aqua); transform:translateY(-2px); }
+.quick-card .quick-icon { color:var(--gold); font-size:22px; }
+.quick-card small { color:var(--muted); }
+.power-row { display:grid; grid-template-columns:40px minmax(0,1fr) auto; align-items:center; gap:12px; padding:12px 14px; border-bottom:1px solid var(--line); }
+.power-row:last-child { border-bottom:0; }
+.power-rank { font:800 24px/1 var(--f-num); color:var(--gold); }
+.power-score { font:800 23px/1 var(--f-num); color:var(--aqua); }
+.power-note { color:var(--muted); font-size:12px; }
+@media(max-width:680px) {
+ body { padding:12px 10px 36px; }
+ .wrap { gap:15px; }
+ .brand { gap:10px; padding-top:2px; }
+ .logo { width:54px; height:54px; }
+ .city { font-size:12px; }
+ .brand h1 { font-size:clamp(25px,7vw,32px); }
+ .eyebrow { font-size:12px; }
+ .role { font-size:12px; }
+ .tab { padding:10px 12px; font-size:15px; }
+ .home-hero { padding:23px 18px; border-radius:18px; }
+ .home-hero h2 { font-size:clamp(34px,10vw,46px); }
+ .home-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+ .home-metric { padding:14px; }
+ .home-two { grid-template-columns:1fr; }
+ .quick-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+ .quick-card { padding:14px; min-height:100px; }
+ .home-panel { padding:15px; }
+}
+@media(prefers-reduced-motion:reduce) { .quick-card:hover { transform:none; } }
+
 </style>
 </head>
 <body>
@@ -729,7 +791,7 @@ body {
   }
 
   var S = {
-    tab: 'board', period: 'week', offset: 0,
+    tab: 'home', period: 'week', offset: 0,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
     funTab: 'spin', roast: { cur: null }, game: { mode: null, res: null }, mm: null, sh: null, hl: null, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
@@ -950,9 +1012,10 @@ body {
   function renderTabs() {
     var t = $('#tabs');
     t.textContent = '';
-    var tabs = [['board', 'লিডারবোর্ড']];
+    var tabs = [['home', 'হোম'], ['board', 'লিডারবোর্ড']];
     if (S.canWrite) tabs.push(['add', 'জয় যোগ']);
     tabs.push(['players', 'প্লেয়ার']);
+    tabs.push(['power', 'পাওয়ার র‍্যাঙ্কিং']);
     tabs.push(['hall', 'হল অফ ফেম']);
     tabs.push(['moments', '📸 মুহূর্ত']);
     tabs.push(['fun', '🎉 মজা']);
@@ -3142,6 +3205,62 @@ body {
     try { return !!(navigator.canShare && navigator.canShare({ files: [new File(['x'], 'a.png', { type: 'image/png' })] })); } catch (e) { return false; }
   }
 
+  /* ---------- SNB home dashboard ---------- */
+  function goTab(tab) { S.tab = tab; S.confirm = null; renderTabs(); renderView(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  function homeView() {
+    var totalWins = 0, totalDraws = 0, totalLosses = 0, totalGoals = 0;
+    S.wins.forEach(function (w) { totalGoals += Number(w.goals || 0); if (w.type === 'draw') totalDraws++; else if (w.type === 'loss') totalLosses++; else totalWins++; });
+    var active = ranking(range('week', 0).start, range('week', 0).end).filter(function (x) { return x.wins || x.draws || x.losses; });
+    var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
+    var top = active[0] || null, power = all.slice().sort(function (a,b) { return ratingFor(b.id)-ratingFor(a.id) || b.wins-a.wins || b.goals-a.goals; }).slice(0,5);
+    var heroBox = h('section', { class: 'home-hero' },
+      h('div', { class: 'home-kicker' }, 'SYLHET NETBREAKERS • OFFICIAL PLATFORM'),
+      h('h2', null, 'COMPETE. PERFORM. MAKE HISTORY.'),
+      h('p', null, 'Player performance, club rankings and the journey behind every SNB achievement — all in one place.'),
+      h('div', { class: 'home-actions' },
+        h('button', { class: 'btn lime', onclick: function () { goTab('board'); } }, 'View Rankings  →'),
+        h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
+        h('button', { class: 'btn ghost', onclick: function () { goTab('hall'); } }, 'Club Records')));
+    var metrics = h('div', { class: 'home-metrics' },
+      h('div', { class: 'home-metric' }, h('span', { class: 'metric-num' }, String(S.players.size)), h('span', { class: 'metric-label' }, 'Registered players')),
+      h('div', { class: 'home-metric' }, h('span', { class: 'metric-num' }, String(totalWins)), h('span', { class: 'metric-label' }, 'Recorded wins')),
+      h('div', { class: 'home-metric' }, h('span', { class: 'metric-num' }, String(totalGoals)), h('span', { class: 'metric-label' }, 'Goals recorded')),
+      h('div', { class: 'home-metric' }, h('span', { class: 'metric-num' }, String(S.wins.length)), h('span', { class: 'metric-label' }, 'Performance entries')));
+    var weekly = h('section', { class: 'home-panel' }, h('h3', null, '🏅 Player of the Week'), h('p', { class: 'muted small' }, rangeLabel('week', 0)));
+    if (top) weekly.append(h('div', { class: 'home-player' }, avatar(top.p, 58), h('div', { class: 'home-player-info' }, h('strong', null, top.p.name), h('small', null, top.wins + ' wins · ' + top.goals + ' goals'), h('small', null, 'Based on recorded weekly performance')), h('button', { class: 'btn sm ghost', onclick: function () { openSheet('profile', top.id); } }, 'Profile')));
+    else weekly.append(h('div', { class: 'home-empty' }, 'এই সপ্তাহে এখনো কোনো পারফরম্যান্স রেকর্ড নেই। ম্যাচের তথ্য যোগ হলে এখানে সেরা খেলোয়াড় দেখা যাবে।'));
+    var leaders = h('section', { class: 'home-panel' }, h('h3', null, '⚡ Power Rankings'), h('p', { class: 'muted small' }, 'Overall rating calculated from recorded performance.'));
+    if (power.length) power.forEach(function (x, i) {
+      leaders.append(h('div', { class: 'power-row' }, h('span', { class: 'power-rank' }, String(i+1).padStart(2,'0')), h('div', { class: 'home-player-info' }, h('strong', null, x.p.name), h('span', { class: 'power-note' }, x.wins + ' wins · ' + x.goals + ' goals')), h('span', { class: 'power-score' }, String(ratingFor(x.id)))));
+    }); else leaders.append(h('div', { class: 'home-empty' }, 'র‍্যাঙ্কিং তৈরি করতে খেলোয়াড় ও ম্যাচের রেকর্ড প্রয়োজন।'));
+    var sections = h('div', { class: 'home-two' }, weekly, leaders);
+    var q = h('section', { class: 'stack' }, h('div', { class: 'home-section-head' }, h('h2', null, 'Explore SNB'), h('span', { class: 'muted small' }, 'QUICK ACCESS')));
+    var quick = h('div', { class: 'quick-grid' });
+    [
+      ['🏆','Leaderboards','Weekly, monthly and all-time stats','board'],
+      ['👥','Player Directory','Find players and view profiles','players'],
+      ['⭐','Dream XI','Auto-selected best performers','hall'],
+      ['📚','Hall of Fame','Past weekly and monthly leaders','hall'],
+      ['📸','Club Moments','Community highlights and photos','moments'],
+      ['🎮','Community Zone','Games and interactive features','fun']
+    ].forEach(function (x) { quick.append(h('button', { class: 'quick-card', onclick: function () { goTab(x[3]); } }, h('span', { class: 'quick-icon' }, x[0]), h('strong', null, x[1]), h('small', null, x[2]))); });
+    q.append(quick);
+    return h('div', { class: 'stack' }, heroBox, metrics, sections, q, h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
+  }
+  function powerView() {
+    var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
+    all.sort(function (a,b) { return ratingFor(b.id)-ratingFor(a.id) || b.wins-a.wins || b.goals-a.goals || (a.p.name||'').localeCompare(b.p.name||'', 'bn'); });
+    var root = h('div', { class: 'stack' }, h('section', { class: 'home-hero' }, h('div', { class: 'home-kicker' }, 'SNB PLAYER INDEX'), h('h2', null, 'POWER RANKINGS'), h('p', null, 'An overall performance index calculated from the records currently available on SNB. Ratings are indicative, not official eFootball ratings.')));
+    if (!all.length) { root.append(h('div', { class: 'home-empty' }, 'এখনো পর্যাপ্ত ম্যাচ রেকর্ড নেই। ম্যাচের তথ্য যোগ হলে Power Rankings এখানে তৈরি হবে।')); return root; }
+    var list = h('section', { class: 'card list' }, h('div', { class: 'lhead', 'aria-hidden': 'true' }, h('span', null, '#'), h('span'), h('span', null, 'প্লেয়ার'), h('span', null, 'জয়'), h('span', null, 'ড্র'), h('span', null, 'হার'), h('span', null, 'গোল')));
+    all.forEach(function (x, i) {
+      var bar = h('div', { class: 'bar' }, h('i')); bar.firstChild.style.width = ratingFor(x.id) + '%';
+      list.append(h('button', { class: 'row' + (i===0?' first':'') + (i<3?' m'+(i+1):''), onclick: function () { openSheet('profile', x.id); } }, h('span', { class: 'rank' }, String(i+1)), avatar(x.p), h('div', { class: 'nm' }, h('strong', null, x.p.name), h('span', { class: 'power-note' }, 'SNB Rating ' + ratingFor(x.id)), bar), h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num mid' }, String(x.draws)), h('span', { class: 'num loss' }, String(x.losses)), h('span', { class: 'num dim' }, String(x.goals))));
+    });
+    root.append(list, h('p', { class: 'muted small' }, 'রেটিংটি ওয়েবসাইটের সংরক্ষিত রেকর্ড থেকে হিসাব করা হয়; এটি Konami-এর official player rating নয়।'));
+    return root;
+  }
+
   /* ---------- render ---------- */
   function renderView() {
     var v = $('#view');
@@ -3153,7 +3272,7 @@ body {
     if (!(S.loaded.p && S.loaded.w)) { v.append(h('p', { class: 'muted' }, 'লোড হচ্ছে…')); return; }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'board' ? viewBoard() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : viewPlayers());
+    v.append(S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
