@@ -466,6 +466,16 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
 .moment img { display: block; width: 100%; aspect-ratio: 4 / 3; height: auto; max-height: 520px; object-fit: cover; background: #0C1A22; }
 .moment .mbody { padding: 12px 14px 14px; }
 .moment.best { outline: 2px solid #E7C26A; }
+.dream .seg { margin: 6px 0; }
+.pitch { margin: 8px 0; padding: 14px 6px; border-radius: 18px; background: linear-gradient(180deg, #1E6B3E, #0F4A2A); border: 2px solid rgba(255,255,255,0.35); display: flex; flex-direction: column; gap: 14px; position: relative; }
+.pitch::before { content: ''; position: absolute; left: 6%; right: 6%; top: 50%; border-top: 2px solid rgba(255,255,255,0.25); }
+.prow { display: flex; justify-content: space-around; align-items: flex-start; position: relative; }
+.pl { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 25%; min-width: 0; background: none; border: 0; padding: 0; color: #fff; font: inherit; cursor: pointer; }
+.pl .pn { font-size: 12px; font-weight: 700; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+.pl .ps { font-size: 11px; color: #F4D88A; font-weight: 700; }
+.pl .cap { position: absolute; top: -4px; right: 14%; z-index: 2; background: #E7C26A; color: #2A1E05; font-size: 11px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; }
+.pl.empty { opacity: 0.45; cursor: default; }
+.pl .ghost { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.15); display: grid; place-items: center; font-size: 22px; }
 .linkbox { margin-top: 12px; padding: 12px; border-radius: 12px; background: rgba(124,200,207,0.12); border: 1px solid var(--aqua); }
 .bestbadge { margin: 0; padding: 8px 14px; background: var(--grad-gold); color: #2A1E05; font-weight: 800; font-size: 14px; }
 .mcap { margin: 0 0 2px; font-weight: 700; font-size: 17px; }
@@ -924,13 +934,78 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   function hallLabel(per, e) {
     return per === 'month' ? fmtMonth.format(e.start) : fmtDay.format(e.start) + ' – ' + fmtDay.format(e.end - 1);
   }
+  /* ---------- dream XI (auto weekly) ---------- */
+  function dreamPick(per) {
+    var out = [], mode = per === 'all' ? 'all' : 'wk';
+    if (mode === 'all') {
+      S.players.forEach(function (p, id) {
+        var a = allStats(id); if (!a.matches) return;
+        out.push({ id: id, p: p, wins: a.wins, goals: a.goals, matches: a.matches, score: ratingFor(id) * 100 + a.wins + a.goals * 0.01, rating: ratingFor(id) });
+      });
+    } else {
+      var rg = range('week', per === 'last' ? -1 : 0), m = {};
+      S.wins.forEach(function (w) {
+        if (w.ts < rg.start || w.ts >= rg.end) return;
+        var a = m[w.playerId] || (m[w.playerId] = { wins: 0, draws: 0, losses: 0, goals: 0 });
+        if (w.type === 'draw') a.draws++; else if (w.type === 'loss') a.losses++; else a.wins++;
+        a.goals += (w.goals || 0);
+      });
+      Object.keys(m).forEach(function (id) {
+        var p = S.players.get(id); if (!p) return; var a = m[id];
+        var sc = a.wins * 3 + a.draws + a.goals * 0.8 - a.losses * 0.3;
+        out.push({ id: id, p: p, wins: a.wins, goals: a.goals, matches: a.wins + a.draws + a.losses, score: sc, rating: Math.max(60, Math.min(99, Math.round(62 + sc * 2.2))) });
+      });
+    }
+    out.sort(function (a, b) { return b.score - a.score || b.goals - a.goals || (a.p.name || '').localeCompare(b.p.name || '', 'bn'); });
+    var top = out.slice(0, 11);
+    if (top.length) top[0].cap = true;
+    var byG = top.slice().sort(function (a, b) { return b.goals - a.goals || b.score - a.score; });
+    var lines = { fw: [], mf: [], df: [], gk: [] };
+    byG.forEach(function (x, i) { (i < 3 ? lines.fw : i < 6 ? lines.mf : i < 10 ? lines.df : lines.gk).push(x); });
+    return { total: out.length, lines: lines, top: top, label: per === 'all' ? 'ALL TIME' : rangeLabelEn('week', per === 'last' ? -1 : 0), bn: per === 'all' ? 'সর্বকালের সেরা' : rangeLabel('week', per === 'last' ? -1 : 0) };
+  }
+  function dreamStat(x, per) { return per === 'all' ? 'OVR ' + x.rating : x.wins + 'জ · ' + x.goals + 'গো'; }
+  function dreamView() {
+    var per = S.dreamPer || 'week', d = dreamPick(per);
+    var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'ড্রিম ইলেভেন' },
+      [['week', 'এই সপ্তাহ'], ['last', 'গত সপ্তাহ'], ['all', 'সর্বকালের']].map(function (x) {
+        return h('button', { 'aria-pressed': per === x[0] ? 'true' : 'false', onclick: function () { S.dreamPer = x[0]; renderView(); } }, x[1]);
+      }));
+    var card = h('section', { class: 'card panel dream' },
+      h('h2', null, '⭐ ড্রিম ইলেভেন'),
+      h('p', { class: 'muted small' }, 'সেরা পারফরমারদের নিয়ে নিজে থেকেই তৈরি হয়। প্রতি সপ্তাহে আপডেট হয়, কাউকে কিছু করতে হয় না।'),
+      seg, h('p', { class: 'muted small' }, d.bn));
+    if (!d.total) { card.append(h('p', { class: 'notice' }, per === 'all' ? 'এখনো কোনো ম্যাচ লেখা হয়নি।' : 'এই সপ্তাহে এখনো কোনো ম্যাচ লেখা হয়নি। ম্যাচ যোগ হলেই দল বানানো শুরু হবে।')); return card; }
+    var pitch = h('div', { class: 'pitch' });
+    [['fw', 3], ['mf', 3], ['df', 4], ['gk', 1]].forEach(function (ln) {
+      var row = h('div', { class: 'prow' }), arr = d.lines[ln[0]];
+      for (var i = 0; i < ln[1]; i++) {
+        var x = arr[i];
+        if (!x) { row.append(h('div', { class: 'pl empty' }, h('span', { class: 'ghost' }, '?'), h('span', { class: 'pn' }, '—'))); continue; }
+        row.append(h('button', { class: 'pl', onclick: (function (id) { return function () { openSheet('profile', id); }; })(x.id) },
+          x.cap ? h('span', { class: 'cap' }, 'C') : null, avatar(x.p, 52), h('span', { class: 'pn' }, x.p.name), h('span', { class: 'ps' }, dreamStat(x, per))));
+      }
+      pitch.append(row);
+    });
+    card.append(pitch, h('p', { class: 'muted small' }, 'লাইনআপ ৪-৩-৩। বেশি গোল যাদের তারা সামনে, C = সেরা পারফরমার (ক্যাপ্টেন)।'),
+      h('button', { class: 'btn lime block', onclick: function () { openDreamCard(per); } }, '🖼️ শেয়ার কার্ড বানান'));
+    return card;
+  }
+  function openDreamCard(per) {
+    var d = dreamPick(per), pos = { fw: 'FW', mf: 'MF', df: 'DF', gk: 'GK' }, rows = [];
+    ['fw', 'mf', 'df', 'gk'].forEach(function (k) { rows.push(d.lines[k].map(function (x) { return { name: x.p.name, photo: x.p.photo || null, stat: dreamStat(x, per), cap: !!x.cap }; })); });
+    S.card = { leaders: [], kind: 'dream', rows: rows, idx: 0, fmt: 'post', title: 'DREAM XI', rangeTxt: d.label, key: 'dream-' + per + '-' + dateStr(new Date()), blob: null, url: null, loading: false, err: false };
+    S.sheet = { mode: 'card', id: null };
+    renderSheet(); $('#scrim').hidden = false; buildCard();
+  }
+
   function viewHall() {
     var per = S.hallPer, hall = buildHall(), list = hall[per];
     var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'সময়' });
     [['week', 'সপ্তাহ'], ['month', 'মাস']].forEach(function (x) {
       seg.append(h('button', { 'aria-pressed': per === x[0] ? 'true' : 'false', onclick: function () { S.hallPer = x[0]; S.hallMore = false; renderView(); } }, x[1]));
     });
-    var root = h('div', { class: 'stack' }, h('div', { class: 'periodbar' }, seg));
+    var root = h('div', { class: 'stack' }, dreamView(), h('div', { class: 'periodbar' }, seg));
     if (!list.length) {
       root.append(h('div', { class: 'card emptybox' },
         h('h2', null, 'এখনো কোনো সেরা বাছাই হয়নি'),
@@ -2089,8 +2164,11 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
   }
   async function saveMoment() {
     var m = S.mom; if (!m.img || m.busy) return;
+    var lp = 0; try { lp = +localStorage.getItem('nb-lastpost') || 0; } catch (e0) { /* ignore */ }
+    if (!S.canWrite && Date.now() - lp < 60000) { toast('একটু অপেক্ষা করুন, ১ মিনিট পর আবার পোস্ট করা যাবে।'); return; }
     m.busy = true; renderView();
-    try { var cap = String(m.cap || '').trim().slice(0, 80); var ref = await S.db.collection('moments').add({ img: m.img, cap: cap, ts: Date.now() }); m.img = null; m.cap = ''; m.open = false; m.link = { id: ref.id, cap: cap }; toast('ছবি যোগ হয়েছে 📸'); }
+    try { var cap = String(m.cap || '').trim().slice(0, 80); var by = String(pname() || '').trim().slice(0, 24); var ref = await S.db.collection('moments').add({ img: m.img, cap: cap, ts: Date.now(), by: by, dev: devId() });
+      try { localStorage.setItem('nb-lastpost', String(Date.now())); } catch (e2) { /* ignore */ } m.img = null; m.cap = ''; m.open = false; m.link = { id: ref.id, cap: cap }; toast('ছবি যোগ হয়েছে 📸'); }
     catch (e) { console.error(e); toast(writeFail(e)); }
     m.busy = false; renderView();
   }
@@ -2124,21 +2202,22 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     listenFun();
     var m = S.mom, me = devId();
     var box = h('section', { class: 'card panel' }, h('h2', null, '📸 আজকের মুহূর্ত'),
-      h('p', { class: 'muted small' }, 'ম্যাচের সেরা ছবি। 🔥😂👏😍 দিয়ে রিঅ্যাক্ট করুন, সপ্তাহের সবচেয়ে বেশি রিঅ্যাকশন পাওয়া ছবি হবে "সেরা মুহূর্ত"। যেকোনো ছবির 🔗 বাটনে চাপলে সেই পোস্টের লিংক শেয়ার করা যাবে।'));
-    if (m.err) { box.append(h('p', { class: 'notice' }, 'ছবির ওয়াল এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
+      h('p', { class: 'muted small' }, 'ম্যাচের সেরা ছবি — যে কেউ পোস্ট করতে পারবে। 🔥😂👏😍 দিয়ে রিঅ্যাক্ট করুন, সপ্তাহের সবচেয়ে বেশি রিঅ্যাকশন পাওয়া ছবি হবে "সেরা মুহূর্ত"। যেকোনো ছবির 🔗 বাটনে চাপলে সেই পোস্টের লিংক শেয়ার করা যাবে।'));
+    if (m.err) { box.append(h('p', { class: 'notice' }, 'ছবির ওয়াল এখনো চালু হয়নি বা পোস্ট করার অনুমতি নেই। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
     if (m.link) {
       var lk = m.link;
       box.append(h('div', { class: 'linkbox' }, h('strong', null, '✅ পোস্ট হয়ে গেছে! লিংক তৈরি:'), h('p', { class: 'small', style: 'word-break:break-all;margin:6px 0' }, momLink(lk.id)),
         h('div', { class: 'btnrow' }, h('button', { class: 'btn', onclick: function () { shareMoment(lk.id, lk.cap); } }, '🔗 লিংক শেয়ার করুন'),
           h('button', { class: 'btn ghost', onclick: function () { m.link = null; renderView(); } }, 'ঠিক আছে'))));
     }
-    if (S.canWrite) {
+    {
       if (!m.open) box.append(h('button', { class: 'btn ghost block', onclick: function () { m.open = true; renderView(); } }, '➕ নতুন ছবি যোগ করুন'));
       else {
         var fin = h('input', { type: 'file', accept: 'image/*', class: 'vh', id: 'momIn', onchange: async function (ev) { var f = ev.target.files && ev.target.files[0]; if (!f) return; try { m.img = await fitImg(f, 1000); renderView(); } catch (e) { toast('ছবিটি পড়া যায়নি।'); } } });
         var cin = h('input', { type: 'text', maxlength: 80, placeholder: 'ক্যাপশন (যেমন: Abid-র সেই গোল!)', value: m.cap, class: 'sel' }); cin.oninput = function () { m.cap = cin.value; };
+        var nin2 = h('input', { type: 'text', maxlength: 24, placeholder: 'তোমার নাম (ঐচ্ছিক)', value: pname(), class: 'sel' }); nin2.oninput = function () { S.pname = nin2.value; try { localStorage.setItem('nb-pname', nin2.value); } catch (e) { /* ignore */ } };
         box.append(fin, m.img ? h('img', { src: m.img, class: 'momprev', alt: '' }) : null,
-          h('label', { class: 'btn ghost block', for: 'momIn' }, m.img ? '🔄 অন্য ছবি' : '🖼️ ছবি বাছুন'), cin,
+          h('label', { class: 'btn ghost block', for: 'momIn' }, m.img ? '🔄 অন্য ছবি' : '🖼️ ছবি বাছুন'), cin, nin2,
           h('div', { class: 'btnrow' }, h('button', { class: 'btn', disabled: !m.img || m.busy, onclick: saveMoment }, m.busy ? 'অপেক্ষা করুন...' : 'পোস্ট করুন'), h('button', { class: 'btn ghost', onclick: function () { m.open = false; m.img = null; renderView(); } }, 'বাতিল')));
       }
     }
@@ -2156,7 +2235,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
       return h('article', { class: 'card moment' + (x.id === bestId ? ' best' : ''), id: 'mom-' + x.id },
         focused ? h('p', { class: 'bestbadge' }, '📌 শেয়ার করা পোস্ট') : (x.id === bestId ? h('p', { class: 'bestbadge' }, '🏅 সপ্তাহের সেরা মুহূর্ত') : null),
         h('img', { src: x.img, alt: x.cap || 'ম্যাচের ছবি', loading: focused ? 'eager' : 'lazy' }),
-        h('div', { class: 'mbody' }, x.cap ? h('p', { class: 'mcap' }, x.cap) : null, h('p', { class: 'muted small' }, fmtDay.format(x.ts)), row,
+        h('div', { class: 'mbody' }, x.cap ? h('p', { class: 'mcap' }, x.cap) : null, h('p', { class: 'muted small' }, (x.by ? '📷 ' + x.by + ' · ' : '') + fmtDay.format(x.ts)), row,
           S.canWrite ? h('button', { class: 'link-btn', onclick: function () { if (window.confirm('এই ছবিটা মুছে ফেলবেন?')) S.db.doc('moments/' + x.id).delete().catch(function (e) { toast(writeFail(e)); }); } }, '🗑️ মুছুন') : null));
     }
     if (m.focus) {
@@ -2662,7 +2741,7 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
     var board = card.kind === 'board';
     cardBg(x, W, H, story ? 980 : 700, card.kind);
 
-    var isF = card.kind === 'fifa', logoSize = board ? (story ? 280 : 200) : isF ? (story ? 190 : 150) : (story ? 300 : 230), logoY = story ? (isF ? 285 + 20 : 215) : (isF ? 36 : 34);
+    var isF = card.kind === 'fifa', logoSize = (board || card.kind === 'dream') ? (story ? 280 : 200) : isF ? (story ? 190 : 150) : (story ? 300 : 230), logoY = story ? (isF ? 285 + 20 : 215) : (isF ? 36 : 34);
     try {
       var logo = await loadImg(LOGO);
       var lcx = W / 2, lcy = logoY + logoSize / 2, lr = logoSize * 0.58;
@@ -2705,6 +2784,45 @@ input:focus { outline: none; border-color: var(--aqua); box-shadow: 0 0 0 3px rg
         x.fillStyle = '#F4D88A'; x.fillText(String(r.draws), cxs[1], ry + RH / 2 + (story ? 30 : 25));
         x.fillStyle = '#A9EEF4'; x.fillText(String(r.goals), cxs[2], ry + RH / 2 + (story ? 30 : 25));
       });
+      footer(x, W, story ? 1742 : H - 40, NUM);
+    } else if (card.kind === 'dream') {
+      var dtY = story ? 600 : 292, drY = story ? 690 : 392;
+      ribbon(x, W, dtY, card.title, NUM, story ? 56 : 50);
+      x.textAlign = 'center'; x.fillStyle = '#ECE8D3'; if ('letterSpacing' in x) x.letterSpacing = '4px';
+      fitFont(x, card.rangeTxt, 900, story ? 44 : 38, 600, NUM); x.fillText(card.rangeTxt, W / 2, drY);
+      if ('letterSpacing' in x) x.letterSpacing = '0px';
+      var py0 = story ? 750 : 432, py1 = story ? 1690 : 1272, px0 = 54, px1 = W - 54, ph = py1 - py0;
+      x.save(); rr(x, px0, py0, px1 - px0, ph, 34); x.clip();
+      var pgd = x.createLinearGradient(0, py0, 0, py1); pgd.addColorStop(0, '#1E6B3E'); pgd.addColorStop(1, '#0F4A2A'); x.fillStyle = pgd; x.fillRect(px0, py0, px1 - px0, ph);
+      for (var sI = 0; sI < 8; sI++) { if (sI % 2) { x.fillStyle = 'rgba(255,255,255,0.045)'; x.fillRect(px0, py0 + sI * ph / 8, px1 - px0, ph / 8); } }
+      x.restore();
+      x.save(); x.strokeStyle = 'rgba(255,255,255,0.45)'; x.lineWidth = 4;
+      rr(x, px0 + 24, py0 + 24, px1 - px0 - 48, ph - 48, 20); x.stroke();
+      x.beginPath(); x.moveTo(px0 + 24, py0 + ph / 2); x.lineTo(px1 - 24, py0 + ph / 2); x.stroke();
+      x.beginPath(); x.arc(W / 2, py0 + ph / 2, 90, 0, 7); x.stroke();
+      x.strokeRect(W / 2 - 190, py0 + 24, 380, 120); x.strokeRect(W / 2 - 190, py1 - 144, 380, 120);
+      x.restore();
+      var fr = [0.13, 0.38, 0.64, 0.88], cnt = [3, 3, 4, 1], rad = story ? 70 : 60;
+      var allP = []; card.rows.forEach(function (ln) { ln.forEach(function (q) { allP.push(q); }); });
+      var pimgs = await Promise.all(allP.map(function (q) { return q.photo ? loadImg(q.photo).catch(function () { return null; }) : Promise.resolve(null); }));
+      var pi = 0;
+      for (var li = 0; li < 4; li++) {
+        var ln = card.rows[li], cy = py0 + ph * fr[li];
+        for (var ci = 0; ci < cnt[li]; ci++) {
+          var cxp = px0 + (px1 - px0) * (ci + 1) / (cnt[li] + 1), q = ln[ci];
+          if (!q) { x.beginPath(); x.arc(cxp, cy, rad, 0, 7); x.fillStyle = 'rgba(255,255,255,0.12)'; x.fill(); continue; }
+          var im = pimgs[pi++];
+          x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 22; x.shadowOffsetY = 8; x.beginPath(); x.arc(cxp, cy, rad + 5, 0, 7); x.fillStyle = q.cap ? '#E7C26A' : '#F2F5F7'; x.fill(); x.restore();
+          x.save(); x.beginPath(); x.arc(cxp, cy, rad, 0, 7); x.clip();
+          if (im) x.drawImage(im, cxp - rad, cy - rad, rad * 2, rad * 2);
+          else { x.fillStyle = '#2B5666'; x.fillRect(cxp - rad, cy - rad, rad * 2, rad * 2); x.fillStyle = '#BFF1F6'; x.font = '800 ' + Math.round(rad * 1.1) + 'px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(q.name), cxp, cy + 4); x.textBaseline = 'alphabetic'; }
+          x.restore();
+          if (q.cap) { x.beginPath(); x.arc(cxp + rad * 0.8, cy - rad * 0.8, 20, 0, 7); x.fillStyle = '#E7C26A'; x.fill(); x.fillStyle = '#2A1E05'; x.font = '800 24px ' + NUM; x.textAlign = 'center'; x.fillText('C', cxp + rad * 0.8, cy - rad * 0.8 + 8); }
+          var nm = String(q.name).split(' ').slice(0, 2).join(' ');
+          x.textAlign = 'center'; x.fillStyle = '#FFFFFF'; fitFont(x, nm, 250, story ? 36 : 32, 800, BN); x.fillText(nm, cxp, cy + rad + (story ? 44 : 40));
+          x.fillStyle = '#F4D88A'; x.font = '700 ' + (story ? 28 : 25) + 'px ' + NUM; x.fillText(q.stat, cxp, cy + rad + (story ? 78 : 72));
+        }
+      }
       footer(x, W, story ? 1742 : H - 40, NUM);
     } else if (card.kind === 'fifa') {
       var F = card.fifa, dy = story ? 285 : 0, TR = tierOf(F.rating);
