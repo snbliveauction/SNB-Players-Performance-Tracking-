@@ -774,6 +774,45 @@ body {
 .hp-chart svg{display:block;width:100%;height:auto}
 .hp-share{width:100%;padding:15px 18px;font-size:17px;font-weight:800;border-radius:16px;background:linear-gradient(135deg,#C5F36A,#F4C96B);color:#1d2a05;border:0;box-shadow:0 10px 26px rgba(197,243,106,.25)}
 @media(prefers-reduced-motion:reduce){.home-hero:before,.hp-shine:after,.hp-live i,.hp-crown{animation:none}}
+
+/* ===== Round 2 ===== */
+.hp-feat-mid{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;padding:4px 0;background:none;border:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.hp-feat-info{display:flex;flex-direction:column;min-width:0}
+.hp-feat-info strong{font-size:18px;overflow-wrap:anywhere}
+.hp-score{display:flex;align-items:baseline;gap:8px;font:800 52px/1 var(--f-num);color:#F4C96B}
+.hp-score small{font:600 15px var(--f-display);color:var(--muted)}
+.hp-pod-col{background:none;border:0;padding:0;color:inherit;font:inherit}
+.hp-pod-col strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em;line-height:1.3;font-size:13px}
+.hp-pod-col small{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home-hero .hp-lead{display:flex;align-items:center;gap:16px;margin:16px 0 2px;flex-wrap:wrap}
+.hp-lead-faces{display:flex}
+.hp-lead-faces .hp-ring+.hp-ring{margin-left:-12px}
+.hp-lead-info{min-width:0;flex:1 1 200px}
+.home-hero .hp-lead h2{margin:0;max-width:none;font-size:clamp(26px,5.5vw,42px);line-height:1.1;text-transform:none;overflow-wrap:anywhere}
+.hp-lead-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hp-lead-stats span{padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);font-size:13px;color:#d6e0e8}
+.hp-lead-stats b{color:var(--gold);font-family:var(--f-num);font-size:15px}
+.home-kicker{padding-right:76px}
+.pr-btn{width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;font:inherit;cursor:pointer}
+.sk{border-radius:16px;background:linear-gradient(100deg,rgba(255,255,255,.04) 30%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.04) 70%) 0 0/200% 100%;animation:hpSk 1.3s linear infinite}
+.sk-hero{height:210px;border-radius:24px}.sk-card{height:92px}.sk-wide{height:150px;border-radius:20px}
+.sk-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@keyframes hpSk{to{background-position:-200% 0}}
+.bnav{display:none}
+@media(max-width:680px){
+ .tabs{display:none}
+ body{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+ .sk-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;gap:2px;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(12,18,26,.94);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(231,194,106,.22)}
+ .bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;padding:7px 2px 6px;border:0;border-radius:12px;background:none;color:var(--muted);font:600 11px/1.2 var(--f-display)}
+ .bnav .bi{font-size:21px;line-height:1}
+ .bnav button[aria-current="page"]{color:var(--gold);background:rgba(231,194,106,.12)}
+ .bmore{position:fixed;right:10px;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:16;display:flex;flex-direction:column;min-width:210px;padding:6px;border-radius:16px;background:#16202b;border:1px solid var(--line-2);box-shadow:0 18px 44px rgba(0,0,0,.55)}
+ .bmore button{display:flex;gap:10px;align-items:center;padding:12px 14px;border:0;border-radius:11px;background:none;color:var(--ink);font:600 15px var(--f-display);text-align:left}
+ .bmore button[aria-current="page"]{background:rgba(231,194,106,.12);color:var(--gold)}
+ .toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+}
+@media(prefers-reduced-motion:reduce){.sk{animation:none}}
 </style>
 </head>
 <body>
@@ -1076,6 +1115,7 @@ body {
     }
   }
   function renderTabs() {
+    hpBottomNav();
     var t = $('#tabs');
     t.textContent = '';
     var tabs = [['home', 'হোম'], ['tournament', '🏆 টুর্নামেন্ট'], ['board', 'লিডারবোর্ড']];
@@ -1758,9 +1798,9 @@ body {
     if (m === 'g') chStart(); else if (m === 'p') { S.game.mode = 'pzpick'; renderView(); } else if (m === 'm') mmStart(); else if (m === 's') { S.game.mode = 'shmenu'; renderView(); } else if (m === 'h') sqStart(); else qzStart();
   }
   function scoreBoard() {
-    var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, m: x.m || 0, s: x.s || 0, h: x.h || 0, t: (x.g || 0) + (x.q || 0) + (x.m || 0) + (x.s || 0) + (x.h || 0) }; }).sort(function (a, b) { return b.t - a.t; });
+    var rows = S.scores.map(function (x) { return { id: x.id, name: x.name || '?', g: x.g || 0, p: x.p || 0, q: x.q || 0, m: x.m || 0, s: x.s || 0, h: x.h || 0, t: (x.g || 0) + (x.s || 0) }; }).filter(function (r) { return r.t > 0; }).sort(function (a, b) { return b.t - a.t; });
     var me = devId(), box = h('section', { class: 'card panel', id: 'scoreboard' }, h('h2', null, '🏆 টপ স্কোরার'),
-      h('p', { class: 'muted small' }, 'সব গেমের সেরা স্কোরের যোগফল। সর্বোচ্চ ৫০০০।'));
+      h('p', { class: 'muted small' }, 'দুই গেমের সেরা স্কোরের যোগফল। সর্বোচ্চ ২০০০।'));
     if (S.scoreErr) { box.append(h('p', { class: 'notice' }, 'লিডারবোর্ড এখনো চালু হয়নি। অ্যাডমিন Firestore rules আপডেট করলে চালু হবে।')); return box; }
     if (!rows.length) { box.append(h('p', { class: 'muted' }, 'এখনো কেউ খেলেনি। প্রথম হোন! 🚀')); return box; }
     var list = h('div', { class: 'lboard' }), myPos = -1;
@@ -1768,7 +1808,7 @@ body {
     rows.slice(0, 10).forEach(function (r, i) {
       var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : String(i + 1);
       list.append(h('div', { class: 'lrow' + (r.id === me ? ' mine' : '') }, h('span', { class: 'lrk' }, medal),
-        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · 🧠 ' + r.q + ' · 🃏 ' + r.m + ' · ⚽ ' + r.s + ' · 🔢 ' + r.h)), h('span', { class: 'ltot' }, String(r.t))));
+        h('div', { class: 'lmid' }, h('b', null, r.name), h('span', { class: 'muted small' }, '🕵️ ' + r.g + ' · ⚽ ' + r.s)), h('span', { class: 'ltot' }, String(r.t))));
     });
     box.append(list);
     if (myPos >= 10) box.append(h('p', { class: 'small' }, 'আপনার অবস্থান: ' + (myPos + 1) + ' (' + rows[myPos].t + ' পয়েন্ট)'));
@@ -2295,15 +2335,15 @@ body {
     if (G.mode === 'shmenu') { root.append(shMenu()); return root; }
     if (G.mode === 'sq') { root.append(viewSeq()); return root; }
     if (G.mode === 'res' && G.res) { root.append(resultBox(), scoreBoard()); return root; }
-    var hub = h('section', { class: 'card panel' }, h('h2', null, '🎮 গেম জোন'), h('p', { class: 'muted small' }, 'পাঁচটা গেম, প্রতিটায় সর্বোচ্চ ১০০০। সব গেমের সেরা স্কোর মিলিয়ে লিডারবোর্ডে টপ স্কোরার!'));
+    var hub = h('section', { class: 'card panel' }, h('h2', null, '🎮 গেম জোন'), h('p', { class: 'muted small' }, 'দুইটা গেম, প্রতিটায় সর্বোচ্চ ১০০০। দুই গেমের সেরা স্কোর মিলিয়ে লিডারবোর্ডে টপ স্কোরার!'));
     var okG = S.players.size >= 4 && withPhoto >= 1, okQ = S.players.size >= 4;
     var modes = h('div', { class: 'gmodes' });
-    ['g', 'q', 'm', 's', 'h'].forEach(function (m) {
+    ['g', 's'].forEach(function (m) {
       var dis = (m === 'g' && !okG) || (m === 'p' && !withPhoto) || ((m === 'q' || m === 'm') && !okQ) || (m === 'h' && S.players.size < 4);
       modes.append(h('button', { class: 'gm', disabled: dis, onclick: function () { startMode(m); } }, h('span', { class: 'gme' }, GM[m][0]), h('span', { class: 'gmt' }, GM[m][1]), h('span', { class: 'gmd' }, GM[m][2]), h('span', { class: 'gmb' }, '🏅 সেরা: ' + bestOf(m))));
     });
     hub.append(modes);
-    if (!okG) hub.append(h('p', { class: 'muted small' }, 'কিছু গেমের জন্য অন্তত ৪ জন প্লেয়ার আর কয়েকজনের ছবি লাগবে।'));
+    if (!okG) hub.append(h('p', { class: 'muted small' }, 'প্লেয়ার চিনো গেমের জন্য অন্তত ৪ জন প্লেয়ার আর কয়েকজনের ছবি লাগবে।'));
     root.append(hub, scoreBoard());
     return root;
   }
@@ -3304,9 +3344,9 @@ body {
     S.wins.forEach(function (w) { var k = hpWeekIdx(w.ts); if (k >= 0 && k < 8) played[7 - k][w.playerId] = 1; });
     var defs = [
       ['👥', 'Registered players', S.players.size, '#F4C96B', played.map(function (o) { return Object.keys(o).length; })],
-      ['🏆', 'Recorded wins', tw, '#C5F36A', hpSeries(function (w) { return w.type === 'draw' || w.type === 'loss' ? 0 : 1; })],
-      ['⚽', 'Goals recorded', tg, '#67D7E8', hpSeries(function (w) { return Number(w.goals || 0); })],
-      ['📊', 'Performance entries', S.wins.length, '#7C5CFF', hpSeries(function () { return 1; })]
+      ['🏆', 'Recorded wins', tw, '#C5F36A', hpCum(function (w) { return w.type === 'draw' || w.type === 'loss' ? 0 : 1; })],
+      ['⚽', 'Goals recorded', tg, '#67D7E8', hpCum(function (w) { return Number(w.goals || 0); })],
+      ['📊', 'Performance entries', S.wins.length, '#7C5CFF', hpCum(function () { return 1; })]
     ];
     var done = !!S._hpCounted;
     var box = h('div', { class: 'home-metrics' });
@@ -3337,35 +3377,13 @@ body {
     nums.forEach(function (n) { n.parentNode.classList.add('show'); });
     requestAnimationFrame(step);
   }
-  function hpFeatured() {
-    var r = range('week', 0), best = null, bs = -1;
-    S.wins.forEach(function (w) {
-      if (w.ts < r.start || w.ts >= r.end || w.type === 'draw' || w.type === 'loss') return;
-      var p = S.players.get(w.playerId); if (!p) return;
-      var sc = Number(w.goals || 0) * 2 + (p.photo ? 1 : 0);
-      if (sc > bs || (sc === bs && w.ts > best.ts)) { bs = sc; best = w; }
-    });
-    if (!best) return null;
-    var p = S.players.get(best.playerId), g = Number(best.goals || 0), t = titleFor(best.playerId), tags = [];
-    if (g >= 3) tags.push('⚽ হ্যাটট্রিক');
-    tags.push('🏆 ' + g + ' গোল');
-    tags.push(t.e + ' ' + t.n);
-    return h('section', { class: 'hp-feat' },
-      h('div', { class: 'hp-feat-top' }, h('span', { class: 'hp-badge' }, '🔥 MATCH OF THE WEEK'),
-        h('small', null, '📅 ' + new Date(best.ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))),
-      h('div', { class: 'hp-feat-mid', onclick: function () { openSheet('profile', best.playerId); } },
-        h('div', { class: 'hp-side' }, avatar(p, 58), h('strong', null, p.name)),
-        h('div', { class: 'hp-score' }, g + ' – ?'),
-        h('div', { class: 'hp-side' }, h('div', { class: 'hp-q' }, '?'), h('strong', { style: 'color:var(--muted)' }, 'প্রতিপক্ষ'))),
-      h('div', { class: 'hp-tags' }, tags.map(function (x) { return h('span', { class: 'hp-tag' }, x); })));
-  }
   function hpPodium(all) {
     var top = all.slice().sort(function (a, b) { return ratingFor(b.id) - ratingFor(a.id) || b.wins - a.wins || b.goals - a.goals; }).slice(0, 3);
     if (top.length < 3) return null;
     var wrap = h('section', { class: 'hp-pod', 'aria-label': 'Top 3 প্লেয়ার' });
     [1, 0, 2].forEach(function (i) {
       var x = top[i], t = titleFor(x.id);
-      wrap.append(h('div', { class: 'hp-pod-col r' + (i + 1), onclick: function () { openSheet('profile', x.id); } },
+      wrap.append(h('button', { type: 'button', class: 'hp-pod-col r' + (i + 1), onclick: function () { openSheet('profile', x.id); } },
         i === 0 ? h('span', { class: 'hp-crown', 'aria-hidden': 'true' }, '👑') : null,
         avatar(x.p, 0), h('strong', null, x.p.name),
         h('span', { class: 'hp-pod-ovr' }, String(ratingFor(x.id)) + ' OVR'),
@@ -3434,6 +3452,76 @@ body {
     return h('div', null, h('h3', { class: 'h3' }, 'রেটিং ট্রেন্ড (৮ সপ্তাহ)'), d);
   }
 
+
+  /* ---------- round 2 ---------- */
+  function hpCum(fn) {
+    var wk = hpSeries(fn), acc = 0;
+    S.wins.forEach(function (w) { if (hpWeekIdx(w.ts) >= 8) acc += fn(w); });
+    return wk.map(function (x) { acc += x; return acc; });
+  }
+  function hpRingAv(p, size) {
+    var pid = null;
+    S.players.forEach(function (v, id) { if (v === p) pid = id; });
+    var tc = hpTierCol(pid ? ratingFor(pid) : 55);
+    return h('span', { class: 'hp-ring', style: '--rc:' + tc[0] + ';--rg:' + tc[1] + ';border-radius:' + Math.round(size * 0.26 + 3) + 'px' }, avatar(p, size));
+  }
+  function hpSkeleton() {
+    return h('div', { class: 'stack', 'aria-busy': 'true', 'aria-label': 'লোড হচ্ছে' },
+      h('div', { class: 'sk sk-hero' }),
+      h('div', { class: 'sk-grid' }, [1, 2, 3, 4].map(function () { return h('div', { class: 'sk sk-card' }); })),
+      h('div', { class: 'sk sk-wide' }), h('div', { class: 'sk sk-wide' }));
+  }
+  function hpCloseMore() { var m = document.getElementById('bmore'); if (m) m.remove(); }
+  function hpBottomNav() {
+    var nav = document.getElementById('bnav');
+    if (!nav) {
+      nav = h('nav', { id: 'bnav', class: 'bnav', 'aria-label': 'প্রধান মেনু' });
+      document.body.append(nav);
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('#bmore') && !e.target.closest('#bmoreBtn')) hpCloseMore();
+      });
+    }
+    nav.textContent = '';
+    var main = [['home', '🏠', 'হোম'], ['board', '🏆', 'র‍্যাঙ্কিং'], ['players', '👥', 'প্লেয়ার'], ['fun', '🎉', 'মজা']];
+    main.forEach(function (x) {
+      nav.append(h('button', { type: 'button', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); goTab(x[0]); } },
+        h('span', { class: 'bi', 'aria-hidden': 'true' }, x[1]), x[2]));
+    });
+    var inMain = main.some(function (x) { return x[0] === S.tab; });
+    nav.append(h('button', { type: 'button', id: 'bmoreBtn', 'aria-haspopup': 'true', 'aria-current': inMain ? null : 'page', onclick: function () {
+      if (document.getElementById('bmore')) { hpCloseMore(); return; }
+      var items = [['tournament', '🏆', 'টুর্নামেন্ট']];
+      if (S.canWrite) items.push(['add', '➕', 'জয় যোগ']);
+      items.push(['power', '⚡', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', '📚', 'হল অফ ফেম'], ['moments', '📸', 'মুহূর্ত']);
+      var box = h('div', { id: 'bmore', class: 'bmore', role: 'menu' });
+      items.forEach(function (x) {
+        box.append(h('button', { type: 'button', role: 'menuitem', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); goTab(x[0]); } }, h('span', { 'aria-hidden': 'true' }, x[1]), x[2]));
+      });
+      document.body.append(box);
+    } }, h('span', { class: 'bi', 'aria-hidden': 'true' }, '☰'), 'আরও'));
+  }
+  function hpFeatured() {
+    var r = range('week', 0), best = null, bs = -1;
+    S.wins.forEach(function (w) {
+      if (w.ts < r.start || w.ts >= r.end || w.type === 'draw' || w.type === 'loss') return;
+      var p = S.players.get(w.playerId); if (!p) return;
+      var sc = Number(w.goals || 0) * 2 + (p.photo ? 1 : 0);
+      if (sc > bs || (sc === bs && w.ts > best.ts)) { bs = sc; best = w; }
+    });
+    if (!best) return null;
+    var p = S.players.get(best.playerId), g = Number(best.goals || 0), t = titleFor(best.playerId), tags = [];
+    if (g >= 3) tags.push('⚽ হ্যাটট্রিক');
+    tags.push('🏆 ' + g + ' গোল');
+    tags.push(t.e + ' ' + t.n);
+    return h('section', { class: 'hp-feat' },
+      h('div', { class: 'hp-feat-top' }, h('span', { class: 'hp-badge' }, '🔥 MATCH OF THE WEEK'),
+        h('small', null, new Date(best.ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }))),
+      h('button', { type: 'button', class: 'hp-feat-mid', onclick: function () { openSheet('profile', best.playerId); } },
+        hpRingAv(p, 76),
+        h('span', { class: 'hp-feat-info' }, h('strong', null, p.name), h('span', { class: 'hp-score' }, String(g), h('small', null, 'গোল')))),
+      h('div', { class: 'hp-tags' }, tags.map(function (x) { return h('span', { class: 'hp-tag' }, x); })));
+  }
+
   function homeView() {
     var totalWins = 0, totalDraws = 0, totalLosses = 0, totalGoals = 0;
     S.wins.forEach(function (w) { totalGoals += Number(w.goals || 0); if (w.type === 'draw') totalDraws++; else if (w.type === 'loss') totalLosses++; else totalWins++; });
@@ -3448,10 +3536,30 @@ body {
         h('button', { class: 'btn lime', onclick: function () { goTab('board'); } }, 'View Rankings  →'),
         h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
         h('button', { class: 'btn ghost', onclick: function () { goTab('hall'); } }, 'Club Records')));
+    var hlead = top && (top.wins || top.draws) ? active.filter(function (r) { return r.wins === top.wins && r.draws === top.draws && r.goals === top.goals; }) : [];
+    if (hlead.length) {
+      var hfaces = h('div', { class: 'hp-lead-faces' });
+      hlead.slice(0, 3).forEach(function (r) { hfaces.append(hpRingAv(r.p, hlead.length === 1 ? 84 : 56)); });
+      heroBox = h('section', { class: 'home-hero' }, h('span', { class: 'hp-shine', 'aria-hidden': 'true' }), hpLive(),
+        h('div', { class: 'home-kicker' }, 'SYLHET NETBREAKERS • ' + (hlead.length > 1 ? 'যুগ্ম ' : '') + 'এই সপ্তাহের লিডার'),
+        h('div', { class: 'hp-lead' }, hfaces, h('div', { class: 'hp-lead-info' },
+          h('h2', null, hlead.map(function (r) { return r.p.name; }).join(' ও ')),
+          h('div', { class: 'hp-lead-stats' },
+            h('span', null, h('b', null, String(top.wins)), ' জয়'), h('span', null, h('b', null, String(top.draws)), ' ড্র'), h('span', null, h('b', null, String(top.goals)), ' গোল'), h('span', null, rangeLabel('week', 0))))),
+        h('div', { class: 'home-actions' },
+          h('button', { class: 'btn lime', onclick: function () { goTab('board'); } }, 'View Rankings  →'),
+          h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
+          h('button', { class: 'btn ghost', onclick: function () { goTab('hall'); } }, 'Club Records')));
+    }
     var metrics = hpMetrics(totalWins, totalGoals);
-    var weekly = h('section', { class: 'home-panel' }, h('h3', null, '🏅 Player of the Week'), h('p', { class: 'muted small' }, rangeLabel('week', 0)));
-    if (top) weekly.append(h('div', { class: 'home-player' }, avatar(top.p, 58), h('div', { class: 'home-player-info' }, h('strong', null, top.p.name), h('small', null, top.wins + ' wins · ' + top.goals + ' goals'), h('small', null, 'Based on recorded weekly performance')), h('button', { class: 'btn sm ghost', onclick: function () { openSheet('profile', top.id); } }, 'Profile')));
-    else weekly.append(h('div', { class: 'home-empty' }, 'এই সপ্তাহে এখনো কোনো পারফরম্যান্স রেকর্ড নেই। ম্যাচের তথ্য যোগ হলে এখানে সেরা খেলোয়াড় দেখা যাবে।'));
+    var weekly = h('section', { class: 'home-panel' }, h('h3', null, '🏅 এই সপ্তাহের টপ ৫'), h('p', { class: 'muted small' }, rangeLabel('week', 0)));
+    if (active.length) active.slice(0, 5).forEach(function (x, i) {
+      weekly.append(h('button', { type: 'button', class: 'power-row pr-btn', onclick: function () { openSheet('profile', x.id); } },
+        h('span', { class: 'power-rank' }, String(i + 1).padStart(2, '0')),
+        h('div', { class: 'home-player-info' }, h('strong', null, x.p.name), h('span', { class: 'power-note' }, x.wins + ' জয় · ' + (x.draws ? x.draws + ' ড্র · ' : '') + x.goals + ' গোল')),
+        h('span', { class: 'power-score' }, String(x.wins))));
+    });
+    else weekly.append(h('div', { class: 'home-empty' }, 'এই সপ্তাহে এখনো কোনো পারফরম্যান্স রেকর্ড নেই। ম্যাচের তথ্য যোগ হলে এখানে সেরা খেলোয়াড়রা দেখা যাবে।'));
     var leaders = h('section', { class: 'home-panel' }, h('h3', null, '⚡ Power Rankings'), h('p', { class: 'muted small' }, 'Overall rating calculated from recorded performance.'));
     if (power.length) power.forEach(function (x, i) {
       leaders.append(h('div', { class: 'power-row' }, h('span', { class: 'power-rank' }, String(i+1).padStart(2,'0')), h('div', { class: 'home-player-info' }, h('strong', null, x.p.name), h('span', { class: 'power-note' }, x.wins + ' wins · ' + x.goals + ' goals')), h('span', { class: 'power-score' }, String(ratingFor(x.id)))));
@@ -3508,7 +3616,7 @@ body {
       v.append(h('div', { class: 'notice' }, 'সাইটের সেটআপ শেষ হয়নি। public/config.js ফাইলে Firebase এর তথ্য বসিয়ে আবার deploy করুন।'));
       return;
     }
-    if (!(S.loaded.p && S.loaded.w)) { v.append(h('p', { class: 'muted' }, 'লোড হচ্ছে…')); return; }
+    if (!(S.loaded.p && S.loaded.w)) { v.append(hpSkeleton()); return; }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
     v.append(S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : viewPlayers());
