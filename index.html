@@ -840,6 +840,19 @@ body {
 @media(max-width:380px){.dream .pitch.pro .pl .ps{font-size:10px;padding:2px 5px}}
 
 /* ===== Admin panel ===== */
+.ac-strip{position:relative;overflow:hidden;padding:16px 14px 14px;border:1px solid rgba(244,201,107,.24);border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015))}
+.ac-strip:before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,#C5F36A,#F4C96B,#67D7E8)}
+.ac-strip-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.ac-strip-head h3{margin:4px 0 0;font:800 20px/1.1 var(--f-num);letter-spacing:.06em}
+.ac-more{background:none;border:0;color:var(--aqua);font:700 13px var(--f-num);letter-spacing:.06em;padding:6px 2px}
+.ac-row{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.ac-row::-webkit-scrollbar{display:none}
+.ac-mini{flex:0 0 auto;width:76px;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;color:var(--ink);padding:0}
+.ac-mini strong{font-size:12.5px;line-height:1.2;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-mini span:not(.hp-ring){font:700 9.5px/1 var(--f-num);letter-spacing:.12em;color:var(--gold);text-transform:uppercase;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ac-mv{position:absolute;left:6px;right:6px;bottom:6px;display:flex;justify-content:space-between}
+.ac-mv button{width:28px;height:24px;border-radius:8px;border:1px solid var(--line-2);background:rgba(0,0,0,.45);color:var(--ink);font-size:11px}
+.ac-card:has(.ac-mv){padding-bottom:36px}
 .ac-panel{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:16px;padding:22px 18px;border:1px solid rgba(244,201,107,.28);border-radius:22px;background:radial-gradient(ellipse at 50% 0%,rgba(244,201,107,.1),transparent 55%),linear-gradient(160deg,#172432,#0b121a 70%)}
 .ac-panel:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#C5F36A,#F4C96B,#67D7E8)}
 .ac-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
@@ -1166,6 +1179,7 @@ body {
     tabs.push(['power', 'পাওয়ার র‍্যাঙ্কিং']);
     tabs.push(['hall', 'হল অফ ফেম']);
     tabs.push(['moments', '📸 মুহূর্ত']);
+    tabs.push(['team', '👑 অ্যাডমিন']);
     tabs.push(['fun', '🎉 মজা']);
     tabs.forEach(function (x) {
       var b = h('button', {
@@ -3546,7 +3560,7 @@ body {
       if (document.getElementById('bmore')) { hpCloseMore(); return; }
       var items = [['tournament', '🏆', 'টুর্নামেন্ট']];
       if (S.canWrite) items.push(['add', '➕', 'জয় যোগ']);
-      items.push(['power', '⚡', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', '📚', 'হল অফ ফেম'], ['moments', '📸', 'মুহূর্ত']);
+      items.push(['power', '⚡', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', '📚', 'হল অফ ফেম'], ['moments', '📸', 'মুহূর্ত'], ['team', '👑', 'অ্যাডমিন প্যানেল']);
       var box = h('div', { id: 'bmore', class: 'bmore', role: 'menu' });
       items.forEach(function (x) {
         box.append(h('button', { type: 'button', role: 'menuitem', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); goTab(x[0]); } }, h('span', { 'aria-hidden': 'true' }, x[1]), x[2]));
@@ -3581,29 +3595,61 @@ body {
   var AC_RULES = 'match /adminCards/{id} {\n  allow read: if true;\n  allow write: if request.auth != null\n    && exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()));\n}';
   function acFail(e) {
     console.error(e);
-    if (e && e.code === 'permission-denied') { S.acErr = true; toast('Firestore rules আপডেট দরকার (হোমের অ্যাডমিন প্যানেলে কোড দেওয়া আছে)'); if (S.tab === 'home') renderView(); }
+    if (e && e.code === 'permission-denied') { S.acErr = true; toast('Firestore rules আপডেট দরকার'); if (S.tab === 'home' || S.tab === 'team') renderView(); }
     else toast('সেভ হয়নি, আবার চেষ্টা করুন।');
   }
+  function acBlank() { return { name: '', role: '', photo: null, busy: false }; }
+  function acEdit(a) { return { name: a.name || '', role: a.role || '', photo: a.photo || null, busy: false }; }
+  function acAvatar(a, size) {
+    return h('span', { class: 'hp-ring', style: '--rc:#F4C96B;--rg:rgba(244,201,107,.4);border-radius:' + Math.round(size * 0.26 + 3) + 'px' }, avatar(a, size));
+  }
+  /* Home: compact strip of small photos */
   function hpAdminPanel() {
     var list = S.acards || [];
     if (!list.length && !S.canWrite) return null;
+    var sec = h('section', { class: 'ac-strip', 'aria-label': 'SNB Admin Panel' },
+      h('div', { class: 'ac-strip-head' },
+        h('div', null, h('p', { class: 'ac-kick' }, 'MANAGED BY'), h('h3', null, 'SNB ADMIN PANEL')),
+        h('button', { type: 'button', class: 'ac-more', onclick: function () { goTab('team'); } }, list.length ? 'View All →' : (S.canWrite ? 'Set up →' : ''))));
+    if (!list.length) { sec.append(h('div', { class: 'home-empty' }, 'এখনো কোনো অ্যাডমিন যোগ করা হয়নি।')); return sec; }
+    var row = h('div', { class: 'ac-row' });
+    list.forEach(function (a) {
+      row.append(h('button', { type: 'button', class: 'ac-mini', onclick: function () { goTab('team'); } },
+        acAvatar(a, 58), h('strong', null, a.name), a.role ? h('span', null, a.role) : null));
+    });
+    sec.append(row);
+    return sec;
+  }
+  /* More menu: full list (admins can add / edit / remove) */
+  function teamView() {
+    var list = S.acards || [];
     var sec = h('section', { class: 'ac-panel', 'aria-label': 'SNB Admin Panel' },
       h('div', { class: 'ac-head' },
         h('div', null, h('p', { class: 'ac-kick' }, 'SYLHET NETBREAKERS'), h('h2', null, 'SNB ADMIN PANEL'), h('p', { class: 'muted small' }, 'ক্লাব পরিচালনায় যারা আছেন')),
-        S.canWrite ? h('button', { class: 'btn sm', onclick: function () { S.acDraft = { name: '', photo: null, busy: false }; openSheet('acnew'); } }, '➕ যোগ করুন') : null));
-    if (S.canWrite && S.acErr) sec.append(h('div', { class: 'notice' }, 'অ্যাডমিন কার্ড সেভ করতে Firebase Console → Firestore → Rules-এ নিচের অংশ যোগ করে Publish করুন (শুধু অ্যাডমিনরা লিখতে পারবে, সবাই দেখতে পারবে):', h('pre', { class: 'ac-code' }, AC_RULES)));
-    if (!list.length) { sec.append(h('div', { class: 'home-empty' }, 'এখনো কোনো অ্যাডমিন যোগ করা হয়নি। উপরের বাটনে চাপুন।')); return sec; }
+        S.canWrite ? h('button', { class: 'btn sm', onclick: function () { S.acDraft = acBlank(); openSheet('acnew'); } }, '➕ যোগ করুন') : null));
+    if (S.canWrite && S.acErr) sec.append(h('div', { class: 'notice' }, 'অ্যাডমিন কার্ড সেভ করতে Firebase Console → Firestore → Rules-এ firestore-rules.txt ফাইলের নতুন অংশ (adminCards) যোগ করে Publish করুন।'));
+    if (!list.length) { sec.append(h('div', { class: 'home-empty' }, S.canWrite ? 'এখনো কোনো অ্যাডমিন যোগ করা হয়নি। উপরের বাটনে চাপুন।' : 'শীঘ্রই আসছে।')); return h('div', { class: 'stack' }, sec); }
     var grid = h('div', { class: 'ac-grid' });
-    list.forEach(function (a) {
+    list.forEach(function (a, i) {
       grid.append(h('div', { class: 'ac-card' },
-        h('span', { class: 'hp-ring', style: '--rc:#F4C96B;--rg:rgba(244,201,107,.4);border-radius:' + Math.round(84 * 0.26 + 3) + 'px' }, avatar(a, 84)),
-        h('strong', null, a.name), h('span', { class: 'ac-tag' }, 'ADMIN'),
+        acAvatar(a, 84),
+        h('strong', null, a.name), h('span', { class: 'ac-tag' }, String(a.role || 'ADMIN').toUpperCase()),
         S.canWrite ? h('div', { class: 'ac-ctl' },
-          h('button', { type: 'button', 'aria-label': 'এডিট', onclick: function () { S.acDraft = { name: a.name || '', photo: a.photo || null, busy: false }; openSheet('acedit', a.id); } }, '✏️'),
-          h('button', { type: 'button', 'aria-label': 'মুছুন', onclick: function () { if (window.confirm(a.name + ' কে অ্যাডমিন প্যানেল থেকে সরাবেন?')) S.db.doc('adminCards/' + a.id).delete().then(function () { toast('সরানো হয়েছে'); }).catch(acFail); } }, '🗑️')) : null));
+          h('button', { type: 'button', 'aria-label': 'এডিট', onclick: function () { S.acDraft = acEdit(a); openSheet('acedit', a.id); } }, '✏️'),
+          h('button', { type: 'button', 'aria-label': 'মুছুন', onclick: function () { if (window.confirm(a.name + ' কে অ্যাডমিন প্যানেল থেকে সরাবেন?')) S.db.doc('adminCards/' + a.id).delete().then(function () { toast('সরানো হয়েছে'); }).catch(acFail); } }, '🗑️')) : null,
+        S.canWrite && list.length > 1 ? h('div', { class: 'ac-mv' },
+          i > 0 ? h('button', { type: 'button', 'aria-label': 'আগে আনুন', onclick: function () { acMove(i, -1); } }, '◀') : h('span'),
+          i < list.length - 1 ? h('button', { type: 'button', 'aria-label': 'পরে নিন', onclick: function () { acMove(i, 1); } }, '▶') : h('span')) : null));
     });
     sec.append(grid);
-    return sec;
+    return h('div', { class: 'stack' }, sec);
+  }
+  async function acMove(i, d) {
+    var l = S.acards || [], a = l[i], b = l[i + d]; if (!a || !b || !S.db) return;
+    var oa = a.ord != null ? a.ord : i, ob = b.ord != null ? b.ord : i + d;
+    if (oa === ob) { oa = i; ob = i + d; }
+    try { await Promise.all([S.db.doc('adminCards/' + a.id).set({ ord: ob }, { merge: true }), S.db.doc('adminCards/' + b.id).set({ ord: oa }, { merge: true })]); }
+    catch (e) { acFail(e); }
   }
   function acFormSheet(mode, closeBtn) {
     var d = S.acDraft, wrap = h('div', { class: 'form' });
@@ -3613,6 +3659,9 @@ body {
       h('label', { class: 'btn ghost' }, icon('camera'), d.photo ? 'ছবি বদলান' : 'ছবি বাছুন', file)));
     wrap.append(h('label', { class: 'field' }, 'নাম',
       h('input', { type: 'text', id: 'acName', maxlength: '40', value: d.name, autocomplete: 'off', oninput: function (e) { S.acDraft.name = e.target.value; } })));
+    var roleIn = h('input', { type: 'text', id: 'acRole', maxlength: '30', value: d.role || '', list: 'acRoles', placeholder: 'যেমন: Founder, Manager, Admin', autocomplete: 'off', oninput: function (e) { S.acDraft.role = e.target.value; } });
+    var dl = h('datalist', { id: 'acRoles' }, ['Founder', 'Co-Founder', 'President', 'Manager', 'Captain', 'Admin', 'Moderator', 'Media Head', 'Treasurer'].map(function (r) { return h('option', { value: r }); }));
+    wrap.append(h('label', { class: 'field' }, 'পদবি', roleIn, dl));
     wrap.append(h('div', { class: 'actions' },
       h('button', { class: 'btn', disabled: d.busy, onclick: saveAc }, d.busy ? 'সেভ হচ্ছে…' : 'সেভ করুন'),
       h('button', { class: 'btn ghost', onclick: closeSheet }, 'বাতিল')));
@@ -3630,8 +3679,8 @@ body {
     if (!S.db) return;
     d.busy = true; renderSheet();
     try {
-      var data = { name: name, photo: d.photo || null };
-      if (S.sheet && S.sheet.mode === 'acnew') { data.createdAt = Date.now(); await S.db.collection('adminCards').add(data); toast(name + ' যোগ হয়েছে'); }
+      var data = { name: name, role: String(d.role || '').trim().slice(0, 30), photo: d.photo || null };
+      if (S.sheet && S.sheet.mode === 'acnew') { data.createdAt = Date.now(); data.ord = (S.acards || []).reduce(function (m, x) { return Math.max(m, x.ord != null ? x.ord : 0); }, -1) + 1; await S.db.collection('adminCards').add(data); toast(name + ' যোগ হয়েছে'); }
       else { await S.db.doc('adminCards/' + S.sheet.id).set(data, { merge: true }); toast('আপডেট হয়েছে'); }
       closeSheet();
     } catch (e) { d.busy = false; if (S.sheet) renderSheet(); acFail(e); }
@@ -3751,7 +3800,7 @@ body {
     if (!S._tfWarm) { S._tfWarm = true; setTimeout(function () { (window.requestIdleCallback || function (f) { f(); })(function () { hpTfEnsure(); var t2 = document.getElementById('tfHost'); if (t2) t2.hidden = S.tab !== 'tournament'; }); }, 2500); }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : viewPlayers());
+    v.append(S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
@@ -3866,12 +3915,18 @@ body {
       if (!changed('r', sigOf(arr, function (x) { return x.id + x.e; }))) return;
       S.mom.reacts = arr; funRefresh();
     }, function (e) { console.error(e); });
+  }
+  var acOn = false;
+  function listenAC() {
+    var db = S.db; if (!db || acOn) return; acOn = true;
+    var lastSig = listenAC.sig = listenAC.sig || {};
+    function sigOf2(arr, f) { return arr.map(f).join('~'); }
     db.collection('adminCards').onSnapshot(function (snap) {
-      var arr = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }).sort(function (a, b) { return (a.createdAt || 0) - (b.createdAt || 0); });
-      var sg = sigOf(arr, function (x) { return x.id + '|' + x.name + '|' + (x.photo ? x.photo.length + x.photo.slice(-24) : ''); });
+      var arr = snap.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }).sort(function (a, b) { return (a.ord != null ? a.ord : 1e9) - (b.ord != null ? b.ord : 1e9) || (a.createdAt || 0) - (b.createdAt || 0); });
+      var sg = sigOf2(arr, function (x) { return x.id + '|' + x.name + '|' + (x.role || '') + '|' + x.ord + '|' + (x.photo ? x.photo.length + x.photo.slice(-24) : ''); });
       if (S.acLoaded && lastSig.ac === sg && !S.acErr) return; lastSig.ac = sg; S.acards = arr; S.acErr = false; S.acLoaded = true;
-      if (S.tab === 'home') renderView();
-    }, function (e) { console.error(e); S.acErr = true; S.acLoaded = true; if (S.tab === 'home') renderView(); });
+      if (S.tab === 'home' || S.tab === 'team') renderView();
+    }, function (e) { console.error(e); S.acErr = true; S.acLoaded = true; if (S.tab === 'home' || S.tab === 'team') renderView(); });
   }
   function loginSheet(closeBtn) {
     var g = S.lg;
@@ -3943,6 +3998,7 @@ body {
     S.auth = firebase.auth();
     if (S.mom.focus) readHashMoment();
     listen();
+    listenAC();
     S.auth.onAuthStateChanged(async function (u) {
       S.user = u; S.canWrite = false;
       if (u && u.email) {
