@@ -792,6 +792,17 @@ body {
 .hp-lead-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .hp-lead-stats span{padding:4px 11px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);font-size:13px;color:#d6e0e8}
 .hp-lead-stats b{color:var(--gold);font-family:var(--f-num);font-size:15px}
+.hp-show{margin:14px 0 2px;min-height:150px;display:flex;align-items:center}
+.hp-slide{display:flex;align-items:center;gap:16px;width:100%;flex-wrap:wrap;cursor:pointer;background:none;border:0;color:inherit;text-align:left;padding:0;font:inherit;transition:opacity .35s ease,transform .35s ease}
+.hp-slide.out{opacity:0;transform:translateX(-14px)}
+.hp-slide.in{opacity:0;transform:translateX(14px)}
+.hp-slide .hp-ring{animation:hpPop .5s ease both}
+@keyframes hpPop{from{transform:scale(.92)}to{transform:scale(1)}}
+.hp-slide h2{margin:0;font:800 clamp(26px,5.5vw,42px)/1.1 var(--f-num);text-transform:none;overflow-wrap:anywhere}
+.hp-count{display:inline-block;margin-left:12px;font:700 12px/1 var(--f-num);letter-spacing:.14em;color:var(--gold);opacity:.8}
+.hp-leadline{margin:6px 0 0;font-size:13px;color:#b6c4d0}
+.hp-leadline b{color:var(--gold)}
+@media (prefers-reduced-motion:reduce){.hp-slide,.hp-slide .hp-ring{transition:none;animation:none}}
 .home-kicker{padding-right:76px}
 .pr-btn{width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:inherit;font:inherit;cursor:pointer}
 .sk{border-radius:16px;background:linear-gradient(100deg,rgba(255,255,255,.04) 30%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.04) 70%) 0 0/200% 100%;animation:hpSk 1.3s linear infinite}
@@ -3742,6 +3753,49 @@ body {
     } catch (e) { d.busy = false; if (S.sheet) renderSheet(); acFail(e); }
   }
 
+  function hpShowcase(all, hlead, top) {
+    var ids = [];
+    S.players.forEach(function (p, id) { if (p.photo) ids.push(id); });
+    if (ids.length < 2) return null;
+    var same = S.hpOrder && S.hpOrder.length === ids.length && ids.every(function (id) { return S.hpOrder.indexOf(id) >= 0; });
+    if (!same) { S.hpOrder = ids.slice(); for (var i = S.hpOrder.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = S.hpOrder[i]; S.hpOrder[i] = S.hpOrder[j]; S.hpOrder[j] = t; } S.hpIdx = 0; }
+    var order = S.hpOrder, n = order.length;
+    if (!(S.hpIdx >= 0 && S.hpIdx < n)) S.hpIdx = 0;
+    var stat = {}; all.forEach(function (x) { stat[x.id] = x; });
+    var count = h('span', { class: 'hp-count', 'aria-hidden': 'true' });
+    var box = h('div', { class: 'hp-show' });
+    function slide(id) {
+      var p = S.players.get(id), st = stat[id], rt = ratingFor(id);
+      var chips = h('div', { class: 'hp-lead-stats' });
+      if (p.number) chips.append(h('span', null, '#', h('b', null, String(p.number))));
+      chips.append(h('span', null, 'OVR ', h('b', null, String(rt))));
+      if (st) { chips.append(h('span', null, h('b', null, String(st.wins)), ' জয়')); chips.append(h('span', null, h('b', null, String(st.goals)), ' গোল')); }
+      return h('button', { type: 'button', class: 'hp-slide', 'aria-label': p.name + ' প্রোফাইল', onclick: function () { openSheet('profile', id); } },
+        hpRingAv(p, 104), h('div', { class: 'hp-lead-info' }, h('h2', null, p.name), chips));
+    }
+    function paint() { count.textContent = String(S.hpIdx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0'); }
+    box.append(slide(order[S.hpIdx])); paint();
+    clearInterval(window._hpT);
+    window._hpT = setInterval(function () {
+      if (!document.body.contains(box)) { clearInterval(window._hpT); return; }
+      if (document.hidden || S.tab !== 'home' || S.sheet) return;
+      var cur = box.firstChild; if (cur) cur.classList.add('out');
+      setTimeout(function () {
+        if (!document.body.contains(box)) return;
+        S.hpIdx = (S.hpIdx + 1) % n;
+        var nx = slide(order[S.hpIdx]); nx.classList.add('in'); box.textContent = ''; box.append(nx); paint();
+        requestAnimationFrame(function () { requestAnimationFrame(function () { nx.classList.remove('in'); }); });
+      }, 360);
+    }, 3200);
+    var line = hlead.length ? h('p', { class: 'hp-leadline' }, '👑 এই সপ্তাহের লিডার: ', h('b', null, hlead.map(function (r) { return r.p.name; }).join(' ও ')), ' · ' + top.wins + ' জয় · ' + top.goals + ' গোল') : null;
+    return h('section', { class: 'home-hero' }, h('span', { class: 'hp-shine', 'aria-hidden': 'true' }), hpLive(),
+      h('div', { class: 'home-kicker' }, 'SYLHET NETBREAKERS • OUR SQUAD', count),
+      box, line,
+      h('div', { class: 'home-actions' },
+        h('button', { class: 'btn lime', onclick: function () { goTab('board'); } }, 'View Rankings  →'),
+        h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
+        h('button', { class: 'btn ghost', onclick: function () { goTab('hall'); } }, 'Club Records')));
+  }
   function homeView() {
     var totalWins = 0, totalDraws = 0, totalLosses = 0, totalGoals = 0;
     S.wins.forEach(function (w) { totalGoals += Number(w.goals || 0); if (w.type === 'draw') totalDraws++; else if (w.type === 'loss') totalLosses++; else totalWins++; });
@@ -3771,6 +3825,7 @@ body {
           h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
           h('button', { class: 'btn ghost', onclick: function () { goTab('hall'); } }, 'Club Records')));
     }
+    var sc = hpShowcase(all, hlead, top); if (sc) heroBox = sc;
     var metrics = hpMetrics(totalWins, totalGoals);
     var weekly = h('section', { class: 'home-panel' }, h('h3', null, '🏅 এই সপ্তাহের টপ ৫'), h('p', { class: 'muted small' }, rangeLabel('week', 0)));
     if (active.length) active.slice(0, 5).forEach(function (x, i) {
