@@ -905,6 +905,16 @@ body {
 .ns-preview img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 .ns-empty{padding:30px 18px;text-align:center;border:1px dashed var(--line-2);border-radius:16px;color:var(--muted)}
 .ns-small{font-size:12px;color:var(--muted)}
+.ns-home{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:18px;border:1px solid rgba(244,201,107,.45);background:linear-gradient(135deg,rgba(244,201,107,.14),rgba(8,14,20,.92))}
+.ns-home-h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;color:var(--gold);font-weight:800}
+.ns-home-row{display:flex;align-items:center;gap:12px;width:100%;padding:8px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.ns-home-av{flex:none;width:52px;height:52px;border-radius:14px;overflow:hidden;background:#123040;display:grid;place-items:center;font-weight:800;font-size:20px;border:2px solid rgba(244,201,107,.6)}
+.ns-home-av img{width:100%;height:100%;object-fit:cover;object-position:50% 25%}
+.ns-home-t{display:flex;flex-direction:column;min-width:0;flex:1}
+.ns-home-t small{font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:800}
+.ns-home-t strong{font-size:17px;overflow-wrap:anywhere}
+.ns-home-t em{font-style:normal;font-size:12.5px;color:var(--muted)}
+.ns-home-go{flex:none;font-size:13px;color:var(--aqua,#67D7E8);font-weight:700}
 @media(max-width:480px){.ns-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ns-body{padding:10px}.ns-name{font-size:17px}.ns-hero{padding:17px}.ns-actions .btn{flex:1;padding-inline:8px;font-size:13px}}
 </style>
 
@@ -3464,7 +3474,7 @@ body {
   }
   function cardCaption() {
     var c = S.card, L = c && c.leaders && c.leaders[c.idx], host = ''; try { host = location.origin; } catch (e) { host = ''; }
-    if (c && c.kind === 'nsign') { var sn = (c.ns && c.ns.name) || ''; return '✍️ NEW SIGNING ALERT 🚨\nHere we go! Welcome ' + sn + ' to the Sylhet Net Breakers family 🤝🔥\n#SylhetNetBreakers #SNB #NewSigning\n' + host; }
+    if (c && c.kind === 'nsign') { var sn = (c.ns && c.ns.name) || ''; if (c.ns && c.ns.type === 'transfer') return '🔄 TRANSFER ALERT 🚨\n' + sn + ' moves from ' + (c.ns.from || 'Main Team') + ' to ' + (c.ns.team || 'Academy') + ' 🤝🔥\n#SylhetNetBreakers #SNB #Transfer\n' + host; return '✍️ NEW SIGNING ALERT 🚨\nHere we go! Welcome ' + sn + ' to the Sylhet Net Breakers family 🤝🔥\n#SylhetNetBreakers #SNB #NewSigning\n' + host; }
     if (!L) return 'Sylhet Net Breakers 🏆 ' + host;
     var what = c.theme === 'potw' ? 'Player of the Week' : c.theme === 'potm' ? 'Player of the Month' : 'Best Player';
     var played = (L.wins || 0) + (L.draws || 0) + (L.losses || 0), wr = played ? Math.round((L.wins || 0) / played * 100) : 0;
@@ -3882,7 +3892,7 @@ body {
     ].forEach(function (x) { quick.append(h('button', { class: 'quick-card', onclick: function () { goTab(x[3]); } }, h('span', { class: 'quick-icon' }, x[0]), h('strong', null, x[1]), h('small', null, x[2]))); });
     q.append(quick);
     setTimeout(hpCount, 120);
-    return h('div', { class: 'stack' }, heroBox, metrics, hpFeatured(), hpPodium(all), sections, q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
+    return h('div', { class: 'stack' }, heroBox, nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), sections, q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
   }
   function powerView() {
     var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
@@ -3938,14 +3948,15 @@ body {
     var card = h('article', { class: 'ns-card' });
     var img = h('img', { class: 'ns-photo', src: x.photo || '', alt: x.name || 'SNB signing', loading: 'lazy' });
     if (!x.photo) { img.style.display = 'none'; }
-    card.append(img, h('span', { class: 'ns-ribbon' }, 'HERE WE GO!'));
+    var isT = x.type === 'transfer';
+    card.append(img, h('span', { class: 'ns-ribbon' }, isT ? 'TRANSFER' : 'HERE WE GO!'));
     var body = h('div', { class: 'ns-body' },
-      h('div', { class: 'ns-kicker' }, 'OFFICIAL SNB SIGNING'),
+      h('div', { class: 'ns-kicker' }, isT ? 'OFFICIAL SNB TRANSFER' : 'OFFICIAL SNB SIGNING'),
       h('h3', { class: 'ns-name' }, x.name || 'New Player'),
       h('div', { class: 'ns-meta' }, (x.userId ? 'USER ID: ' + x.userId : 'SYLHET NETBREAKERS') + (x.device ? ' · ' + x.device : '')),
-      h('span', { class: 'ns-team' }, x.team || 'Main Team'),
+      h('span', { class: 'ns-team' }, isT ? (x.fromTeam || 'Main Team') + ' → ' + (x.team || 'Academy') : (x.team || 'Main Team')),
       x.note ? h('p', { class: 'ns-meta', style: 'margin-top:10px' }, x.note) : null,
-      h('div', { class: 'ns-meta' }, x.signingDate ? 'SIGNED · ' + x.signingDate : '')
+      h('div', { class: 'ns-meta' }, x.signingDate ? (isT ? 'TRANSFERRED · ' : 'SIGNED · ') + x.signingDate : '')
     );
     var actions = h('div', { class: 'ns-actions' });
     actions.append(h('button', { class: 'btn ghost sm', type: 'button', onclick: function(){ nsDownload(x); } }, '⬇ Download Card'));
@@ -3956,7 +3967,7 @@ body {
     body.append(actions); card.append(body); return card;
   }
   function nsDownload(x) {
-    startSpecial('nsign', { ns: { name: x.name || '', team: x.team || 'Main Team', date: x.signingDate || '', photo: x.photo || null } }, 'NEW SIGNING', 'signing-' + String(x.name || 'player').toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+    startSpecial('nsign', { ns: { name: x.name || '', team: x.team || 'Main Team', from: x.fromTeam || '', type: x.type === 'transfer' ? 'transfer' : 'signing', date: x.signingDate || '', photo: x.photo || null } }, x.type === 'transfer' ? 'TRANSFER' : 'NEW SIGNING', (x.type === 'transfer' ? 'transfer-' : 'signing-') + String(x.name || 'player').toLowerCase().replace(/[^a-z0-9]+/g, '-'));
   }
   async function nsDraw(card, W, H) {
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
@@ -3968,7 +3979,7 @@ body {
     c.strokeStyle = '#F4C96B'; c.lineWidth = 4; c.strokeRect(28, 28, W - 56, H - 56);
     c.strokeStyle = 'rgba(244,201,107,0.35)'; c.lineWidth = 1.5; c.strokeRect(42, 42, W - 84, H - 84);
     c.textAlign = 'left'; c.fillStyle = '#F4C96B'; c.font = '800 36px ' + HEAD; sp(7); c.fillText('SYLHET NETBREAKERS', 76, 106 + oy * 0.5);
-    c.fillStyle = '#67D7E8'; c.font = '700 22px ' + HEAD; sp(6); c.fillText('OFFICIAL PLAYER ANNOUNCEMENT', 76, 144 + oy * 0.5); sp(0);
+    c.fillStyle = '#67D7E8'; c.font = '700 22px ' + HEAD; sp(6); c.fillText(g.type === 'transfer' ? 'OFFICIAL TRANSFER ANNOUNCEMENT' : 'OFFICIAL PLAYER ANNOUNCEMENT', 76, 144 + oy * 0.5); sp(0);
     try { var lg = await loadImg(LOGO); c.save(); c.shadowColor = 'rgba(0,0,0,0.5)'; c.shadowBlur = 20; c.drawImage(lg, W - 200, 60 + oy * 0.5, 120, 120); c.restore(); } catch (e) { /* skip logo */ }
     var bx = 70, by = 200 + oy * 0.7, bw = W - 140, bh = 790 + oy * 0.3;
     c.save(); c.beginPath(); c.rect(bx, by, bw, bh); c.clip();
@@ -3980,11 +3991,11 @@ body {
     c.restore();
     c.strokeStyle = '#F4C96B'; c.lineWidth = 3; c.strokeRect(bx, by, bw, bh);
     var ty = by + bh + 62;
-    c.fillStyle = '#F4C96B'; c.font = '800 38px ' + HEAD; sp(8); c.fillText('HERE WE GO!', 76, ty); sp(0);
+    c.fillStyle = '#F4C96B'; c.font = '800 38px ' + HEAD; sp(8); c.fillText(g.type === 'transfer' ? 'TRANSFER COMPLETE' : 'HERE WE GO!', 76, ty); sp(0);
     var name = String(g.name || 'NEW SIGNING').toUpperCase().slice(0, 30), fs = 84;
     do { c.font = '800 ' + fs + 'px ' + HEAD; fs -= 4; } while (c.measureText(name).width > W - 152 && fs > 30);
     c.fillStyle = '#FFFFFF'; c.fillText(name, 76, ty + 80);
-    c.fillStyle = '#B9C7D7'; c.font = '600 28px ' + HEAD; sp(4); c.fillText(String(g.team || 'Main Team').toUpperCase() + '  ·  SNB' + (g.date ? '  ·  ' + g.date : ''), 76, ty + 128); sp(0);
+    c.fillStyle = '#B9C7D7'; c.font = '600 28px ' + HEAD; sp(4); c.fillText((g.type === 'transfer' ? String(g.from || 'Main Team').toUpperCase() + '  →  ' + String(g.team || 'Academy').toUpperCase() : String(g.team || 'Main Team').toUpperCase() + '  ·  SNB') + (g.date ? '  ·  ' + g.date : ''), 76, ty + 128); sp(0);
     c.textAlign = 'center'; c.fillStyle = 'rgba(185,199,215,0.7)'; c.font = '500 20px ' + HEAD; sp(5); c.fillText('SYLHET NETBREAKERS • #SNB', W / 2, H - 62 - oy * 0.4); sp(0);
     return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
   }
@@ -3993,7 +4004,7 @@ body {
     nsEditId=x&&x.id||null; nsPhotoData=x&&x.photo||'';
     var overlay=h('div',{class:'scrim',id:'nsFormOverlay'});
     var sheet=h('div',{class:'sheet ns-form'});
-    var title=h('h2',null,nsEditId?'Edit New Signing':'Add New Signing');
+    var title=h('h2',null,nsEditId?'Edit Signing / Transfer':'Add Signing / Transfer');
     var close=h('button',{class:'btn ghost sm',type:'button',onclick:function(){overlay.remove();}},'Close');
     sheet.append(h('div',{class:'sheet-head'},title,close));
     var form=h('div',{class:'ns-form',style:'padding:0'});
@@ -4004,10 +4015,14 @@ body {
       else inp=h('input',{type:kind,placeholder:placeholder||'',value:val||''});
       inp.dataset.nsField=labelText;lab.append(inp);form.append(lab);return inp;
     }
+    var typeSel=field('Type','select',x&&x.type==='transfer'?'Transfer':'New Signing','',['New Signing','Transfer']);
     field('Player Name','text',x&&x.name,'e.g. Kazi Ifthekar').required=true;
     field('User ID','text',x&&x.userId,'eFootball User ID');
     field('Device','text',x&&x.device,'e.g. iPhone 12 Pro Max');
-    field('Team','select',x&&x.team||'Main Team','',['Main Team','Academy','Youth']);
+    var fromSel=field('From Team','select',x&&x.fromTeam||'Main Team','',['Main Team','Academy','Youth']);
+    var teamSel=field('Team','select',x&&x.team||'Main Team','',['Main Team','Academy','Youth']);
+    function nsSyncType(){var t=typeSel.value==='Transfer';fromSel.parentNode.style.display=t?'':'none';teamSel.parentNode.firstChild.textContent=t?'To Team':'Team';}
+    typeSel.onchange=nsSyncType;nsSyncType();
     field('Signing Date','date',x&&x.signingDate||new Date().toISOString().slice(0,10),'');
     field('Announcement Note','textarea',x&&x.note,'Optional short note');
     var photoLab=h('label',null,'Player Photo');
@@ -4019,18 +4034,32 @@ body {
       if(!vals['Player Name']){toast('Player Name লিখুন');return;}
       var photo=nsPhotoData;if(photo&&photo.length>900000){toast('ছবিটি আরও ছোট করে আপলোড করুন');return;}
       nsSaving=true;save.disabled=true;save.textContent='Saving…';
-      var data={name:vals['Player Name'],userId:vals['User ID'],device:vals['Device'],team:vals['Team'],signingDate:vals['Signing Date'],note:vals['Announcement Note'],photo:photo,updatedAt:Date.now()};
-      try{if(nsEditId){await S.db.doc('newSignings/'+nsEditId).set(data,{merge:true});}else{data.createdAt=Date.now();await S.db.collection('newSignings').add(data);}toast('New Signing published');overlay.remove();}
+      var isTr=vals['Type']==='Transfer';var data={type:isTr?'transfer':'signing',fromTeam:isTr?vals['From Team']:'',name:vals['Player Name'],userId:vals['User ID'],device:vals['Device'],team:vals['Team'],signingDate:vals['Signing Date'],note:vals['Announcement Note'],photo:photo,updatedAt:Date.now()};
+      try{if(nsEditId){await S.db.doc('newSignings/'+nsEditId).set(data,{merge:true});}else{data.createdAt=Date.now();await S.db.collection('newSignings').add(data);}toast(isTr?'Transfer published':'New Signing published');overlay.remove();}
       catch(e){console.error(e);toast(e&&e.code==='permission-denied'?'Firestore Rules আপডেট প্রয়োজন':'Save হয়নি—ছবির সাইজ বা Database connection পরীক্ষা করুন');}
-      finally{nsSaving=false;save.disabled=false;save.textContent='Publish New Signing';}
-    }},'Publish New Signing');
+      finally{nsSaving=false;save.disabled=false;save.textContent='Publish';}
+    }},'Publish');
     sheet.append(form,save);overlay.append(sheet);document.body.append(overlay);
   }
-  async function nsDelete(x){if(!S.canWrite||!x||!confirm('এই New Signing মুছে ফেলবেন?'))return;try{await S.db.doc('newSignings/'+x.id).delete();toast('Signing deleted');}catch(e){console.error(e);toast('Delete হয়নি—Firestore Rules পরীক্ষা করুন');}}
+  async function nsDelete(x){if(!S.canWrite||!x||!confirm('এটা মুছে ফেলবেন?'))return;try{await S.db.doc('newSignings/'+x.id).delete();toast('Signing deleted');}catch(e){console.error(e);toast('Delete হয়নি—Firestore Rules পরীক্ষা করুন');}}
+  function nsHomeStrip() {
+    var now = Date.now(), list = (S.signings || []).filter(function (x) { return x.createdAt && now - x.createdAt < 48 * 36e5 && now - x.createdAt > -36e5; }).sort(function (a, b) { return b.createdAt - a.createdAt; }).slice(0, 3);
+    if (!list.length) return null;
+    var box = h('section', { class: 'ns-home' }, h('div', { class: 'ns-home-h' }, h('span', null, '🆕 CLUB NEWS · LAST 48 HOURS'), h('button', { type: 'button', class: 'link-btn', onclick: function () { goTab('signings'); } }, 'সব দেখুন →')));
+    list.forEach(function (x) {
+      var t = x.type === 'transfer', av = x.photo ? h('img', { src: x.photo, alt: '' }) : h('span', null, String(x.name || '?').charAt(0).toUpperCase());
+      box.append(h('button', { type: 'button', class: 'ns-home-row', onclick: function () { nsDownload(x); } },
+        h('span', { class: 'ns-home-av' }, av),
+        h('span', { class: 'ns-home-t' }, h('small', null, t ? '🔄 TRANSFER' : '✍️ NEW SIGNING'), h('strong', null, x.name || 'Player'),
+          h('em', null, t ? (x.fromTeam || 'Main Team') + ' → ' + (x.team || 'Academy') : (x.team || 'Main Team') + ' · যোগ দিয়েছেন')),
+        h('span', { class: 'ns-home-go' }, 'কার্ড →')));
+    });
+    return box;
+  }
   function nsView(){
     var root=h('div',{class:'ns-wrap'});
-    root.append(h('section',{class:'ns-hero'},h('div',{class:'ns-kicker'},'SNB • OFFICIAL CLUB NEWS'),h('h2',{class:'ns-title'},'NEW SIGNINGS'),h('p',{class:'ns-sub'},'New chapter. New ambition. Welcome to Sylhet Netbreakers.')));
-    if(S.canWrite){root.append(h('button',{class:'btn',type:'button',onclick:function(){nsOpenForm(null);}},'＋ Add New Signing'));}
+    root.append(h('section',{class:'ns-hero'},h('div',{class:'ns-kicker'},'SNB • OFFICIAL CLUB NEWS'),h('h2',{class:'ns-title'},'SIGNINGS & TRANSFERS'),h('p',{class:'ns-sub'},'New chapter. New ambition. Welcome to Sylhet Netbreakers.')));
+    if(S.canWrite){root.append(h('button',{class:'btn',type:'button',onclick:function(){nsOpenForm(null);}},'＋ Add Signing / Transfer'));}
     if(S.signingErr){root.append(h('div',{class:'notice'},'New Signings ডেটা লোড হয়নি। Firestore Rules পরীক্ষা করুন।'));return root;}
     if(!S.signingLoaded){root.append(h('div',{class:'ns-empty'},'Loading latest signings…'));return root;}
     var list=(S.signings||[]).slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
