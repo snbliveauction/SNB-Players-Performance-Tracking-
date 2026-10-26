@@ -3134,6 +3134,7 @@ body {
   async function drawCard(card) {
     var story = card.fmt === 'story';
     var W = 1080, H = story ? 1920 : 1350;
+    if (card.kind === 'nsign') return nsDraw(card, W, H);
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var x = cv.getContext('2d');
     var NUM = '"Barlow Condensed","Arial Narrow",sans-serif';
@@ -3444,7 +3445,7 @@ body {
     wrap.append(h('div', { class: 'actions' },
       h('button', { class: 'btn', disabled: !c.blob || c.loading, onclick: saveCard }, icon('down'), 'PNG ডাউনলোড'),
       canShareFiles() ? h('button', { class: 'btn ghost', disabled: !c.blob || c.loading, onclick: shareCard }, 'শেয়ার করুন') : null,
-      c.kind === 'player' && c.leaders.length ? h('button', { class: 'btn ghost', onclick: copyCaption }, '📋 ক্যাপশন কপি') : null));
+      (c.kind === 'nsign' || (c.kind === 'player' && c.leaders.length)) ? h('button', { class: 'btn ghost', onclick: copyCaption }, '📋 ক্যাপশন কপি') : null));
     wrap.append(h('p', { class: 'muted small' }, 'ডাউনলোড না হলে ছবিটি চেপে ধরে ফোনে সেভ করুন, তারপর ফেসবুক বা ইনস্টাগ্রামে পোস্ট করুন।'));
     return wrap;
   }
@@ -3463,6 +3464,7 @@ body {
   }
   function cardCaption() {
     var c = S.card, L = c && c.leaders && c.leaders[c.idx], host = ''; try { host = location.origin; } catch (e) { host = ''; }
+    if (c && c.kind === 'nsign') { var sn = (c.ns && c.ns.name) || ''; return '✍️ NEW SIGNING ALERT 🚨\nHere we go! Welcome ' + sn + ' to the Sylhet Net Breakers family 🤝🔥\n#SylhetNetBreakers #SNB #NewSigning\n' + host; }
     if (!L) return 'Sylhet Net Breakers 🏆 ' + host;
     var what = c.theme === 'potw' ? 'Player of the Week' : c.theme === 'potm' ? 'Player of the Month' : 'Best Player';
     var played = (L.wins || 0) + (L.draws || 0) + (L.losses || 0), wr = played ? Math.round((L.wins || 0) / played * 100) : 0;
@@ -3954,15 +3956,37 @@ body {
     body.append(actions); card.append(body); return card;
   }
   function nsDownload(x) {
-    var W=1080,H=1350,canvas=document.createElement('canvas'); canvas.width=W;canvas.height=H;
-    var c=canvas.getContext('2d'),g=c.createLinearGradient(0,0,W,H);
-    g.addColorStop(0,'#1a3040');g.addColorStop(.55,'#0b121c');g.addColorStop(1,'#05080d');c.fillStyle=g;c.fillRect(0,0,W,H);
-    c.strokeStyle='#F4C96B';c.lineWidth=5;c.strokeRect(28,28,W-56,H-56);
-    c.fillStyle='#F4C96B';c.font='800 34px Arial';c.fillText('SYLHET NETBREAKERS',70,100);
-    c.fillStyle='#67D7E8';c.font='700 24px Arial';c.fillText('OFFICIAL PLAYER ANNOUNCEMENT',70,145);
-    var drawText=function(){c.fillStyle='#F4C96B';c.font='900 36px Arial';c.fillText('HERE WE GO!',70,1010);c.fillStyle='#FFFFFF';c.font='900 58px Arial';var name=(x.name||'NEW SIGNING').toUpperCase();if(name.length>24)c.font='900 42px Arial';c.fillText(name.slice(0,30),70,1080);c.fillStyle='#B9C7D7';c.font='600 26px Arial';c.fillText((x.team||'Main Team').toUpperCase()+'  ·  SNB',70,1135);c.font='22px Arial';c.fillText('SYLHET NETBREAKERS • EST. CLUB PRIDE',70,1240);
-      var a=document.createElement('a');a.download='SNB-New-Signing-'+(x.name||'Player').replace(/[^a-z0-9-_]/gi,'-')+'.png';a.href=canvas.toDataURL('image/png');a.click();};
-    if(x.photo){var im=new Image();im.onload=function(){var ratio=Math.max(900/im.width,800/im.height),iw=im.width*ratio,ih=im.height*ratio;c.save();c.beginPath();c.rect(70,190,940,800);c.clip();c.drawImage(im,70+(940-iw)/2,190+(800-ih)/2,iw,ih);c.restore();drawText();};im.onerror=function(){drawText();};im.src=x.photo;}else drawText();
+    startSpecial('nsign', { ns: { name: x.name || '', team: x.team || 'Main Team', date: x.signingDate || '', photo: x.photo || null } }, 'NEW SIGNING', 'signing-' + String(x.name || 'player').toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+  }
+  async function nsDraw(card, W, H) {
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    var c = cv.getContext('2d'), g = card.ns || {}, oy = (H - 1350) / 2;
+    var HEAD = '"Barlow Condensed","Arial Narrow","DejaVu Sans Condensed",Arial,sans-serif';
+    function sp(px) { if ('letterSpacing' in c) c.letterSpacing = px + 'px'; }
+    var bg = c.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#1a3040'); bg.addColorStop(0.55, '#0b121c'); bg.addColorStop(1, '#05080d'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    var gl = c.createRadialGradient(W / 2, 560 + oy, 40, W / 2, 560 + oy, 620); gl.addColorStop(0, 'rgba(244,201,107,0.18)'); gl.addColorStop(1, 'rgba(244,201,107,0)'); c.fillStyle = gl; c.fillRect(0, 0, W, H);
+    c.strokeStyle = '#F4C96B'; c.lineWidth = 4; c.strokeRect(28, 28, W - 56, H - 56);
+    c.strokeStyle = 'rgba(244,201,107,0.35)'; c.lineWidth = 1.5; c.strokeRect(42, 42, W - 84, H - 84);
+    c.textAlign = 'left'; c.fillStyle = '#F4C96B'; c.font = '800 36px ' + HEAD; sp(7); c.fillText('SYLHET NETBREAKERS', 76, 106 + oy * 0.5);
+    c.fillStyle = '#67D7E8'; c.font = '700 22px ' + HEAD; sp(6); c.fillText('OFFICIAL PLAYER ANNOUNCEMENT', 76, 144 + oy * 0.5); sp(0);
+    try { var lg = await loadImg(LOGO); c.save(); c.shadowColor = 'rgba(0,0,0,0.5)'; c.shadowBlur = 20; c.drawImage(lg, W - 200, 60 + oy * 0.5, 120, 120); c.restore(); } catch (e) { /* skip logo */ }
+    var bx = 70, by = 200 + oy * 0.7, bw = W - 140, bh = 790 + oy * 0.3;
+    c.save(); c.beginPath(); c.rect(bx, by, bw, bh); c.clip();
+    c.fillStyle = '#0a1018'; c.fillRect(bx, by, bw, bh);
+    if (g.photo) {
+      try { var im = await loadImg(g.photo), r = Math.max(bw / im.width, bh / im.height), iw = im.width * r, ih = im.height * r; c.drawImage(im, bx + (bw - iw) / 2, by + (bh - ih) * 0.25, iw, ih); } catch (e) { /* no photo */ }
+    }
+    var fd = c.createLinearGradient(0, by + bh * 0.62, 0, by + bh); fd.addColorStop(0, 'rgba(5,8,13,0)'); fd.addColorStop(1, 'rgba(5,8,13,0.85)'); c.fillStyle = fd; c.fillRect(bx, by, bw, bh);
+    c.restore();
+    c.strokeStyle = '#F4C96B'; c.lineWidth = 3; c.strokeRect(bx, by, bw, bh);
+    var ty = by + bh + 62;
+    c.fillStyle = '#F4C96B'; c.font = '800 38px ' + HEAD; sp(8); c.fillText('HERE WE GO!', 76, ty); sp(0);
+    var name = String(g.name || 'NEW SIGNING').toUpperCase().slice(0, 30), fs = 84;
+    do { c.font = '800 ' + fs + 'px ' + HEAD; fs -= 4; } while (c.measureText(name).width > W - 152 && fs > 30);
+    c.fillStyle = '#FFFFFF'; c.fillText(name, 76, ty + 80);
+    c.fillStyle = '#B9C7D7'; c.font = '600 28px ' + HEAD; sp(4); c.fillText(String(g.team || 'Main Team').toUpperCase() + '  ·  SNB' + (g.date ? '  ·  ' + g.date : ''), 76, ty + 128); sp(0);
+    c.textAlign = 'center'; c.fillStyle = 'rgba(185,199,215,0.7)'; c.font = '500 20px ' + HEAD; sp(5); c.fillText('SYLHET NETBREAKERS • #SNB', W / 2, H - 62 - oy * 0.4); sp(0);
+    return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
   }
   function nsOpenForm(x) {
     if(!S.canWrite){toast('শুধু Admin signing যোগ করতে পারবেন');return;}
