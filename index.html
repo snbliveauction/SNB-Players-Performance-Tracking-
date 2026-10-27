@@ -4124,7 +4124,7 @@ body {
     var m = {}, b = bdInit();
     b.entries.forEach(function (e) {
       if (String(e.season) !== String(season)) return;
-      var a = m[e.playerId] || (m[e.playerId] = { id: e.playerId, name: e.name, total: 0, tro: 0, awd: 0, items: [] });
+      var a = m[e.playerId] || (m[e.playerId] = { id: e.playerId, name: e.name, guest: !!e.guest, total: 0, tro: 0, awd: 0, items: [] });
       a.total += Number(e.pts) || 0; if (/Champ$/.test(e.cat)) a.tro++; if (BD_AWARDS.indexOf(e.cat) >= 0) a.awd++; a.items.push(e);
     });
     var arr = Object.keys(m).map(function (k) { var a = m[k], p = S.players.get(k); if (p) a.name = p.name; return a; });
@@ -4133,6 +4133,8 @@ body {
   }
   function bdSeasonRange(season) { var y = Number(season); if (!y) return { start: -Infinity, end: Infinity }; return { start: new Date(y, 0, 1).getTime(), end: new Date(y + 1, 0, 1).getTime() }; }
   function bdPlayerObj(id, name) { return S.players.get(id) || { name: name || '?', photo: null }; }
+  function bdGuests() { var m = {}; bdInit().entries.forEach(function (e) { if (e.guest && e.playerId) m[e.playerId] = e.name; }); return m; }
+  function bdGuestId(n) { return 'g_' + String(n).trim().toLowerCase().replace(/\s+/g, ' '); }
   function bdWho() { return (S.user && S.user.email) || 'admin'; }
 
   async function bdAddEntries(cat, note, pts, ids) {
@@ -4140,8 +4142,8 @@ body {
     if (!ids.length) { toast('কমপক্ষে একজন প্লেয়ার বাছুন'); return false; }
     if (!(pts > 0 || (cat === 'custom' && pts !== 0))) { toast('পয়েন্ট লিখুন'); return false; }
     try {
-      var batch = S.db.batch(), season = bdSeason(), now = Date.now();
-      ids.forEach(function (id) { var p = S.players.get(id); batch.set(S.db.collection('ballonEntries').doc(), { season: String(season), playerId: id, name: p ? p.name : '', cat: cat, label: String(note || '').slice(0, 60), pts: Number(pts), ts: now, by: bdWho() }); });
+      var batch = S.db.batch(), season = bdSeason(), now = Date.now(), gm = Object.assign({}, bdGuests(), bdInit().gnew || {});
+      ids.forEach(function (id) { var p = S.players.get(id); batch.set(S.db.collection('ballonEntries').doc(), { season: String(season), playerId: id, name: p ? p.name : (gm[id] || ''), guest: !p, cat: cat, label: String(note || '').slice(0, 60), pts: Number(pts), ts: now, by: bdWho() }); });
       await batch.commit(); toast(ids.length + ' জনকে ' + pts + ' পয়েন্ট যোগ হয়েছে ✅'); return true;
     } catch (e) { writeFail(e); return false; }
   }
@@ -4280,7 +4282,7 @@ body {
       var st = bdStand(season); if (!st.length) wrap.append(h('div', { class: 'ns-empty' }, 'এখনো কোনো পয়েন্ট যোগ হয়নি। "➕ পয়েন্ট" থেকে শুরু করুন।'));
       st.slice(0, 20).forEach(function (a, i) {
         var det = h('div', { class: 'bd-det', hidden: true }, a.items.slice().sort(function (x, y) { return y.pts - x.pts; }).map(function (e) { return h('div', { class: 'bd-it' }, h('span', null, bdCatLabel(e.cat) + (e.label ? ' · ' + e.label : '')), h('b', null, '+' + e.pts)); }));
-        wrap.append(h('button', { type: 'button', class: 'bd-srow' + (i < 10 ? ' top' : ''), onclick: function () { det.hidden = !det.hidden; } }, h('span', { class: 'bd-rank' }, '#' + (i + 1)), avatar(bdPlayerObj(a.id, a.name), 40), h('span', { class: 'bd-nm' }, h('strong', null, a.name), h('em', null, a.tro + ' ট্রফি · ' + a.awd + ' অ্যাওয়ার্ড')), h('b', { class: 'bd-tot' }, String(a.total))), det);
+        wrap.append(h('button', { type: 'button', class: 'bd-srow' + (i < 10 ? ' top' : ''), onclick: function () { det.hidden = !det.hidden; } }, h('span', { class: 'bd-rank' }, '#' + (i + 1)), avatar(bdPlayerObj(a.id, a.name), 40), h('span', { class: 'bd-nm' }, h('strong', null, a.name), h('em', null, (a.guest ? '🌐 গেস্ট · ' : '') + a.tro + ' ট্রফি · ' + a.awd + ' অ্যাওয়ার্ড')), h('b', { class: 'bd-tot' }, String(a.total))), det);
       });
       if (st.length) wrap.append(h('p', { class: 'ns-small' }, 'টাই হলে: বেশি ট্রফি → বেশি ব্যক্তিগত অ্যাওয়ার্ড → নামের ক্রম। ট্যাপ করলে পয়েন্টের হিসাব খোলে।'));
     } else if (b.sub === 'add') {
@@ -4291,11 +4293,13 @@ body {
       cat.onchange = function () { b.cat = cat.value; b.pts = ''; pts.value = bdCfgPts(b.cat); }; note.oninput = function () { b.note = note.value; }; pts.oninput = function () { b.pts = pts.value; };
       var q = h('input', { type: 'search', placeholder: 'প্লেয়ার খুঁজুন…', value: b.q }), chips = h('div', { class: 'bd-chips' });
       var names = []; S.players.forEach(function (p, id) { names.push([id, p]); }); names.sort(function (x, y) { return String(x[1].name).localeCompare(String(y[1].name)); });
+      var gm0 = bdGuests(); Object.keys(gm0).forEach(function (id) { names.push([id, { name: '🌐 ' + gm0[id] }]); });
       names.forEach(function (n) { var c = h('button', { type: 'button', class: 'bd-chip' + (b.pick[n[0]] ? ' on' : ''), 'data-n': String(n[1].name).toLowerCase(), onclick: function () { if (b.pick[n[0]]) delete b.pick[n[0]]; else b.pick[n[0]] = 1; c.classList.toggle('on'); cnt.textContent = Object.keys(b.pick).length + ' জন বাছা হয়েছে'; } }, n[1].name); chips.append(c); });
       q.oninput = function () { b.q = q.value; var v = q.value.trim().toLowerCase(); chips.querySelectorAll('.bd-chip').forEach(function (c) { c.style.display = !v || c.getAttribute('data-n').indexOf(v) >= 0 ? '' : 'none'; }); };
       var helper = h('div', { class: 'actions' }, h('button', { type: 'button', class: 'btn ghost sm', onclick: function () { var per = b.cat === 'potm' ? 'month' : 'week', r = range(per, -1), rows = ranking(r.start, r.end).filter(function (x) { return x.wins > 0; }); if (!rows.length) { toast('গত ' + (per === 'month' ? 'মাসে' : 'সপ্তাহে') + ' কোনো ম্যাচ নেই'); return; } var t = rows[0]; b.pick = {}; rows.forEach(function (x) { if (x.wins === t.wins && x.draws === t.draws && x.goals === t.goals) b.pick[x.id] = 1; }); renderView(); } }, '⚡ গত সপ্তাহ/মাসের লিডার বাছুন'));
-      var go = h('button', { type: 'button', class: 'btn block', onclick: async function () { go.disabled = true; var ok = await bdAddEntries(b.cat, b.note, Number(pts.value), Object.keys(b.pick)); go.disabled = false; if (ok) { b.pick = {}; b.note = ''; renderView(); } } }, 'পয়েন্ট যোগ করুন');
-      wrap.append(h('div', { class: 'ns-form', style: 'padding:0' }, h('label', null, 'ক্যাটাগরি', cat), h('label', null, 'টুর্নামেন্ট / নোট', note), h('label', null, 'প্রতি প্লেয়ারের পয়েন্ট', pts), h('label', null, 'প্লেয়ার বাছুন (একাধিক)', q), helper, chips, cnt, go));
+      var gin = h('input', { type: 'text', placeholder: '🌐 বাইরের প্লেয়ারের নাম (একাধিক হলে কমা দিয়ে)' });
+      var go = h('button', { type: 'button', class: 'btn block', onclick: async function () { go.disabled = true; var picks = Object.keys(b.pick); b.gnew = {}; gin.value.split(',').forEach(function (n) { n = n.trim(); if (n && n.length <= 40) { var id = bdGuestId(n); b.gnew[id] = n; if (picks.indexOf(id) < 0) picks.push(id); } }); var ok = await bdAddEntries(b.cat, b.note, Number(pts.value), picks); go.disabled = false; if (ok) { b.pick = {}; gin.value = ''; b.note = ''; renderView(); } } }, 'পয়েন্ট যোগ করুন');
+      wrap.append(h('div', { class: 'ns-form', style: 'padding:0' }, h('label', null, 'ক্যাটাগরি', cat), h('label', null, 'টুর্নামেন্ট / নোট', note), h('label', null, 'প্রতি প্লেয়ারের পয়েন্ট', pts), h('label', null, 'প্লেয়ার বাছুন (একাধিক)', q), helper, chips, h('label', null, 'বাইরের (গেস্ট) প্লেয়ার যোগ করুন', gin), cnt, go));
       var r10 = bdSeasonRange(season), rows10 = ranking(r10.start, r10.end).filter(function (x) { return x.wins > 0; }).slice(0, 10), p10 = bdTop10();
       var bonus = h('div', { class: 'bd-bonus' }, h('strong', null, '📊 ক্লাব র‍্যাংকিং Top-10 বোনাস'), h('p', { class: 'ns-small' }, 'মৌসুম শেষে সাইটের জয়-গোল র‍্যাংকিংয়ের শীর্ষ ১০ জন ক্রমানুসারে বোনাস পাবে। নিচে এখনকার প্রিভিউ:'));
       if (rows10.length) bonus.append(h('div', { class: 'bd-pv' }, rows10.map(function (x, i) { return h('span', null, '#' + (i + 1) + ' ' + x.p.name + ' +' + (p10[i] || 0)); })));
