@@ -1109,6 +1109,46 @@ input, select, textarea { accent-color:#F4C96B; }
 }
 </style>
 
+<style>
+/* SNB Transfer Market */
+:root{--mk-up:#5EDC9A;--mk-dn:#FF8F85}
+.mk-chip{display:inline-flex;align-items:baseline;gap:7px;margin-top:4px;font-family:var(--f-num);letter-spacing:.02em}
+.mk-chip b{font-weight:800;font-size:17px;color:var(--gold)}
+.mk-chip em{font-style:normal;font-weight:700;font-size:13px}
+.pinfo .mk-chip.up em,.mk-val em.up,.mk-chg b{color:var(--mk-up)}
+.pinfo .mk-chip.dn em,.mk-val em.dn{color:var(--mk-dn)}
+.pinfo .mk-chip.eq em,.mk-val em.eq{color:var(--muted)}
+.mk-card{padding:16px 18px 14px;border-radius:20px;border:1px solid rgba(231,194,106,.4);display:flex;flex-direction:column;gap:8px;
+  background:radial-gradient(120% 140% at 100% 0%,rgba(231,194,106,.16),transparent 55%),linear-gradient(160deg,#18222d,#0d141b);color:var(--mk-up)}
+.mk-card.dn{color:var(--mk-dn)}.mk-card.eq{color:var(--muted)}
+.mk-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.mk-top small{display:block;font-size:11px;letter-spacing:.2em;font-weight:800;color:var(--gold)}
+.mk-top strong{display:block;font:800 44px/1 var(--f-num);color:var(--ink);letter-spacing:.01em}
+.mk-chg{text-align:right;display:flex;flex-direction:column;line-height:1.2}
+.mk-chg b{font:800 22px var(--f-num);color:inherit}
+.mk-card.dn .mk-chg b{color:var(--mk-dn)}.mk-card.eq .mk-chg b{color:var(--muted)}
+.mk-chg span{font-size:12px;color:var(--muted)}
+.mk-spark{display:block;height:64px}.mk-spark svg{width:100%;height:100%;display:block;overflow:visible}
+.mk-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.mk-stats{display:flex;gap:26px;flex-wrap:wrap;margin-top:16px}
+.mk-stats div{display:flex;flex-direction:column}
+.mk-stats b{font:800 34px/1 var(--f-num);color:var(--gold)}
+.mk-stats span{font-size:13px;color:var(--muted);margin-top:4px}
+.mk-list{display:flex;flex-direction:column;padding:6px}
+.mk-mv{display:flex;flex-direction:column;gap:6px}
+.mk-row{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border-radius:14px;border:1px solid transparent;background:none;color:inherit;font:inherit;text-align:left}
+.mk-row:hover,.mk-row:focus-visible{background:rgba(255,255,255,.05)}
+.mk-row+.mk-row{border-top:1px solid rgba(255,255,255,.05)}
+.mk-rank{flex:none;min-width:26px;text-align:center;font:800 20px var(--f-num);color:var(--muted)}
+.mk-row.top1 .mk-rank{color:#F4C96B}.mk-row.top2 .mk-rank{color:#C8D0D9}.mk-row.top3 .mk-rank{color:#C98954}
+.mk-nm{display:flex;flex-direction:column;min-width:0;flex:1}
+.mk-nm strong{font-family:var(--f-display);font-weight:700;font-size:16px;overflow-wrap:anywhere;line-height:1.3}
+.mk-nm span{font-size:12.5px;color:var(--muted)}
+.mk-val{flex:none;display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.mk-val b{font:800 22px var(--f-num);color:var(--gold)}
+.mk-val em{font-style:normal;font-weight:700;font-size:13px;font-family:var(--f-num)}
+@media(max-width:480px){.mk-top strong{font-size:38px}.mk-stats{gap:18px}.mk-stats b{font-size:28px}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -1416,6 +1456,7 @@ input, select, textarea { accent-color:#F4C96B; }
     var tabs = [['home', 'হোম'], ['tournament', '🏆 টুর্নামেন্ট'], ['signings', '✍️ Signings'], ['board', 'লিডারবোর্ড']];
     if (S.canWrite) tabs.push(['add', 'জয় যোগ']);
     tabs.push(['players', 'প্লেয়ার']);
+    tabs.push(['market', '💷 মার্কেট']);
     tabs.push(['power', 'পাওয়ার র‍্যাঙ্কিং']);
     tabs.push(['hall', 'হল অফ ফেম']);
     tabs.push(['ballon', '🏅 Ballon d’Or']);
@@ -1853,6 +1894,7 @@ input, select, textarea { accent-color:#F4C96B; }
           h('div', { class: 'pinfo' },
             h('strong', null, e[1].name),
             ttlChip(e[0]),
+            mkChip(e[0]),
             h('span', null, (e[1].number ? '#' + e[1].number + ' · ' : '') + st.wins + ' জয় · ' + st.goals + ' গোল'),
             h('span', { class: 'mini', 'aria-hidden': 'true' }, badgesFor(e[0]).filter(function (x) { return x.on; }).slice(0, 5).map(function (x) { return x.b.e; }).join(' ')))));
       });
@@ -3081,7 +3123,7 @@ input, select, textarea { accent-color:#F4C96B; }
           h('div', { class: 'bt' }, h('strong', null, x.b.n + (x.on && x.n > 1 ? ' ×' + x.n : '')), h('span', { class: 'd' }, x.b.d)));
       })));
     var fifaBtn = h('button', { class: 'btn hp-share', onclick: function () { openFifa(id); } }, '🃏 Share Player Card');
-    sh.append(head, pro, fifaBtn, hpRadar(id), hpTrend(id), tbl, bsec, hist);
+    sh.append(head, pro, mkProfileBlock(id), fifaBtn, hpRadar(id), hpTrend(id), tbl, bsec, hist);
     if (S.canWrite) {
       var key = 'player:' + id, act = h('div', { class: 'actions' });
       if (S.confirm === key) {
@@ -3858,7 +3900,7 @@ input, select, textarea { accent-color:#F4C96B; }
     var inMain = main.some(function (x) { return x[0] === S.tab; });
     nav.append(h('button', { type: 'button', id: 'bmoreBtn', 'aria-haspopup': 'true', 'aria-current': inMain ? null : 'page', onclick: function () {
       if (document.getElementById('bmore')) { hpCloseMore(); return; }
-      var items = [['tournament', '🏆', 'টুর্নামেন্ট'], ['signings', '✍️', 'New Signings'], ['ballon', '🏅', 'Ballon d’Or']];
+      var items = [['tournament', '🏆', 'টুর্নামেন্ট'], ['market', '💷', 'ট্রান্সফার মার্কেট'], ['signings', '✍️', 'New Signings'], ['ballon', '🏅', 'Ballon d’Or']];
       if (S.canWrite) items.push(['add', '➕', 'জয় যোগ']);
       items.push(['power', '⚡', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', '📚', 'হল অফ ফেম'], ['moments', '📸', 'মুহূর্ত'], ['team', '👑', 'অ্যাডমিন প্যানেল']);
       var box = h('div', { id: 'bmore', class: 'bmore', role: 'menu' });
@@ -4079,6 +4121,7 @@ input, select, textarea { accent-color:#F4C96B; }
       ['🏆','Tournament Center','Fixtures, results and competition tables','tournament'],
       ['🏅','Leaderboards','Weekly, monthly and all-time stats','board'],
       ['👥','Player Directory','Find players and view profiles','players'],
+      ['💷','Transfer Market','Player values and weekly movers','market'],
       ['⭐','Dream XI','Auto-selected best performers','hall'],
       ['📚','Hall of Fame','Past weekly and monthly leaders','hall'],
       ['✍️','New Signings','Official player announcements','signings'],
@@ -4101,6 +4144,138 @@ input, select, textarea { accent-color:#F4C96B; }
       list.append(h('button', { class: 'row' + (i===0?' first':'') + (i<3?' m'+(i+1):''), onclick: function () { openSheet('profile', x.id); } }, h('span', { class: 'rank' }, String(i+1)), avatar(x.p), h('div', { class: 'nm' }, h('strong', null, x.p.name), h('span', { class: 'power-note' }, 'SNB Rating ' + ratingFor(x.id)), bar), h('span', { class: 'num' }, String(x.wins)), h('span', { class: 'num mid' }, String(x.draws)), h('span', { class: 'num loss' }, String(x.losses)), h('span', { class: 'num dim' }, String(x.goals))));
     });
     root.append(list, h('p', { class: 'muted small' }, 'রেটিংটি ওয়েবসাইটের সংরক্ষিত রেকর্ড থেকে হিসাব করা হয়; এটি Konami-এর official player rating নয়।'));
+    return root;
+  }
+
+  /* ---------- Transfer market (player value, £) ---------- */
+  /* Value comes from career performance (results, goals, hat-tricks) times a form factor
+     from the last two weeks. Players who stop playing slowly lose value, like in real life.
+     Weekly change = value now versus the value computed as of 7 days ago. */
+  var MK_MIN = 0.4;
+  function mkCalc(a, asOf) {
+    var m = a.W + a.D + a.L, v, fm = 1;
+    if (!m) return { v: MK_MIN, m: 0, form: 0, idle: 0 };
+    var ppm = (a.W * 3 + a.D + 4.5) / (m + 3);
+    var gpm = Math.min(3, a.G / m);
+    var r = Math.min(90, 45 + ppm * 8 + gpm * 3.5 + Math.min(m, 30) * 0.3 + Math.min(a.hat, 3) * 2);
+    v = MK_MIN * Math.exp(0.125 * (r - 45));
+    fm += Math.max(-0.2, Math.min(0.3, a.fs * 0.025));
+    var idle = Math.floor((asOf - a.last) / WEEK_MS);
+    if (idle >= 2) fm *= Math.max(0.72, 1 - 0.05 * (idle - 1));
+    v = Math.max(MK_MIN, v * fm);
+    return { v: Math.round(v * 100) / 100, m: m, form: a.fs, idle: idle };
+  }
+  function mkMap(asOf) {
+    var key = Math.floor(asOf / 36e5), c = S._mkc;
+    if (!c || c.w !== S.wins || c.p !== S.players) c = S._mkc = { w: S.wins, p: S.players, k: {} };
+    if (c.k[key]) return c.k[key];
+    var acc = {}, d7 = asOf - WEEK_MS, d14 = asOf - 2 * WEEK_MS;
+    S.players.forEach(function (p, id) { acc[id] = { W: 0, D: 0, L: 0, G: 0, hat: 0, last: 0, fs: 0 }; });
+    S.wins.forEach(function (w) {
+      var a = acc[w.playerId]; if (!a || w.ts > asOf) return;
+      var g = w.goals || 0, pts;
+      a.G += g; if (g >= 3) a.hat++;
+      if (w.type === 'draw') { a.D++; pts = 1 + g * 0.7; }
+      else if (w.type === 'loss') { a.L++; pts = -1.5 + g * 0.7; }
+      else { a.W++; pts = 3 + g * 0.7; }
+      if (w.ts > a.last) a.last = w.ts;
+      if (w.ts > d14) a.fs += pts * (w.ts > d7 ? 1 : 0.5);
+    });
+    var out = {};
+    Object.keys(acc).forEach(function (id) { out[id] = mkCalc(acc[id], asOf); });
+    c.k[key] = out;
+    return out;
+  }
+  function mkInfo(id) {
+    var now = Date.now(), cur = mkMap(now)[id] || { v: MK_MIN, m: 0, form: 0, idle: 0 }, old = mkMap(now - WEEK_MS)[id];
+    var prev = old ? old.v : MK_MIN, d = Math.round((cur.v - prev) * 100) / 100;
+    return { v: cur.v, prev: prev, d: d, pct: prev ? d / prev * 100 : 0, m: cur.m, form: cur.form, idle: cur.idle };
+  }
+  function mkFmt(v) {
+    if (v >= 100) return '£' + Math.round(v) + 'M';
+    if (v >= 10) return '£' + (Math.round(v * 10) / 10).toString().replace(/\.0$/, '') + 'M';
+    if (v >= 1) return '£' + (Math.round(v * 100) / 100).toString() + 'M';
+    return '£' + (Math.round(v * 20) * 50) + 'K';
+  }
+  function mkDelta(i) {
+    var up = i.d > 0.004, dn = i.d < -0.004;
+    return { cls: up ? 'up' : dn ? 'dn' : 'eq', ar: up ? '▲' : dn ? '▼' : '–', txt: (up || dn) ? Math.abs(Math.round(i.pct)) + '%' : '' };
+  }
+  function mkChip(id) {
+    var i = mkInfo(id), d = mkDelta(i);
+    return h('span', { class: 'mk-chip ' + d.cls, title: 'মার্কেট ভ্যালু' }, h('b', null, mkFmt(i.v)), h('em', null, d.ar + (d.txt ? ' ' + d.txt : '')));
+  }
+  function mkSpark(vals, w, hgt) {
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals), rg = mx - mn || 1, n = vals.length, pts = [];
+    vals.forEach(function (v, k) { pts.push((k / (n - 1) * (w - 8) + 4).toFixed(1) + ',' + (hgt - 6 - (v - mn) / rg * (hgt - 12)).toFixed(1)); });
+    var last = pts[n - 1].split(',');
+    var s = document.createElement('span');
+    s.className = 'mk-spark';
+    s.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + hgt + '" preserveAspectRatio="none" aria-hidden="true"><polyline points="' + pts.join(' ') + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="' + last[0] + '" cy="' + last[1] + '" r="3.6" fill="currentColor"/></svg>';
+    return s;
+  }
+  function mkHistory(id, weeks) {
+    var now = Date.now(), out = [];
+    for (var k = weeks - 1; k >= 0; k--) { var e = mkMap(now - k * WEEK_MS)[id]; out.push(e ? e.v : MK_MIN); }
+    return out;
+  }
+  function mkProfileBlock(id) {
+    var i = mkInfo(id), d = mkDelta(i), hist = mkHistory(id, 8), peak = Math.max.apply(null, hist);
+    var note = !i.m ? 'এখনো ম্যাচ খেলেননি, তাই শুরুর দাম।' : i.idle >= 2 ? i.idle + ' সপ্তাহ ম্যাচ খেলেননি, তাই দাম কমছে।' : i.form > 4 ? 'দারুণ ফর্মে, দাম বাড়ছে।' : i.form < -1 ? 'সাম্প্রতিক ফর্ম খারাপ, দাম চাপে।' : 'ফর্ম স্থির আছে।';
+    return h('section', { class: 'mk-card ' + d.cls },
+      h('div', { class: 'mk-top' },
+        h('div', null, h('small', null, 'MARKET VALUE'), h('strong', null, mkFmt(i.v))),
+        h('div', { class: 'mk-chg' }, h('b', null, d.ar + ' ' + (d.txt || '০%')), h('span', null, 'গত ৭ দিনে'))),
+      mkSpark(hist, 300, 64),
+      h('div', { class: 'mk-foot' }, h('span', null, 'গত ৮ সপ্তাহের সর্বোচ্চ ' + mkFmt(peak)), h('span', null, note)));
+  }
+  function mkRow(x, i, showRank) {
+    var inf = x.i, d = mkDelta(inf);
+    return h('button', { type: 'button', class: 'mk-row' + (i < 3 && showRank ? ' top' + (i + 1) : ''), onclick: function () { openSheet('profile', x.id); } },
+      showRank ? h('span', { class: 'mk-rank' }, String(i + 1)) : null,
+      avatar(x.p, 44),
+      h('div', { class: 'mk-nm' }, h('strong', null, x.p.name), h('span', null, titleFor(x.id).e + ' ' + titleFor(x.id).n + (inf.m ? ' · ' + inf.m + ' ম্যাচ' : ''))),
+      h('div', { class: 'mk-val' }, h('b', null, mkFmt(inf.v)), h('em', { class: d.cls }, d.ar + (d.txt ? ' ' + d.txt : ''))));
+  }
+  function marketView() {
+    var rows = [];
+    S.players.forEach(function (p, id) { rows.push({ id: id, p: p, i: mkInfo(id) }); });
+    var total = rows.reduce(function (s, x) { return s + x.i.v; }, 0);
+    var byVal = rows.slice().sort(function (a, b) { return b.i.v - a.i.v || (a.p.name || '').localeCompare(b.p.name || '', 'bn'); });
+    var risers = rows.filter(function (x) { return x.i.d > 0.004; }).sort(function (a, b) { return b.i.d - a.i.d; }).slice(0, 3);
+    var fallers = rows.filter(function (x) { return x.i.d < -0.004; }).sort(function (a, b) { return a.i.d - b.i.d; }).slice(0, 3);
+    var hero = h('section', { class: 'home-hero' }, h('span', { class: 'hp-shine', 'aria-hidden': 'true' }),
+      h('div', { class: 'home-kicker' }, 'SNB TRANSFER MARKET'), h('h2', null, 'PLAYER MARKET VALUE'),
+      h('p', null, 'প্রতিটি প্লেয়ারের দাম নির্ধারিত হয় তার পারফরম্যান্স ও সাম্প্রতিক ফর্ম দেখে। জিতলে দাম বাড়ে, ফর্ম হারালে বা ম্যাচ না খেললে কমে।'),
+      h('div', { class: 'mk-stats' },
+        h('div', null, h('b', null, mkFmt(total)), h('span', null, 'ক্লাবের মোট মূল্য')),
+        h('div', null, h('b', null, byVal.length ? mkFmt(byVal[0].i.v) : '–'), h('span', null, 'সবচেয়ে দামি')),
+        h('div', null, h('b', null, String(rows.length)), h('span', null, 'প্লেয়ার'))));
+    var root = h('div', { class: 'stack' }, hero);
+    if (!rows.length) { root.append(h('div', { class: 'home-empty' }, 'প্লেয়ার যোগ হলে মার্কেট ভ্যালু এখানে দেখা যাবে।')); return root; }
+    function movers(title, sub, list, cls) {
+      var box = h('section', { class: 'home-panel mk-mv ' + cls }, h('h3', null, title), h('p', { class: 'muted small' }, sub));
+      if (!list.length) box.append(h('div', { class: 'home-empty' }, 'এই সপ্তাহে কোনো পরিবর্তন নেই।'));
+      list.forEach(function (x, i) { box.append(mkRow(x, i, false)); });
+      return box;
+    }
+    root.append(h('div', { class: 'home-two' },
+      movers('📈 এই সপ্তাহের উত্থান', 'গত ৭ দিনে সবচেয়ে বেশি দাম বেড়েছে', risers, 'up'),
+      movers('📉 এই সপ্তাহের পতন', 'গত ৭ দিনে সবচেয়ে বেশি দাম কমেছে', fallers, 'dn')));
+    var sortKey = S.mkSort || 'val';
+    var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'সাজান' });
+    [['val', 'সবচেয়ে দামি'], ['up', 'বেশি বৃদ্ধি'], ['dn', 'বেশি পতন']].forEach(function (x) {
+      seg.append(h('button', { 'aria-pressed': sortKey === x[0] ? 'true' : 'false', onclick: function () { S.mkSort = x[0]; renderView(); } }, x[1]));
+    });
+    var sorted = rows.slice().sort(function (a, b) {
+      if (sortKey === 'up') return b.i.d - a.i.d || b.i.v - a.i.v;
+      if (sortKey === 'dn') return a.i.d - b.i.d || b.i.v - a.i.v;
+      return b.i.v - a.i.v || (a.p.name || '').localeCompare(b.p.name || '', 'bn');
+    });
+    var list = h('section', { class: 'card mk-list' });
+    sorted.forEach(function (x, i) { list.append(mkRow(x, i, true)); });
+    root.append(h('div', { class: 'periodbar' }, h('h3', { class: 'h3' }, 'সব প্লেয়ারের দাম'), seg), list,
+      h('p', { class: 'muted small' }, 'এটি ক্লাবের কাল্পনিক মূল্য, বাস্তব অর্থের সঙ্গে সম্পর্ক নেই। জয়, ড্র, গোল, হ্যাটট্রিক ও গত ২ সপ্তাহের ফর্ম থেকে স্বয়ংক্রিয়ভাবে হিসাব হয়। টানা ২ সপ্তাহ ম্যাচ না খেললে দাম কমতে শুরু করে।'));
     return root;
   }
 
@@ -4537,7 +4712,7 @@ input, select, textarea { accent-color:#F4C96B; }
     if (!S._tfWarm) { S._tfWarm = true; setTimeout(function () { (window.requestIdleCallback || function (f) { f(); })(function () { hpTfEnsure(); var t2 = document.getElementById('tfHost'); if (t2) t2.hidden = S.tab !== 'tournament'; }); }, 2500); }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'ballon' ? bdView() : S.tab === 'signings' ? nsView() : S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : viewPlayers());
+    v.append(S.tab === 'ballon' ? bdView() : S.tab === 'signings' ? nsView() : S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : S.tab === 'market' ? marketView() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
