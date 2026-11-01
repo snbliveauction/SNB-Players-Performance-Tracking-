@@ -1,4 +1,5 @@
 window.NB_CONFIG = {
+  vapidKey: "BDfgejVAdPdzty9CDIEyEEPDgxIHVN7UMtTuUHphl41vQRCkL0ucVnKuPuGR620BBFcBXt_8MssB9dvFTtn74Bs",
   firebase: {
     apiKey: "AIzaSyC6KB2cCzAToY2Qym8iv5uDNfqhh1xtwkA",
     authDomain: "snb-players-performance.firebaseapp.com",
