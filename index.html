@@ -1232,6 +1232,68 @@ html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none
 .nc-body{margin:2px 0 4px;font-size:14.5px;line-height:1.55;color:var(--ink);opacity:.92;overflow-wrap:anywhere}
 .nc-dot{position:absolute;right:6px;top:18px;width:9px;height:9px;border-radius:50%;background:#4C8DFF}
 </style>
+<style>
+/* home v2 */
+.hx-slide{position:relative;display:block!important;min-height:236px;padding:0!important;overflow:hidden;border-radius:20px}
+.hx-photo{position:absolute;top:-6px;right:-14px;bottom:-6px;width:62%;display:block;pointer-events:none;
+  -webkit-mask-image:radial-gradient(closest-side at 55% 46%,#000 58%,transparent 100%);mask-image:radial-gradient(closest-side at 55% 46%,#000 58%,transparent 100%)}
+.hx-ph{width:100%;height:100%;object-fit:cover;object-position:50% 18%;display:block;filter:saturate(1.08) contrast(1.04);animation:hxZoom 9s ease-out both}
+.hx-ph0{display:grid;place-items:center;font:800 120px/1 var(--f-num);color:var(--tc);opacity:.35}
+@keyframes hxZoom{from{transform:scale(1.08)}to{transform:scale(1)}}
+.hx-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 78% 40%,var(--tg),transparent 55%);opacity:.55}
+.hx-info{position:relative;z-index:2;max-width:62%;padding:22px 0 20px 4px;display:flex;flex-direction:column;gap:9px;align-items:flex-start}
+.hx-tag{font:700 11.5px/1 var(--f-num);letter-spacing:.14em;text-transform:uppercase;color:var(--tc);padding:6px 10px;border:1px solid var(--tc);border-radius:99px;background:rgba(0,0,0,.28)}
+.hx-slide h2.hx-name{margin:2px 0 0!important;font:800 clamp(28px,8vw,44px)/1.02 var(--f-num)!important;text-transform:none;letter-spacing:.005em;text-shadow:0 2px 18px rgba(0,0,0,.55)}
+.hx-ovr{display:flex;align-items:baseline;gap:6px}
+.hx-ovr b{font:800 54px/.9 var(--f-num);background:linear-gradient(180deg,#fff,var(--tc));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hx-ovr em{font:700 13px/1 var(--f-num);letter-spacing:.2em;color:var(--muted);font-style:normal}
+.hx-ovr span{margin-left:6px;font:700 14px/1 var(--f-num);color:var(--ink);opacity:.8}
+.hx-mini{display:flex;flex-wrap:wrap;gap:6px}
+.hx-mini span{font-size:12.5px;padding:5px 9px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(6px)}
+.hx-mini b{font-family:var(--f-num);font-size:14px}
+.hx-val{color:var(--gold)}
+.hx-val.up em{color:var(--mk-up,#5EDC9A)}.hx-val.dn em{color:var(--mk-dn,#FF6B5E)}
+.hx-val em{font-style:normal;margin-left:4px;font-size:11.5px}
+.hx-prog{display:block;height:3px;margin:12px 0 0;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.hx-prog i{display:block;height:100%;width:100%;transform-origin:left;background:linear-gradient(90deg,var(--gold),#fff);animation:hxProg 3.2s linear both}
+@keyframes hxProg{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* ticker */
+.hx-tick{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:linear-gradient(90deg,rgba(231,194,106,.10),rgba(124,200,207,.06));-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.hx-tt{display:flex;width:max-content;gap:0;padding:11px 0;animation:hxMarq var(--d,40s) linear infinite}
+.hx-tick:hover .hx-tt,.hx-tick:active .hx-tt{animation-play-state:paused}
+.hx-ti{display:inline-flex;align-items:center;gap:7px;padding:0 20px;white-space:nowrap;font-size:13.5px;border-right:1px solid var(--line-2)}
+.hx-ti b{font-family:var(--f-num);font-weight:700}.hx-ti .up{color:var(--mk-up,#5EDC9A)}.hx-ti .dn{color:var(--mk-dn,#FF6B5E)}
+.hx-ti .ico{color:var(--gold);display:inline-flex}
+@keyframes hxMarq{to{transform:translateX(-50%)}}
+/* bento stats */
+.hx-bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.hx-bento .home-metric:first-child{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;column-gap:14px;align-items:center;padding:18px}
+.hx-bento .home-metric:last-child{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;column-gap:14px;align-items:center;padding:18px}
+.hx-bento .home-metric:last-child .metric-ic{grid-row:1/3;margin:0}
+.hx-bento .home-metric:last-child .metric-label{margin:0}
+.hx-bento .home-metric:last-child .spark{position:static;grid-row:1/3;grid-column:3;width:80px;height:36px}
+.hx-bento .home-metric:first-child .metric-ic{grid-row:1/3;margin:0}
+.hx-bento .home-metric:first-child .metric-label{margin:0}
+.hx-bento .home-metric:first-child .spark{position:static;grid-row:1/3;grid-column:3;width:80px;height:36px}
+.hx-bento .home-metric{background:linear-gradient(150deg,rgba(255,255,255,.045),transparent 60%),linear-gradient(145deg,var(--surface),#10171f)}
+.hx-bento .home-metric:before{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:var(--mc);opacity:.12;filter:blur(10px)}
+.hx-bento .metric-ic{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;margin-bottom:10px;color:var(--mc);background:color-mix(in srgb,var(--mc) 16%,transparent);border:1px solid color-mix(in srgb,var(--mc) 35%,transparent)}
+.hx-bento .metric-ic .ico{display:inline-flex}
+/* movers + club form */
+.hx-mv-row{display:flex;align-items:center;gap:10px;width:100%;padding:9px 4px;background:none;border:0;border-top:1px solid rgba(255,255,255,.06);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.hx-mv-row:first-of-type{border-top:0}
+.hx-mv-row strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hx-sub{margin:14px 0 4px;font:700 11.5px/1 var(--f-num);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hx-bars{display:flex;align-items:flex-end;gap:7px;height:96px;margin:10px 0 4px}
+.hx-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:2px;min-width:0}
+.hx-bar i{display:block;border-radius:4px;min-height:0;transition:height .7s cubic-bezier(.2,.8,.2,1)}
+.hx-bar .w{background:linear-gradient(180deg,#8CF0BD,#34D399)}.hx-bar .d{background:#C8D0D9}.hx-bar .l{background:#FF6B5E}
+.hx-lbls{display:flex;gap:7px;font:600 10.5px/1 var(--f-num);color:var(--muted)}.hx-lbls span{flex:1;text-align:center}
+.hx-kpis{display:flex;gap:8px;margin-top:10px}.hx-kpi{flex:1;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line);text-align:center}
+.hx-kpi b{display:block;font:800 22px/1 var(--f-num);color:var(--gold)}.hx-kpi small{color:var(--muted);font-size:11.5px}
+@media(prefers-reduced-motion:reduce){.hx-tt,.hx-ph,.hx-prog i{animation:none}}
+html[data-theme="light"] .hx-ph0{opacity:.5}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -3851,17 +3913,17 @@ html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none
     var played = [0, 0, 0, 0, 0, 0, 0, 0].map(function () { return {}; });
     S.wins.forEach(function (w) { var k = hpWeekIdx(w.ts); if (k >= 0 && k < 8) played[7 - k][w.playerId] = 1; });
     var defs = [
-      ['👥', 'Registered players', S.players.size, '#F4C96B', played.map(function (o) { return Object.keys(o).length; })],
-      ['🏆', 'Recorded wins', tw, '#C5F36A', hpCum(function (w) { return w.type === 'draw' || w.type === 'loss' ? 0 : 1; })],
-      ['⚽', 'Goals recorded', tg, '#67D7E8', hpCum(function (w) { return Number(w.goals || 0); })],
-      ['📊', 'Performance entries', S.wins.length, '#7C5CFF', hpCum(function () { return 1; })]
+      ['users', 'Registered players', S.players.size, '#F4C96B', played.map(function (o) { return Object.keys(o).length; })],
+      ['trophy', 'Recorded wins', tw, '#C5F36A', hpCum(function (w) { return w.type === 'draw' || w.type === 'loss' ? 0 : 1; })],
+      ['ball', 'Goals recorded', tg, '#67D7E8', hpCum(function (w) { return Number(w.goals || 0); })],
+      ['feed', 'Performance entries', S.wins.length, '#7C5CFF', hpCum(function () { return 1; })]
     ];
     var done = !!S._hpCounted;
-    var box = h('div', { class: 'home-metrics' });
+    var box = h('div', { class: 'home-metrics hx-bento' });
     defs.forEach(function (d) {
       var num = h('span', { class: 'metric-num', 'data-v': d[2] }, String(done ? d[2] : 0));
       var card = h('div', { class: 'home-metric' + (done ? ' show' : ''), style: '--mc:' + d[3] },
-        h('span', { class: 'metric-ic', 'aria-hidden': 'true' }, d[0]), num, h('span', { class: 'metric-label' }, d[1]), hpSpark(d[4]));
+        h('span', { class: 'metric-ic', 'aria-hidden': 'true' }, icoEl(d[0], 20)), num, h('span', { class: 'metric-label' }, d[1]), hpSpark(d[4]));
       box.append(card);
     });
     return box;
@@ -4127,6 +4189,66 @@ html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none
     } catch (e) { d.busy = false; if (S.sheet) renderSheet(); acFail(e); }
   }
 
+  /* ---------- home v2: spotlight hero, ticker, movers, club form ---------- */
+  function hxTicker() {
+    var items = [];
+    var evs = S.wins.slice().sort(function (a, b) { return (b.createdAt || b.ts) - (a.createdAt || a.ts); }).slice(0, 8);
+    evs.forEach(function (w) {
+      var p = S.players.get(w.playerId); if (!p) return;
+      var g = w.goals || 0, res = w.type === 'draw' ? 'ড্র করল' : w.type === 'loss' ? 'হারল' : 'জিতল';
+      if (g >= 3) items.push({ ic: 'ball', t: [h('b', null, p.name), ' হ্যাটট্রিক! ' + bn(g) + ' গোল'] });
+      else items.push({ ic: w.type === 'loss' ? 'down' : w.type === 'draw' ? 'dot' : 'trophy', t: [h('b', null, p.name), ' ' + res + (g ? ' · ' + bn(g) + ' গোল' : '')] });
+    });
+    var mv = [];
+    S.players.forEach(function (p, id) { var i = mkInfo(id); if (i.m > 0 && Math.abs(i.pct) >= 1) mv.push({ p: p, i: i }); });
+    mv.sort(function (a, b) { return Math.abs(b.i.pct) - Math.abs(a.i.pct); });
+    mv.slice(0, 3).forEach(function (x) {
+      var up = x.i.d > 0;
+      items.push({ ic: 'market', t: [h('b', null, x.p.name), ' ', h('span', { class: up ? 'up' : 'dn' }, (up ? '▲ ' : '▼ ') + bn(Math.abs(Math.round(x.i.pct))) + '%'), ' · ' + mkFmt(x.i.v)] });
+    });
+    if (items.length < 3) return null;
+    var track = h('div', { class: 'hx-tt', style: '--d:' + Math.max(28, items.length * 5) + 's' });
+    for (var rep = 0; rep < 2; rep++) items.forEach(function (it) { var s = h('span', { class: 'hx-ti' }, icoEl(it.ic, 16)); it.t.forEach(function (n) { s.append(typeof n === 'string' ? document.createTextNode(n) : n.cloneNode(true)); }); track.append(s); });
+    return h('div', { class: 'hx-tick', role: 'marquee', 'aria-label': 'ক্লাবের সর্বশেষ খবর' }, track);
+  }
+  function hxMovers() {
+    var arr = [];
+    S.players.forEach(function (p, id) { var i = mkInfo(id); if (i.m > 0) arr.push({ id: id, p: p, i: i }); });
+    var up = arr.filter(function (x) { return x.i.d > 0.004; }).sort(function (a, b) { return b.i.pct - a.i.pct; }).slice(0, 3);
+    var dn = arr.filter(function (x) { return x.i.d < -0.004; }).sort(function (a, b) { return a.i.pct - b.i.pct; }).slice(0, 2);
+    if (!up.length && !dn.length) return null;
+    var box = h('section', { class: 'home-panel' }, h('h3', null, hIco('market', 'মার্কেট মুভার্স')), h('p', { class: 'muted small' }, 'গত ৭ দিনে যাদের দাম সবচেয়ে বেশি বদলেছে'));
+    function row(x) {
+      return h('button', { type: 'button', class: 'hx-mv-row', onclick: function () { openSheet('profile', x.id); } }, avatar(x.p, 34), h('strong', null, x.p.name), mkChip(x.id));
+    }
+    up.forEach(function (x) { box.append(row(x)); });
+    if (dn.length) { box.append(h('div', { class: 'hx-sub' }, 'দাম পড়েছে')); dn.forEach(function (x) { box.append(row(x)); }); }
+    box.append(h('button', { type: 'button', class: 'btn ghost block', style: 'margin-top:12px', onclick: function () { goTab('market'); } }, 'পুরো মার্কেট দেখুন'));
+    return box;
+  }
+  function hxForm() {
+    var wk = [0, 1, 2, 3, 4, 5, 6, 7].map(function () { return { w: 0, d: 0, l: 0 }; }), tw = 0, tm = 0;
+    S.wins.forEach(function (w) {
+      tm++; if (w.type !== 'draw' && w.type !== 'loss') tw++;
+      var k = hpWeekIdx(w.ts); if (k < 0 || k > 7) return;
+      var c = wk[7 - k]; if (w.type === 'draw') c.d++; else if (w.type === 'loss') c.l++; else c.w++;
+    });
+    var mx = Math.max.apply(null, wk.map(function (c) { return c.w + c.d + c.l; }).concat([1]));
+    if (!tm) return null;
+    var bars = h('div', { class: 'hx-bars' }), lbls = h('div', { class: 'hx-lbls' });
+    wk.forEach(function (c, i) {
+      var b = h('div', { class: 'hx-bar', title: bn(c.w) + ' জয় · ' + bn(c.d) + ' ড্র · ' + bn(c.l) + ' হার' });
+      [['l', c.l], ['d', c.d], ['w', c.w]].forEach(function (s) { var e = h('i', { class: s[0] }); e.style.height = (s[1] / mx * 100) + '%'; b.append(e); });
+      bars.append(b); lbls.append(h('span', null, i === 7 ? 'এই' : '-' + bn(7 - i)));
+    });
+    var cw = wk[7], thisM = cw.w + cw.d + cw.l, g = 0, r = range('week', 0);
+    S.wins.forEach(function (w) { if (w.ts >= r.start && w.ts < r.end) g += Number(w.goals || 0); });
+    return h('section', { class: 'home-panel' }, h('h3', null, hIco('bolt', 'ক্লাব ফর্ম')), h('p', { class: 'muted small' }, 'গত ৮ সপ্তাহের জয় · ড্র · হার'), bars, lbls,
+      h('div', { class: 'hx-kpis' },
+        h('div', { class: 'hx-kpi' }, h('b', null, bn(Math.round(tw / tm * 100)) + '%'), h('small', null, 'জয়ের হার')),
+        h('div', { class: 'hx-kpi' }, h('b', null, bn(thisM)), h('small', null, 'এই সপ্তাহে ম্যাচ')),
+        h('div', { class: 'hx-kpi' }, h('b', null, bn(g)), h('small', null, 'এই সপ্তাহে গোল'))));
+  }
   function hpShowcase(all, hlead, top) {
     var ids = [];
     S.players.forEach(function (p, id) { if (p.photo) ids.push(id); });
@@ -4137,34 +4259,43 @@ html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none
     if (!(S.hpIdx >= 0 && S.hpIdx < n)) S.hpIdx = 0;
     var stat = {}; all.forEach(function (x) { stat[x.id] = x; });
     var count = h('span', { class: 'hp-count', 'aria-hidden': 'true' });
-    var box = h('div', { class: 'hp-show' });
+    var box = h('div', { class: 'hp-show', style: 'min-height:236px;margin:14px 0 0' });
+    var prog = h('span', { class: 'hx-prog', 'aria-hidden': 'true' }, h('i'));
     function slide(id) {
-      var p = S.players.get(id), st = stat[id], rt = ratingFor(id);
-      var chips = h('div', { class: 'hp-lead-stats' });
-      if (p.number) chips.append(h('span', null, '#', h('b', null, String(p.number))));
-      chips.append(h('span', null, 'OVR ', h('b', null, String(rt))));
-      if (st) { chips.append(h('span', null, h('b', null, String(st.wins)), ' জয়')); chips.append(h('span', null, h('b', null, String(st.goals)), ' গোল')); }
-      return h('button', { type: 'button', class: 'hp-slide', 'aria-label': p.name + ' প্রোফাইল', onclick: function () { openSheet('profile', id); } },
-        hpRingAv(p, 104), h('div', { class: 'hp-lead-info' }, h('h2', null, p.name), chips));
+      var p = S.players.get(id), st = stat[id], rt = ratingFor(id), tc = hpTierCol(rt), ti = titleFor(id), mi = mkInfo(id), md = mkDelta(mi);
+      var mini = h('div', { class: 'hx-mini' }, h('span', { class: 'hx-val ' + md.cls }, h('b', null, mkFmt(mi.v)), md.txt ? h('em', null, md.ar + ' ' + md.txt) : null));
+      if (st) { mini.append(h('span', null, h('b', null, String(st.wins)), ' জয়')); mini.append(h('span', null, h('b', null, String(st.goals)), ' গোল')); }
+      var ph = p.photo ? h('img', { class: 'hx-ph', src: p.photo, alt: '' }) : h('span', { class: 'hx-ph hx-ph0' }, initial(p.name));
+      return h('button', { type: 'button', class: 'hp-slide hx-slide', style: '--tc:' + tc[0] + ';--tg:' + tc[1], 'aria-label': p.name + ' প্রোফাইল', onclick: function () { openSheet('profile', id); } },
+        h('span', { class: 'hx-glow' }), h('span', { class: 'hx-photo' }, ph),
+        h('div', { class: 'hx-info' }, h('span', { class: 'hx-tag' }, ti.e + ' ' + ti.n), h('h2', { class: 'hx-name' }, p.name),
+          h('div', { class: 'hx-ovr' }, h('b', null, String(rt)), h('em', null, 'OVR'), p.number ? h('span', null, '#' + p.number) : null), mini));
     }
-    function paint() { count.textContent = String(S.hpIdx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0'); }
-    box.append(slide(order[S.hpIdx])); paint();
-    clearInterval(window._hpT);
-    window._hpT = setInterval(function () {
-      if (!document.body.contains(box)) { clearInterval(window._hpT); return; }
-      if (document.hidden || S.tab !== 'home' || S.sheet) return;
+    function paint() { count.textContent = String(S.hpIdx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0'); var b = prog.firstChild; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; }
+    function go(dir) {
       var cur = box.firstChild; if (cur) cur.classList.add('out');
       setTimeout(function () {
         if (!document.body.contains(box)) return;
-        S.hpIdx = (S.hpIdx + 1) % n;
+        S.hpIdx = (S.hpIdx + dir + n) % n;
         var nx = slide(order[S.hpIdx]); nx.classList.add('in'); box.textContent = ''; box.append(nx); paint();
         requestAnimationFrame(function () { requestAnimationFrame(function () { nx.classList.remove('in'); }); });
-      }, 360);
-    }, 3200);
+      }, 300);
+    }
+    box.append(slide(order[S.hpIdx])); paint();
+    var sx = null;
+    box.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener('touchend', function (e) { if (sx === null) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) { go(dx < 0 ? 1 : -1); clearInterval(window._hpT); window._hpT = setInterval(tick, 3200); } }, { passive: true });
+    function tick() {
+      if (!document.body.contains(box)) { clearInterval(window._hpT); return; }
+      if (document.hidden || S.tab !== 'home' || S.sheet) return;
+      go(1);
+    }
+    clearInterval(window._hpT);
+    window._hpT = setInterval(tick, 3200);
     var line = hlead.length ? h('p', { class: 'hp-leadline' }, '👑 এই সপ্তাহের লিডার: ', h('b', null, hlead.map(function (r) { return r.p.name; }).join(' ও ')), ' · ' + top.wins + ' জয় · ' + top.goals + ' গোল') : null;
     return h('section', { class: 'home-hero' }, h('span', { class: 'hp-shine', 'aria-hidden': 'true' }), hpLive(),
       h('div', { class: 'home-kicker' }, 'SYLHET NETBREAKERS • OUR SQUAD', count),
-      box, line,
+      box, prog, line,
       h('div', { class: 'home-actions' },
         h('button', { class: 'btn lime', onclick: function () { goTab('board'); } }, 'View Rankings  →'),
         h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
@@ -4232,7 +4363,8 @@ html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none
     ].forEach(function (x) { quick.append(h('button', { class: 'quick-card', onclick: function () { goTab(x[3]); } }, h('span', { class: 'quick-icon' }, icoEl(x[0], 22)), h('strong', null, x[1]), h('small', null, x[2]))); });
     q.append(quick);
     setTimeout(hpCount, 120);
-    return h('div', { class: 'stack' }, heroBox, ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), sections, feedPanel(6), q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
+    var hxMid = [hxMovers(), hxForm()].filter(Boolean); hxMid = hxMid.length ? h('div', { class: 'home-two' }, hxMid) : null;
+    return h('div', { class: 'stack' }, heroBox, hxTicker(), ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), hxMid, sections, feedPanel(6), q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
   }
   function powerView() {
     var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
