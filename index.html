@@ -28,6 +28,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" media="print" onload="this.media='all'" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;700;800&family=Barlow+Condensed:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;700;800&family=Barlow+Condensed:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap"></noscript>
+<script>try{if(localStorage.getItem('nb-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <style>
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 [hidden] { display: none !important; }
@@ -1149,6 +1150,64 @@ input, select, textarea { accent-color:#F4C96B; }
 .mk-val em{font-style:normal;font-weight:700;font-size:13px;font-family:var(--f-num)}
 @media(max-width:480px){.mk-top strong{font-size:38px}.mk-stats{gap:18px}.mk-stats b{font-size:28px}}
 </style>
+<style>
+/* icons, header tools, feed, fantasy, notifications, offline, light theme */
+.ico{display:inline-flex;flex:none;vertical-align:middle}.ico svg{display:block}
+.hico{display:inline-flex;align-items:center;gap:8px}.hico .ico{color:var(--gold)}
+.bnav .bi{display:flex;justify-content:center;line-height:1;font-size:0}
+.quick-card .quick-icon{display:flex;width:42px;height:42px;align-items:center;justify-content:center;border-radius:12px;background:rgba(231,194,106,.12);border:1px solid rgba(231,194,106,.25)}
+.bmore button .ico{color:var(--gold)}
+.hdr-tools{display:flex;gap:8px;margin-bottom:4px}
+.hdr-tools .iconbtn{width:36px;height:36px;border-radius:50%;color:var(--gold)}
+.fd-panel{display:flex;flex-direction:column;gap:2px}
+.fd-row{display:flex;gap:12px;align-items:center;width:100%;padding:10px 4px;border:0;border-top:1px solid rgba(255,255,255,.06);background:none;color:inherit;font:inherit;text-align:left}
+.fd-row:first-of-type{border-top:0}
+button.fd-row:hover{background:rgba(255,255,255,.04)}
+.fd-ic{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.07);color:var(--muted)}
+.fd-row.gold .fd-ic{background:rgba(231,194,106,.16);color:var(--gold)}
+.fd-row.up .fd-ic{background:rgba(94,220,154,.15);color:var(--mk-up)}
+.fd-row.dn .fd-ic{background:rgba(255,143,133,.15);color:var(--mk-dn)}
+.fd-row.aqua .fd-ic{background:rgba(124,200,207,.15);color:var(--aqua)}
+.fd-tx{display:flex;flex-direction:column;min-width:0}
+.fd-tx strong{font-family:var(--f-display);font-weight:600;font-size:15.5px;line-height:1.35;overflow-wrap:anywhere}
+.fd-tx span{font-size:12.5px;color:var(--muted)}
+.fn-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.fn-head small{display:block;font-size:11px;letter-spacing:.18em;color:var(--gold);font-weight:800}
+.fn-head strong{font:800 26px/1.1 var(--f-display)}
+.fn-tot{text-align:right;display:flex;flex-direction:column;line-height:1}
+.fn-tot b{font:800 40px/1 var(--f-num);color:var(--gold)}.fn-tot span{font-size:12px;color:var(--muted);margin-top:4px}
+.fn-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:10px 0 12px}
+.fn-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#C5F36A,#E7C26A)}
+.fn-bar.over i{background:var(--danger)}
+.fn-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0 6px}
+.fn-slot{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 8px;border-radius:14px;border:1px solid var(--line-2);background:rgba(255,255,255,.04);color:inherit;font:inherit;min-width:0}
+.fn-slot.empty{border-style:dashed;color:var(--muted);justify-content:center;min-height:106px;font-size:12px;background:none}
+.fn-slot.cap{border-color:var(--gold);box-shadow:0 0 0 1px rgba(231,194,106,.4),0 0 22px rgba(231,194,106,.18)}
+.fn-slot b{font-size:13px;font-family:var(--f-display);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fn-slot span{font-size:11.5px;color:var(--muted)}
+.fn-slot .fn-pt{color:var(--mk-up);font-weight:700}
+.fn-c{position:absolute;top:-7px;right:-4px;width:22px;height:22px;border-radius:50%;background:var(--gold);color:#241805;font:800 12px/22px var(--f-num);font-style:normal;text-align:center}
+.fn-pick{position:relative}
+.fn-pick:disabled{opacity:.38;cursor:not-allowed}
+.fn-pick.on{background:rgba(231,194,106,.1)}
+.fn-chk{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:14px;color:#241805}
+.fn-pick.on .fn-chk{background:var(--gold);border-color:var(--gold)}
+.fn-lb.me{background:rgba(124,200,207,.1);border-radius:12px}
+.fn-faces{display:flex!important;gap:3px;margin-top:3px}
+.fn-faces .av{--s:26px}
+.notice{white-space:pre-line}
+.nt-banner{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;border:1px solid rgba(231,194,106,.4);background:linear-gradient(135deg,rgba(231,194,106,.14),rgba(10,16,24,.9));color:var(--gold);position:relative}
+.nt-banner div{display:flex;flex-direction:column;flex:1;min-width:0}
+.nt-banner strong{color:var(--ink);font-family:var(--f-display);font-size:15.5px}
+.nt-banner span{color:var(--muted);font-size:13px}
+.nt-x{width:30px;height:30px;border:0;background:none;color:var(--muted);flex:none}
+.offbar{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;gap:8px;align-items:center;justify-content:center;padding:7px 12px calc(7px);background:#3A2A0F;color:#F4C96B;font-size:13px;font-weight:600}
+@media(max-width:480px){.fn-slots{gap:6px}.fn-slot{padding:8px 2px 6px}.fn-slot b{font-size:12px}.hdr-tools .iconbtn{width:34px;height:34px}}
+/* light theme: smart invert keeps the whole design, photos and video stay natural */
+html[data-theme="light"]{filter:invert(.93) hue-rotate(180deg);background:#fff}
+html[data-theme="light"] img,html[data-theme="light"] video,html[data-theme="light"] canvas,html[data-theme="light"] .av,html[data-theme="light"] iframe,html[data-theme="light"] .fn-c,html[data-theme="light"] .bd-confetti{filter:invert(1) hue-rotate(180deg)}
+html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -1441,6 +1500,7 @@ input, select, textarea { accent-color:#F4C96B; }
     var r = $('#role');
     r.textContent = '';
     r.className = 'role';
+    r.append(hdrTools());
     if (S.noDb) return;
     if (S.user) {
       r.append(h('span', { class: 'who' }, S.canWrite ? 'অ্যাডমিন' : 'অ্যাডমিন নন'),
@@ -1453,15 +1513,17 @@ input, select, textarea { accent-color:#F4C96B; }
     hpBottomNav();
     var t = $('#tabs');
     t.textContent = '';
-    var tabs = [['home', 'হোম'], ['tournament', '🏆 টুর্নামেন্ট'], ['signings', '✍️ Signings'], ['board', 'লিডারবোর্ড']];
+    var tabs = [['home', 'হোম'], ['tournament', 'টুর্নামেন্ট'], ['signings', 'Signings'], ['board', 'লিডারবোর্ড']];
     if (S.canWrite) tabs.push(['add', 'জয় যোগ']);
     tabs.push(['players', 'প্লেয়ার']);
-    tabs.push(['market', '💷 মার্কেট']);
+    tabs.push(['market', 'মার্কেট']);
+    tabs.push(['fantasy', 'Fantasy']);
+    tabs.push(['feed', 'ফিড']);
     tabs.push(['power', 'পাওয়ার র‍্যাঙ্কিং']);
     tabs.push(['hall', 'হল অফ ফেম']);
-    tabs.push(['ballon', '🏅 Ballon d’Or']);
-    tabs.push(['moments', '📸 মুহূর্ত']);
-    tabs.push(['team', '👑 অ্যাডমিন']);
+    tabs.push(['ballon', 'Ballon d’Or']);
+    tabs.push(['moments', 'মুহূর্ত']);
+    tabs.push(['team', 'অ্যাডমিন']);
     tabs.push(['fun', '🎉 মজা']);
     tabs.forEach(function (x) {
       var b = h('button', {
@@ -1766,7 +1828,7 @@ input, select, textarea { accent-color:#F4C96B; }
           h('button', { class: 'iconbtn', 'aria-label': 'গোল বাড়ান', disabled: S.goals >= 30, onclick: function () { S.goals = Math.min(30, S.goals + 1); renderView(); } }, icon('plus')))),
       h('label', { class: 'field' }, 'তারিখ', dateIn),
       (subBtn = h('button', { class: 'btn block', disabled: !S.pick || S.busy, onclick: addWin }, S.busy ? 'সেভ হচ্ছে…' : (S.kind === 'draw' ? 'ড্র যোগ করুন' : S.kind === 'loss' ? 'হার যোগ করুন' : 'জয় যোগ করুন'))));
-    var root = h('div', { class: 'stack' }, form);
+    var root = h('div', { class: 'stack' }, form, ntAdminBox());
     var allRecent = S.wins.slice().sort(function (a, b) { return b.ts - a.ts || b.createdAt - a.createdAt; });
     var recent = allRecent.slice(0, S.recentN || 8);
     if (recent.length) {
@@ -1787,6 +1849,7 @@ input, select, textarea { accent-color:#F4C96B; }
       await S.db.doc('months/' + monthKey(ts)).set({ entries: firebase.firestore.FieldValue.arrayUnion(entry) }, { merge: true });
       var p = S.players.get(S.pick);
       toast((p ? p.name : 'প্লেয়ার') + (S.kind === 'draw' ? '-এর ড্র যোগ হয়েছে' : S.kind === 'loss' ? '-এর হার যোগ হয়েছে' : '-এর জয় যোগ হয়েছে') + (S.goals ? ' · ' + S.goals + ' গোল' : ''));
+      ntQueue((p ? p.name : 'একজন প্লেয়ার') + (S.kind === 'draw' ? ' ম্যাচ ড্র করল' : S.kind === 'loss' ? ' হারল' : ' জিতল') + (S.goals ? ' (' + bn(S.goals) + ' গোল)' : ''));
       S.pick = null; S.goals = 0;
     } catch (e) { writeFail(e); }
     S.busy = false; renderView();
@@ -3042,8 +3105,8 @@ input, select, textarea { accent-color:#F4C96B; }
   }
   function openFifa(id) {
     var p = S.players.get(id); if (!p) return;
-    var a = allStats(id), t = titleFor(id);
-    startSpecial('fifa', { fifa: { name: p.name, photo: p.photo || null, number: p.number || '', rating: ratingFor(id), title: t.e + ' ' + t.n, a: a } }, 'PLAYER CARD', 'fifa-' + id);
+    var a = allStats(id), t = titleFor(id), mi = mkInfo(id), md = mkDelta(mi);
+    startSpecial('fifa', { fifa: { name: p.name, photo: p.photo || null, number: p.number || '', rating: ratingFor(id), title: t.e + ' ' + t.n, a: a, value: mkFmt(mi.v), vdelta: md.txt ? md.ar + ' ' + md.txt + ' • 7D' : '', holo: mi.v >= 30 || ratingFor(id) >= 88 } }, 'PLAYER CARD', 'fifa-' + id);
   }
   function startSpecial(kind, extra, title, key) {
     var now = new Date();
@@ -3479,6 +3542,15 @@ input, select, textarea { accent-color:#F4C96B; }
       rr(x, cx0 + 14, cy0 + 14, cw - 28, ch - 28, 68); x.lineWidth = 3; x.strokeStyle = TR.line; x.stroke();
       var sh2 = x.createLinearGradient(0, cy0, 0, cy0 + ch * 0.5); sh2.addColorStop(0, 'rgba(255,255,255,0.35)'); sh2.addColorStop(1, 'rgba(255,255,255,0)');
       rr(x, cx0, cy0, cw, ch, 80); x.fillStyle = sh2; x.fill();
+      if (F.holo) {
+        x.save(); rr(x, cx0, cy0, cw, ch, 80); x.clip();
+        var hg2 = x.createLinearGradient(cx0, cy0 + ch, cx0 + cw, cy0);
+        ['255,90,140', '255,200,80', '90,230,160', '90,170,255', '190,120,255'].forEach(function (c, i) { hg2.addColorStop(i / 4, 'rgba(' + c + ',0.16)'); });
+        x.fillStyle = hg2; x.fillRect(cx0, cy0, cw, ch);
+        x.globalCompositeOperation = 'lighter'; x.fillStyle = 'rgba(255,255,255,0.07)';
+        for (var hs = -ch; hs < cw; hs += 70) { x.beginPath(); x.moveTo(cx0 + hs, cy0 + ch); x.lineTo(cx0 + hs + 36, cy0 + ch); x.lineTo(cx0 + hs + 36 + ch, cy0); x.lineTo(cx0 + hs + ch, cy0); x.closePath(); x.fill(); }
+        x.restore();
+      }
       var DK = TR.ink;
       x.textAlign = 'center'; x.fillStyle = DK; x.font = '800 190px ' + NUM; x.fillText(String(F.rating), 290, cy0 + 215);
       x.font = '700 44px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '8px'; x.fillText('RATING', 296, cy0 + 268); if ('letterSpacing' in x) x.letterSpacing = '0px';
@@ -3493,12 +3565,13 @@ input, select, textarea { accent-color:#F4C96B; }
       x.fillStyle = DK; fitFont(x, F.name, 700, 80, 800, BN); x.fillText(F.name, W / 2, cy0 + 548);
       x.font = '700 44px ' + BN; x.fillStyle = TR.sub; x.fillText(F.title, W / 2, cy0 + 612);
       x.fillStyle = TR.div; x.fillRect(cx0 + 90, cy0 + 650, cw - 180, 4);
-      var st = [['WIN', F.a.wins], ['DRAW', F.a.draws], ['LOSS', F.a.losses || 0], ['GOAL', F.a.goals], ['HAT-TRICK', F.a.hat], ['TITLES', F.a.champs]];
+      var st = [['WIN', F.a.wins], ['DRAW', F.a.draws], ['GOAL', F.a.goals], ['HAT-TRICK', F.a.hat], ['TITLES', F.a.champs], ['VALUE', F.value]];
       st.forEach(function (s, i) {
         var col = i % 3, row = Math.floor(i / 3), sx = 270 + col * 270, sy = cy0 + 760 + row * 150;
-        x.fillStyle = DK; x.font = '800 96px ' + NUM; x.fillText(String(s[1]), sx, sy);
+        x.fillStyle = DK; fitFont(x, String(s[1]), 236, 96, 800, NUM); x.fillText(String(s[1]), sx, sy);
         x.font = '700 30px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillStyle = TR.sub; x.fillText(s[0], sx + 2, sy + 42); if ('letterSpacing' in x) x.letterSpacing = '0px';
       });
+      if (F.vdelta) { x.fillStyle = TR.sub; x.font = '700 32px ' + NUM; x.fillText(F.vdelta, 812, cy0 + 910 + 84); }
       x.restore();
       footer(x, W, story ? 1790 : H - 36, NUM);
     } else if (card.kind === 'spin') {
@@ -3892,23 +3965,24 @@ input, select, textarea { accent-color:#F4C96B; }
       });
     }
     nav.textContent = '';
-    var main = [['home', '🏠', 'হোম'], ['board', '🏆', 'র‍্যাঙ্কিং'], ['players', '👥', 'প্লেয়ার'], ['fun', '🎉', 'মজা']];
+    var main = [['home', 'home', 'হোম'], ['board', 'trophy', 'র‍্যাঙ্কিং'], ['players', 'users', 'প্লেয়ার'], ['fun', 'spark', 'মজা']];
     main.forEach(function (x) {
       nav.append(h('button', { type: 'button', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); goTab(x[0]); } },
-        h('span', { class: 'bi', 'aria-hidden': 'true' }, x[1]), x[2]));
+        h('span', { class: 'bi', 'aria-hidden': 'true' }, icoEl(x[1], 24)), x[2]));
     });
     var inMain = main.some(function (x) { return x[0] === S.tab; });
     nav.append(h('button', { type: 'button', id: 'bmoreBtn', 'aria-haspopup': 'true', 'aria-current': inMain ? null : 'page', onclick: function () {
       if (document.getElementById('bmore')) { hpCloseMore(); return; }
-      var items = [['tournament', '🏆', 'টুর্নামেন্ট'], ['market', '💷', 'ট্রান্সফার মার্কেট'], ['signings', '✍️', 'New Signings'], ['ballon', '🏅', 'Ballon d’Or']];
-      if (S.canWrite) items.push(['add', '➕', 'জয় যোগ']);
-      items.push(['power', '⚡', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', '📚', 'হল অফ ফেম'], ['moments', '📸', 'মুহূর্ত'], ['team', '👑', 'অ্যাডমিন প্যানেল']);
+      var items = [['feed', 'feed', 'ক্লাব ফিড'], ['tournament', 'trophy', 'টুর্নামেন্ট'], ['market', 'market', 'ট্রান্সফার মার্কেট'], ['fantasy', 'fantasy', 'Fantasy'], ['signings', 'pen', 'New Signings'], ['ballon', 'medal', 'Ballon d’Or']];
+      if (S.canWrite) items.push(['add', 'plus', 'জয় যোগ']);
+      items.push(['power', 'bolt', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', 'book', 'হল অফ ফেম'], ['moments', 'camera', 'মুহূর্ত'], ['team', 'crown', 'অ্যাডমিন প্যানেল']);
+      items.push(['theme', themeNow() === 'light' ? 'moon' : 'sun', themeNow() === 'light' ? 'ডার্ক থিম' : 'লাইট থিম']);
       var box = h('div', { id: 'bmore', class: 'bmore', role: 'menu' });
       items.forEach(function (x) {
-        box.append(h('button', { type: 'button', role: 'menuitem', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); goTab(x[0]); } }, h('span', { 'aria-hidden': 'true' }, x[1]), x[2]));
+        box.append(h('button', { type: 'button', role: 'menuitem', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); if (x[0] === 'theme') { themeToggle(); renderTabs(); return; } goTab(x[0]); } }, icoEl(x[1], 20), x[2]));
       });
       document.body.append(box);
-    } }, h('span', { class: 'bi', 'aria-hidden': 'true' }, '☰'), 'আরও'));
+    } }, h('span', { class: 'bi', 'aria-hidden': 'true' }, icoEl('menu', 24)), 'আরও'));
   }
   function hpFeatured() {
     var r = range('week', 0), best = null, bs = -1;
@@ -4102,7 +4176,7 @@ input, select, textarea { accent-color:#F4C96B; }
     }
     var sc = hpShowcase(all, hlead, top); if (sc) heroBox = sc;
     var metrics = hpMetrics(totalWins, totalGoals);
-    var weekly = h('section', { class: 'home-panel' }, h('h3', null, '🏅 এই সপ্তাহের টপ ৫'), h('p', { class: 'muted small' }, rangeLabel('week', 0)));
+    var weekly = h('section', { class: 'home-panel' }, h('h3', null, hIco('medal', 'এই সপ্তাহের টপ ৫')), h('p', { class: 'muted small' }, rangeLabel('week', 0)));
     if (active.length) active.slice(0, 5).forEach(function (x, i) {
       weekly.append(h('button', { type: 'button', class: 'power-row pr-btn', onclick: function () { openSheet('profile', x.id); } },
         h('span', { class: 'power-rank' }, String(i + 1).padStart(2, '0')),
@@ -4110,7 +4184,7 @@ input, select, textarea { accent-color:#F4C96B; }
         h('span', { class: 'power-score' }, String(x.wins))));
     });
     else weekly.append(h('div', { class: 'home-empty' }, 'এই সপ্তাহে এখনো কোনো পারফরম্যান্স রেকর্ড নেই। ম্যাচের তথ্য যোগ হলে এখানে সেরা খেলোয়াড়রা দেখা যাবে।'));
-    var leaders = h('section', { class: 'home-panel' }, h('h3', null, '⚡ Power Rankings'), h('p', { class: 'muted small' }, 'Overall rating calculated from recorded performance.'));
+    var leaders = h('section', { class: 'home-panel' }, h('h3', null, hIco('bolt', 'Power Rankings')), h('p', { class: 'muted small' }, 'Overall rating calculated from recorded performance.'));
     if (power.length) power.forEach(function (x, i) {
       leaders.append(h('div', { class: 'power-row' }, h('span', { class: 'power-rank' }, String(i+1).padStart(2,'0')), h('div', { class: 'home-player-info' }, h('strong', null, x.p.name), h('span', { class: 'power-note' }, x.wins + ' wins · ' + x.goals + ' goals')), h('span', { class: 'power-score' }, String(ratingFor(x.id)))));
     }); else leaders.append(h('div', { class: 'home-empty' }, 'র‍্যাঙ্কিং তৈরি করতে খেলোয়াড় ও ম্যাচের রেকর্ড প্রয়োজন।'));
@@ -4118,20 +4192,22 @@ input, select, textarea { accent-color:#F4C96B; }
     var q = h('section', { class: 'stack' }, h('div', { class: 'home-section-head' }, h('h2', null, 'Explore SNB'), h('span', { class: 'muted small' }, 'QUICK ACCESS')));
     var quick = h('div', { class: 'quick-grid' });
     [
-      ['🏆','Tournament Center','Fixtures, results and competition tables','tournament'],
-      ['🏅','Leaderboards','Weekly, monthly and all-time stats','board'],
-      ['👥','Player Directory','Find players and view profiles','players'],
-      ['💷','Transfer Market','Player values and weekly movers','market'],
-      ['⭐','Dream XI','Auto-selected best performers','hall'],
-      ['📚','Hall of Fame','Past weekly and monthly leaders','hall'],
-      ['✍️','New Signings','Official player announcements','signings'],
-      ['🥇','Ballon d’Or','Season awards and club honours','ballon'],
-      ['📸','Club Moments','Community highlights and photos','moments'],
-      ['🎮','Community Zone','Games and interactive features','fun']
-    ].forEach(function (x) { quick.append(h('button', { class: 'quick-card', onclick: function () { goTab(x[3]); } }, h('span', { class: 'quick-icon' }, x[0]), h('strong', null, x[1]), h('small', null, x[2]))); });
+      ['trophy','Tournament Center','Fixtures, results and competition tables','tournament'],
+      ['medal','Leaderboards','Weekly, monthly and all-time stats','board'],
+      ['users','Player Directory','Find players and view profiles','players'],
+      ['market','Transfer Market','Player values and weekly movers','market'],
+      ['fantasy','Fantasy XI','Pick 5 players, beat the club','fantasy'],
+      ['feed','Club Feed','Live results and milestones','feed'],
+      ['star','Dream XI','Auto-selected best performers','hall'],
+      ['book','Hall of Fame','Past weekly and monthly leaders','hall'],
+      ['pen','New Signings','Official player announcements','signings'],
+      ['crown','Ballon d’Or','Season awards and club honours','ballon'],
+      ['camera','Club Moments','Community highlights and photos','moments'],
+      ['spark','Community Zone','Games and interactive features','fun']
+    ].forEach(function (x) { quick.append(h('button', { class: 'quick-card', onclick: function () { goTab(x[3]); } }, h('span', { class: 'quick-icon' }, icoEl(x[0], 22)), h('strong', null, x[1]), h('small', null, x[2]))); });
     q.append(quick);
     setTimeout(hpCount, 120);
-    return h('div', { class: 'stack' }, heroBox, bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), sections, q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
+    return h('div', { class: 'stack' }, heroBox, ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), sections, feedPanel(6), q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
   }
   function powerView() {
     var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
@@ -4154,7 +4230,7 @@ input, select, textarea { accent-color:#F4C96B; }
   var MK_MIN = 0.4;
   function mkCalc(a, asOf) {
     var m = a.W + a.D + a.L, v, fm = 1;
-    if (!m) return { v: MK_MIN, m: 0, form: 0, idle: 0 };
+    if (!m) return { v: MK_MIN, m: 0, form: 0, idle: 0, last: 0 };
     var ppm = (a.W * 3 + a.D + 4.5) / (m + 3);
     var gpm = Math.min(3, a.G / m);
     var r = Math.min(90, 45 + ppm * 8 + gpm * 3.5 + Math.min(m, 30) * 0.3 + Math.min(a.hat, 3) * 2);
@@ -4163,7 +4239,7 @@ input, select, textarea { accent-color:#F4C96B; }
     var idle = Math.floor((asOf - a.last) / WEEK_MS);
     if (idle >= 2) fm *= Math.max(0.72, 1 - 0.05 * (idle - 1));
     v = Math.max(MK_MIN, v * fm);
-    return { v: Math.round(v * 100) / 100, m: m, form: a.fs, idle: idle };
+    return { v: Math.round(v * 100) / 100, m: m, form: a.fs, idle: idle, last: a.last };
   }
   function mkMap(asOf) {
     var key = Math.floor(asOf / 36e5), c = S._mkc;
@@ -4187,9 +4263,9 @@ input, select, textarea { accent-color:#F4C96B; }
     return out;
   }
   function mkInfo(id) {
-    var now = Date.now(), cur = mkMap(now)[id] || { v: MK_MIN, m: 0, form: 0, idle: 0 }, old = mkMap(now - WEEK_MS)[id];
+    var now = Date.now(), cur = mkMap(now)[id] || { v: MK_MIN, m: 0, form: 0, idle: 0, last: 0 }, old = mkMap(now - WEEK_MS)[id];
     var prev = old ? old.v : MK_MIN, d = Math.round((cur.v - prev) * 100) / 100;
-    return { v: cur.v, prev: prev, d: d, pct: prev ? d / prev * 100 : 0, m: cur.m, form: cur.form, idle: cur.idle };
+    return { v: cur.v, prev: prev, d: d, pct: prev ? d / prev * 100 : 0, m: cur.m, form: cur.form, idle: cur.idle, last: cur.last };
   }
   function mkFmt(v) {
     if (v >= 100) return '£' + Math.round(v) + 'M';
@@ -4250,7 +4326,8 @@ input, select, textarea { accent-color:#F4C96B; }
       h('div', { class: 'mk-stats' },
         h('div', null, h('b', null, mkFmt(total)), h('span', null, 'ক্লাবের মোট মূল্য')),
         h('div', null, h('b', null, byVal.length ? mkFmt(byVal[0].i.v) : '–'), h('span', null, 'সবচেয়ে দামি')),
-        h('div', null, h('b', null, String(rows.length)), h('span', null, 'প্লেয়ার'))));
+        h('div', null, h('b', null, String(rows.length)), h('span', null, 'প্লেয়ার'))),
+      h('div', { class: 'home-actions', style: 'margin-top:16px' }, h('button', { class: 'btn lime', onclick: function () { goTab('fantasy'); } }, 'Fantasy খেলুন  →')));
     var root = h('div', { class: 'stack' }, hero);
     if (!rows.length) { root.append(h('div', { class: 'home-empty' }, 'প্লেয়ার যোগ হলে মার্কেট ভ্যালু এখানে দেখা যাবে।')); return root; }
     function movers(title, sub, list, cls) {
@@ -4260,8 +4337,8 @@ input, select, textarea { accent-color:#F4C96B; }
       return box;
     }
     root.append(h('div', { class: 'home-two' },
-      movers('📈 এই সপ্তাহের উত্থান', 'গত ৭ দিনে সবচেয়ে বেশি দাম বেড়েছে', risers, 'up'),
-      movers('📉 এই সপ্তাহের পতন', 'গত ৭ দিনে সবচেয়ে বেশি দাম কমেছে', fallers, 'dn')));
+      movers(hIco('up', 'এই সপ্তাহের উত্থান'), 'গত ৭ দিনে সবচেয়ে বেশি দাম বেড়েছে', risers, 'up'),
+      movers(hIco('down', 'এই সপ্তাহের পতন'), 'গত ৭ দিনে সবচেয়ে বেশি দাম কমেছে', fallers, 'dn')));
     var sortKey = S.mkSort || 'val';
     var seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'সাজান' });
     [['val', 'সবচেয়ে দামি'], ['up', 'বেশি বৃদ্ধি'], ['dn', 'বেশি পতন']].forEach(function (x) {
@@ -4277,6 +4354,343 @@ input, select, textarea { accent-color:#F4C96B; }
     root.append(h('div', { class: 'periodbar' }, h('h3', { class: 'h3' }, 'সব প্লেয়ারের দাম'), seg), list,
       h('p', { class: 'muted small' }, 'এটি ক্লাবের কাল্পনিক মূল্য, বাস্তব অর্থের সঙ্গে সম্পর্ক নেই। জয়, ড্র, গোল, হ্যাটট্রিক ও গত ২ সপ্তাহের ফর্ম থেকে স্বয়ংক্রিয়ভাবে হিসাব হয়। টানা ২ সপ্তাহ ম্যাচ না খেললে দাম কমতে শুরু করে।'));
     return root;
+  }
+
+  /* ---------- icon set (SVG, follows text colour) ---------- */
+  var ICO = {
+    home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h4.5V14h4v5.5h4.5V10"/>',
+    trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5.5a2 2 0 0 0 0 4H8M16 6h2.5a2 2 0 0 1 0 4H16"/><path d="M12 13v4M8.5 20h7M10 17h4"/>',
+    users: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M17.5 14c2.2.2 3.8 1.8 3.8 4.5"/>',
+    spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>',
+    menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+    market: '<path d="M4 4.5V19h16"/><path d="M7.5 15l3.5-4 3 3 5-6"/><path d="M16 8h3v3"/>',
+    pen: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+    medal: '<circle cx="12" cy="15" r="5"/><path d="M8.5 3.5 11 10M15.5 3.5 13 10"/>',
+    bolt: '<path d="M13 3 5 13.5h6L10 21l9-11h-6z"/>',
+    book: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5V4.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19"/>',
+    camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+    crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    feed: '<path d="M5 4h14v16H5z"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/>',
+    fantasy: '<path d="M12 3 4.5 6v5.5c0 4.5 3 7.7 7.5 9.5 4.5-1.8 7.5-5 7.5-9.5V6z"/><path d="M12 8.5l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5V5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+    moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
+    bell: '<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
+    bellOff: '<path d="M6 16v-5a6 6 0 0 1 9-5.2M18 11v5l1.5 2H8"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0M4 4l16 16"/>',
+    ball: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5l3.5 2.5-1.3 4.2H9.8L8.5 10z"/>',
+    star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 17l-5.2 2.7 1-5.9-4.3-4.1 5.9-.8z"/>',
+    up: '<path d="M5 15l7-7 7 7"/>',
+    down: '<path d="M5 9l7 7 7-7"/>',
+    wifi: '<path d="M3 9a14 14 0 0 1 18 0M6 12.5a9.5 9.5 0 0 1 12 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19" r=".8"/><path d="M4 4l16 16"/>',
+    dot: '<circle cx="12" cy="12" r="3"/>'
+  };
+  function icoEl(n, sz) {
+    var s = document.createElement('span');
+    s.className = 'ico'; s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = '<svg viewBox="0 0 24 24" width="' + (sz || 22) + '" height="' + (sz || 22) + '" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + (ICO[n] || ICO.dot) + '</svg>';
+    return s;
+  }
+  function hIco(n, text) { return h('span', { class: 'hico' }, icoEl(n, 20), text); }
+
+  /* ---------- theme (dark / light) ---------- */
+  function themeNow() { try { return localStorage.getItem('nb-theme') === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; } }
+  function themeSet(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    try { localStorage.setItem('nb-theme', t); } catch (e) { /* ignore */ }
+    var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t === 'light' ? '#EEF1F4' : '#0F151C');
+    renderHeader();
+  }
+  function themeToggle() { themeSet(themeNow() === 'light' ? 'dark' : 'light'); }
+
+  /* ---------- time helpers ---------- */
+  var BNF = new Intl.NumberFormat('bn-BD');
+  function bn(n) { return BNF.format(n); }
+  function agoBn(ts) {
+    var d = Date.now() - ts;
+    if (d < 12e4) return 'এইমাত্র';
+    if (d < 36e5) return bn(Math.floor(d / 6e4)) + ' মিনিট আগে';
+    if (d < 864e5) return bn(Math.floor(d / 36e5)) + ' ঘণ্টা আগে';
+    if (d < 2 * 864e5) return 'গতকাল';
+    if (d < 7 * 864e5) return bn(Math.floor(d / 864e5)) + ' দিন আগে';
+    return fmtDay.format(new Date(ts));
+  }
+
+  /* ---------- club feed (built automatically from matches, values and signings) ---------- */
+  function feedItems(limit) {
+    var items = [], cum = {};
+    var wins = S.wins.slice().sort(function (a, b) { return a.ts - b.ts; });
+    wins.forEach(function (w) {
+      var p = S.players.get(w.playerId); if (!p) return;
+      var n = p.name, g = w.goals || 0, c = cum[w.playerId] || (cum[w.playerId] = { w: 0, g: 0 }), won = false, ts = w.createdAt && w.createdAt > w.ts ? w.createdAt : w.ts;
+      if (g >= 3) items.push({ ts: ts + 2, ic: 'star', tone: 'gold', id: w.playerId, t: 'হ্যাটট্রিক! ' + n + ' এক ম্যাচে ' + bn(g) + ' গোল করল' });
+      if (w.type === 'draw') items.push({ ts: ts, ic: 'ball', id: w.playerId, t: n + ' ড্র করল' + (g ? ' · ' + bn(g) + ' গোল' : '') });
+      else if (w.type !== 'loss') { c.w++; won = true; items.push({ ts: ts, ic: 'ball', id: w.playerId, t: n + ' জিতল' + (g ? ' · ' + bn(g) + ' গোল' : '') }); }
+      if (won) [5, 10, 25, 50].forEach(function (k) { if (c.w === k) items.push({ ts: ts + 1, ic: 'medal', tone: 'gold', id: w.playerId, t: n + ' ' + bn(k) + ' জয়ের ক্লাবে ঢুকল' }); });
+      var pg = c.g; c.g += g;
+      [10, 25, 50, 100].forEach(function (k) { if (pg < k && c.g >= k) items.push({ ts: ts + 1, ic: 'ball', tone: 'gold', id: w.playerId, t: n + ' ' + bn(k) + ' গোলের মাইলফলক ছুঁল' }); });
+    });
+    var mv = [];
+    S.players.forEach(function (p, id) { var i = mkInfo(id); if (i.m >= 2 && Math.abs(i.pct) >= 12 && i.last) mv.push({ id: id, p: p, i: i }); });
+    mv.sort(function (a, b) { return Math.abs(b.i.d) - Math.abs(a.i.d); }).slice(0, 4).forEach(function (x) {
+      var up = x.i.d > 0;
+      items.push({ ts: x.i.last + 3, ic: 'market', tone: up ? 'up' : 'dn', id: x.id, t: x.p.name + '-এর দাম ' + (up ? '▲ ' : '▼ ') + bn(Math.round(Math.abs(x.i.pct))) + '% ' + (up ? 'বেড়ে ' : 'কমে ') + mkFmt(x.i.v) });
+    });
+    (S.signings || []).forEach(function (x) {
+      if (!x.createdAt || !x.name) return;
+      items.push({ ts: x.createdAt, ic: 'pen', tone: 'aqua', t: (x.type === 'transfer' ? 'ট্রান্সফার: ' : 'নতুন সাইনিং: ') + x.name + (x.team ? ' → ' + x.team : '') });
+    });
+    items.sort(function (a, b) { return b.ts - a.ts; });
+    return items.slice(0, limit);
+  }
+  function feedRow(it) {
+    var tag = it.id ? 'button' : 'div';
+    return h(tag, { type: it.id ? 'button' : null, class: 'fd-row ' + (it.tone || ''), onclick: it.id ? function () { openSheet('profile', it.id); } : null },
+      h('span', { class: 'fd-ic' }, icoEl(it.ic, 18)),
+      h('div', { class: 'fd-tx' }, h('strong', null, it.t), h('span', null, agoBn(it.ts))));
+  }
+  function feedPanel(limit) {
+    var list = feedItems(limit), box = h('section', { class: 'home-panel fd-panel' }, h('h3', null, hIco('feed', 'ক্লাব ফিড')), h('p', { class: 'muted small' }, 'ম্যাচ, মাইলফলক, দামের বড় পরিবর্তন ও নতুন খবর'));
+    if (!list.length) { box.append(h('div', { class: 'home-empty' }, 'ম্যাচের রেকর্ড যোগ হলে এখানে খবর আসতে থাকবে।')); return box; }
+    list.forEach(function (it) { box.append(feedRow(it)); });
+    box.append(h('button', { class: 'btn ghost block', style: 'margin-top:8px', onclick: function () { goTab('feed'); } }, 'সব খবর দেখুন'));
+    return box;
+  }
+  function feedView() {
+    var list = feedItems(60), box = h('section', { class: 'home-panel fd-panel' }, h('h3', null, hIco('feed', 'ক্লাব ফিড')), h('p', { class: 'muted small' }, 'সর্বশেষ ৬০টি খবর, নিজে থেকেই তৈরি হয়'));
+    if (!list.length) box.append(h('div', { class: 'home-empty' }, 'এখনো কোনো খবর নেই।'));
+    list.forEach(function (it) { box.append(feedRow(it)); });
+    return h('div', { class: 'stack' }, box);
+  }
+
+  /* ---------- Fantasy: pick 5 players inside a budget, captain scores double ---------- */
+  var FAN_SIZE = 5;
+  S.fan = { docs: [], err: false, listening: false, lw: '', unsub: null, draft: null, editing: false, busy: false };
+  function fanKey() { return 'nb-fan-' + weekKey(); }
+  function fanName() { try { return localStorage.getItem('nb-fan-name') || ''; } catch (e) { return ''; } }
+  function fanBudget() {
+    var vals = []; S.players.forEach(function (p, id) { vals.push(mkInfo(id).v); });
+    vals.sort(function (a, b) { return b - a; });
+    var top = vals.slice(0, FAN_SIZE).reduce(function (s, v) { return s + v; }, 0);
+    return Math.max(3, Math.round(top * 0.6 * 2) / 2);
+  }
+  function fanMine() {
+    var id = weekKey() + '_' + devId(), d = null;
+    S.fan.docs.forEach(function (x) { if (x.id === id) d = x; });
+    if (!d) { try { var raw = localStorage.getItem(fanKey()); if (raw) d = JSON.parse(raw); } catch (e) { /* ignore */ } }
+    return d;
+  }
+  function fanPoints(d) {
+    var wk = range('week', 0), from = d.savedAt || 0, per = {}, tot = 0;
+    (d.picks || []).forEach(function (id) { per[id] = 0; });
+    S.wins.forEach(function (w) {
+      if (per[w.playerId] === undefined || w.ts < wk.start || w.ts >= wk.end || (w.createdAt || w.ts) < from) return;
+      var g = w.goals || 0;
+      per[w.playerId] += (w.type === 'draw' ? 1 : w.type === 'loss' ? -0.5 : 3) + g + (g >= 3 ? 2 : 0);
+    });
+    Object.keys(per).forEach(function (id) { if (id === d.cap) per[id] *= 2; tot += per[id]; });
+    return { tot: Math.round(tot * 10) / 10, per: per };
+  }
+  function fanListen() {
+    if (!S.db) return;
+    var wk = weekKey();
+    if (S.fan.listening && S.fan.lw === wk) return;
+    if (S.fan.unsub) { try { S.fan.unsub(); } catch (e) { /* ignore */ } }
+    S.fan.listening = true; S.fan.lw = wk; S.fan.docs = [];
+    S.fan.unsub = S.db.collection('fantasy').where('week', '==', wk).onSnapshot(function (sn) {
+      S.fan.docs = sn.docs.map(function (d) { var x = d.data(); x.id = d.id; return x; }); S.fan.err = false;
+      if (S.tab === 'fantasy' && !funBusy()) renderView();
+    }, function (e) { console.error(e); S.fan.err = true; S.fan.listening = false; if (S.tab === 'fantasy') renderView(); });
+  }
+  async function fanSave() {
+    var dr = S.fan.draft; if (!dr || dr.picks.length !== FAN_SIZE || !dr.cap) return;
+    var nm = String(dr.name || '').trim(); if (!nm) { toast('আপনার নাম লিখুন'); return; }
+    var prices = {}; dr.picks.forEach(function (id) { prices[id] = mkInfo(id).v; });
+    var doc = { week: weekKey(), dev: devId(), name: nm, picks: dr.picks.slice(), cap: dr.cap, prices: prices, budget: fanBudget(), savedAt: Date.now() };
+    try { localStorage.setItem(fanKey(), JSON.stringify(doc)); localStorage.setItem('nb-fan-name', nm); } catch (e) { /* ignore */ }
+    S.fan.busy = true; renderView();
+    try { await S.db.doc('fantasy/' + weekKey() + '_' + devId()).set(doc); toast('টিম সেভ হয়েছে'); }
+    catch (e) { console.error(e); S.fan.err = true; toast('অনলাইনে সেভ হয়নি, শুধু এই ফোনে রাখা হলো'); }
+    S.fan.busy = false; S.fan.draft = null; S.fan.editing = false; renderView();
+  }
+  function fanSlots(picks, cap, per, onTap) {
+    var row = h('div', { class: 'fn-slots' });
+    for (var k = 0; k < FAN_SIZE; k++) {
+      var id = picks[k], p = id ? S.players.get(id) : null;
+      if (!p) { row.append(h('div', { class: 'fn-slot empty' }, icoEl('plus', 20), h('span', null, 'খালি'))); continue; }
+      row.append(h('button', { type: 'button', class: 'fn-slot' + (cap === id ? ' cap' : ''), onclick: (function (i) { return function () { onTap(i); }; })(id) },
+        avatar(p, 52), cap === id ? h('i', { class: 'fn-c' }, 'C') : null, h('b', null, p.name),
+        per ? h('span', { class: 'fn-pt' }, (per[id] > 0 ? '+' : '') + (Math.round(per[id] * 10) / 10) + ' পয়েন্ট') : h('span', null, mkFmt(mkInfo(id).v))));
+    }
+    return row;
+  }
+  function fanView() {
+    fanListen();
+    var f = S.fan, wk = range('week', 0), mine = fanMine();
+    var root = h('div', { class: 'stack' }, h('section', { class: 'home-hero' }, h('span', { class: 'hp-shine', 'aria-hidden': 'true' }),
+      h('div', { class: 'home-kicker' }, 'SNB FANTASY • ' + rangeLabel('week', 0)), h('h2', null, 'BUILD YOUR XI'),
+      h('p', null, FAN_SIZE + ' জন প্লেয়ার বাছুন বাজেটের মধ্যে। ক্যাপ্টেনের পয়েন্ট দ্বিগুণ। সেভ করার পর থেকে রেকর্ড হওয়া ম্যাচের পয়েন্ট গোনা হয়।')));
+    if (!S.players.size) { root.append(h('div', { class: 'home-empty' }, 'প্লেয়ার যোগ হলে Fantasy খেলা যাবে।')); return root; }
+    var budget = fanBudget();
+    if (mine && !f.editing) {
+      var pt = fanPoints(mine);
+      root.append(h('section', { class: 'home-panel' },
+        h('div', { class: 'fn-head' }, h('div', null, h('small', null, 'আপনার টিম'), h('strong', null, mine.name || 'আমি')), h('div', { class: 'fn-tot' }, h('b', null, String(pt.tot)), h('span', null, 'পয়েন্ট'))),
+        fanSlots(mine.picks, mine.cap, pt.per, function (id) { openSheet('profile', id); }),
+        h('p', { class: 'muted small' }, 'প্রতি জয় ৩, ড্র ১, হার −০.৫, প্রতি গোল +১, হ্যাটট্রিকে +২। ক্যাপ্টেন ×২।'),
+        h('button', { class: 'btn ghost block', onclick: function () { f.editing = true; f.draft = { picks: mine.picks.slice(), cap: mine.cap, name: mine.name || fanName() }; renderView(); } }, 'টিম বদলান (পয়েন্ট নতুন করে শুরু হবে)')));
+    } else {
+      if (!f.draft) f.draft = { picks: [], cap: null, name: fanName() };
+      var dr = f.draft, spent = dr.picks.reduce(function (s, id) { return s + mkInfo(id).v; }, 0), left = budget - spent;
+      var bar = h('div', { class: 'fn-bar' + (left < 0 ? ' over' : '') }, h('i')); bar.firstChild.style.width = Math.min(100, spent / budget * 100) + '%';
+      var nameIn = h('input', { type: 'text', placeholder: 'আপনার নাম (লিডারবোর্ডে দেখাবে)', maxlength: '24', value: dr.name || '', 'aria-label': 'নাম', oninput: function (e) { dr.name = e.target.value; } });
+      var save = h('button', { class: 'btn lime block', disabled: dr.picks.length !== FAN_SIZE || !dr.cap || f.busy, onclick: fanSave }, f.busy ? 'সেভ হচ্ছে…' : 'টিম সেভ করুন');
+      var panel = h('section', { class: 'home-panel' },
+        h('div', { class: 'fn-head' }, h('div', null, h('small', null, 'বাজেট'), h('strong', null, mkFmt(Math.max(0, left)) + ' বাকি')), h('div', { class: 'fn-tot' }, h('b', null, dr.picks.length + '/' + FAN_SIZE), h('span', null, 'বাছাই'))),
+        bar, fanSlots(dr.picks, dr.cap, null, function (id) { if (dr.cap === id) { dr.picks = dr.picks.filter(function (x) { return x !== id; }); dr.cap = null; } else dr.cap = id; renderView(); }),
+        h('p', { class: 'muted small' }, dr.picks.length ? 'প্লেয়ারে একবার চাপলে ক্যাপ্টেন (C), আবার চাপলে বাদ।' : 'নিচের তালিকা থেকে প্লেয়ার বাছুন।'), nameIn, save);
+      var list = h('section', { class: 'card mk-list' });
+      var rows = []; S.players.forEach(function (p, id) { rows.push({ id: id, p: p, i: mkInfo(id) }); });
+      rows.sort(function (a, b) { return b.i.v - a.i.v; }).forEach(function (x) {
+        var on = dr.picks.indexOf(x.id) >= 0, full = !on && dr.picks.length >= FAN_SIZE, cant = !on && x.i.v > left + 1e-6, d = mkDelta(x.i);
+        list.append(h('button', { type: 'button', class: 'mk-row fn-pick' + (on ? ' on' : ''), disabled: full || cant, onclick: function () {
+          if (on) { dr.picks = dr.picks.filter(function (i) { return i !== x.id; }); if (dr.cap === x.id) dr.cap = null; }
+          else { dr.picks.push(x.id); if (!dr.cap) dr.cap = x.id; }
+          renderView(); } },
+          avatar(x.p, 40), h('div', { class: 'mk-nm' }, h('strong', null, x.p.name), h('span', null, x.i.m + ' ম্যাচ · ফর্ম ' + (x.i.form > 0 ? '+' : '') + (Math.round(x.i.form * 10) / 10))),
+          h('div', { class: 'mk-val' }, h('b', null, mkFmt(x.i.v)), h('em', { class: d.cls }, d.ar + (d.txt ? ' ' + d.txt : ''))),
+          h('span', { class: 'fn-chk', 'aria-hidden': 'true' }, on ? '✓' : '')));
+      });
+      root.append(panel, h('h3', { class: 'h3' }, 'প্লেয়ার বাজার'), list);
+      if (mine) root.append(h('button', { class: 'btn ghost block', onclick: function () { f.editing = false; f.draft = null; renderView(); } }, 'বাতিল করুন'));
+    }
+    var board = f.docs.slice();
+    if (mine && !board.some(function (x) { return x.id === mine.week + '_' + mine.dev; })) { mine.id = mine.week + '_' + mine.dev; board.push(mine); }
+    board = board.map(function (d) { return { d: d, pt: fanPoints(d).tot }; }).sort(function (a, b) { return b.pt - a.pt || (a.d.savedAt || 0) - (b.d.savedAt || 0); });
+    var lb = h('section', { class: 'card mk-list' });
+    if (!board.length) lb.append(h('p', { class: 'muted small', style: 'padding:14px' }, 'এই সপ্তাহে এখনো কেউ টিম বানায়নি। প্রথম হোন!'));
+    board.forEach(function (x, i) {
+      var me = x.d.dev === devId();
+      lb.append(h('div', { class: 'mk-row fn-lb' + (me ? ' me' : '') + (i < 3 ? ' top' + (i + 1) : '') },
+        h('span', { class: 'mk-rank' }, String(i + 1)),
+        h('div', { class: 'mk-nm' }, h('strong', null, (x.d.name || 'অজানা') + (me ? ' (আপনি)' : '')),
+          h('span', { class: 'fn-faces' }, (x.d.picks || []).map(function (id) { var p = S.players.get(id); return p ? avatar(p, 26) : null; }))),
+        h('div', { class: 'mk-val' }, h('b', null, String(x.pt)), h('em', { class: 'eq' }, 'পয়েন্ট'))));
+    });
+    root.append(h('h3', { class: 'h3' }, 'এই সপ্তাহের লিডারবোর্ড'), lb);
+    if (f.err) root.append(h('div', { class: 'notice' }, 'সবার টিম দেখাতে Firestore rules-এ নিচের লাইনটি যোগ করুন, না হলে শুধু আপনার ফোনের টিম দেখা যাবে:\nmatch /fantasy/{id} { allow read, write: if true; }'));
+    return root;
+  }
+
+  /* ---------- notifications (in-app events + optional real push through Firebase Cloud Messaging) ---------- */
+  var NT = { seenW: null, seenS: null };
+  function ntSupported() { return 'Notification' in window && 'serviceWorker' in navigator; }
+  function ntOn() { try { return ntSupported() && Notification.permission === 'granted' && localStorage.getItem('nb-notif') !== '0'; } catch (e) { return false; } }
+  async function ntShow(title, body, tag) {
+    if (!ntOn()) return;
+    if (!document.hidden) { toast(title + ' · ' + body); return; }
+    try { var reg = await navigator.serviceWorker.ready; reg.showNotification(title, { body: body, tag: tag, icon: 'apple-touch-icon.png', badge: 'favicon.png', lang: 'bn', data: { url: './' } }); } catch (e) { /* ignore */ }
+  }
+  async function ntRegisterPush() {
+    var cfg = window.NB_CONFIG || {}, fb = cfg.firebase || {};
+    if (!cfg.vapidKey || !fb.messagingSenderId || !S.db || !window.firebase) return;
+    try {
+      if (!firebase.messaging) {
+        await new Promise(function (res, rej) { var sc = document.createElement('script'); sc.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js'; sc.onload = res; sc.onerror = rej; document.head.append(sc); });
+      }
+      var reg = await navigator.serviceWorker.ready, tk = await firebase.messaging().getToken({ vapidKey: cfg.vapidKey, serviceWorkerRegistration: reg });
+      if (tk) await S.db.doc('pushTokens/' + tk.slice(-40)).set({ token: tk, ts: Date.now() });
+    } catch (e) { console.error('push', e); }
+  }
+  async function ntEnable() {
+    if (!ntSupported()) { toast('এই ব্রাউজারে নোটিফিকেশন চলে না। ফোনে "Add to Home Screen" করে খুলুন।'); return; }
+    var p = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    if (p !== 'granted') { toast('অনুমতি দেওয়া হয়নি। ব্রাউজার সেটিংস থেকে চালু করুন।'); renderHeader(); renderView(); return; }
+    try { localStorage.setItem('nb-notif', '1'); } catch (e) { /* ignore */ }
+    toast('নোটিফিকেশন চালু হয়েছে');
+    ntRegisterPush(); renderHeader(); renderView();
+  }
+  function ntToggle() {
+    if (ntOn()) { try { localStorage.setItem('nb-notif', '0'); } catch (e) { /* ignore */ } toast('নোটিফিকেশন বন্ধ করা হয়েছে'); renderHeader(); renderView(); }
+    else ntEnable();
+  }
+  function ntBanner() {
+    var dis = false; try { dis = localStorage.getItem('nb-nt-dis') === '1'; } catch (e) { /* ignore */ }
+    if (dis || !ntSupported() || Notification.permission !== 'default') return null;
+    return h('section', { class: 'nt-banner' }, icoEl('bell', 24),
+      h('div', null, h('strong', null, 'ম্যাচের খবর সরাসরি পান'), h('span', null, 'জয়, হ্যাটট্রিক ও নতুন সাইনিংয়ের নোটিফিকেশন চালু করুন।')),
+      h('button', { class: 'btn lime sm', onclick: ntEnable }, 'চালু করুন'),
+      h('button', { class: 'iconbtn nt-x', 'aria-label': 'বন্ধ করুন', onclick: function () { try { localStorage.setItem('nb-nt-dis', '1'); } catch (e) { /* ignore */ } renderView(); } }, icon('close')));
+  }
+  function ntCheckWins(list) {
+    var ids = {}; list.forEach(function (w) { ids[w.id] = 1; });
+    if (NT.seenW) {
+      list.filter(function (w) { return !NT.seenW[w.id] && w.type !== 'loss' && (w.createdAt || w.ts) > Date.now() - 6 * 36e5; }).slice(0, 3).forEach(function (w) {
+        var p = S.players.get(w.playerId); if (!p) return;
+        var g = w.goals || 0, i = mkInfo(w.playerId), d = mkDelta(i), tail = ' · দাম ' + mkFmt(i.v) + (d.txt ? ' ' + d.ar + d.txt : '');
+        if (g >= 3) ntShow('হ্যাটট্রিক! ' + p.name, bn(g) + ' গোল করে ম্যাচ ' + (w.type === 'draw' ? 'ড্র' : 'জিতল') + tail, 'w-' + w.id);
+        else ntShow('ম্যাচের ফল', p.name + (w.type === 'draw' ? ' ড্র করল' : ' জিতল') + (g ? ' (' + bn(g) + ' গোল)' : '') + tail, 'w-' + w.id);
+      });
+    }
+    NT.seenW = ids;
+  }
+  function ntCheckSignings(list) {
+    var ids = {}; list.forEach(function (x) { ids[x.id] = 1; });
+    if (NT.seenS) {
+      list.filter(function (x) { return !NT.seenS[x.id] && x.createdAt && x.createdAt > Date.now() - 6 * 36e5; }).slice(0, 2).forEach(function (x) {
+        ntShow(x.type === 'transfer' ? 'নতুন ট্রান্সফার' : 'নতুন সাইনিং', (x.name || '') + (x.team ? ' যোগ দিল ' + x.team + '-এ' : ' ক্লাবে যোগ দিল'), 's-' + x.id);
+      });
+    }
+    NT.seenS = ids;
+  }
+  function hdrTools() {
+    var on = ntOn(), light = themeNow() === 'light';
+    return h('div', { class: 'hdr-tools' },
+      h('button', { class: 'iconbtn', 'aria-label': on ? 'নোটিফিকেশন বন্ধ করুন' : 'নোটিফিকেশন চালু করুন', title: on ? 'নোটিফিকেশন চালু আছে' : 'নোটিফিকেশন চালু করুন', onclick: ntToggle }, icoEl(on ? 'bell' : 'bellOff', 19)),
+      h('button', { class: 'iconbtn', 'aria-label': light ? 'ডার্ক থিম' : 'লাইট থিম', title: light ? 'ডার্ক থিম' : 'লাইট থিম', onclick: themeToggle }, icoEl(light ? 'moon' : 'sun', 19)));
+  }
+  function offlineBar() {
+    var el = document.getElementById('offbar');
+    if (!el) { el = h('div', { id: 'offbar', class: 'offbar', role: 'status' }, icoEl('wifi', 16), 'অফলাইন, সংরক্ষিত তথ্য দেখাচ্ছে'); document.body.append(el); }
+    el.hidden = navigator.onLine;
+  }
+  window.addEventListener('online', offlineBar); window.addEventListener('offline', offlineBar);
+
+
+  /* ---------- admin push broadcast (needs functions/api/notify.js on Cloudflare Pages) ---------- */
+  var NB = { q: [], t: 0 };
+  async function ntSend(title, body, url) {
+    if (!S.canWrite || !S.user) return { ok: false, msg: 'অ্যাডমিন লগইন দরকার' };
+    try {
+      var tk = await S.user.getIdToken(), cfg = window.NB_CONFIG || {};
+      var r = await fetch(cfg.notifyUrl || '/api/notify', { method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Bearer ' + tk }, body: JSON.stringify({ title: title, body: body, url: url || './' }) });
+      var j = await r.json().catch(function () { return {}; });
+      return r.ok ? { ok: true, sent: j.sent || 0, devices: j.devices || 0 } : { ok: false, msg: j.error || ('সার্ভার ত্রুটি ' + r.status) };
+    } catch (e) { return { ok: false, msg: 'সার্ভারে পৌঁছানো যায়নি' }; }
+  }
+  function ntQueue(line) {
+    if (!S.canWrite) return;
+    NB.q.push(line); clearTimeout(NB.t);
+    NB.t = setTimeout(function () {
+      var q = NB.q; NB.q = [];
+      ntSend(q.length > 1 ? 'SNB: ' + bn(q.length) + 'টি নতুন আপডেট' : 'SNB আপডেট', q.slice(0, 3).join(' • '), './');
+    }, 20000);
+  }
+  function ntAdminBox() {
+    if (!S.canWrite) return null;
+    var ti = h('input', { type: 'text', maxlength: '60', placeholder: 'যেমন: আজ রাতে ফাইনাল', 'aria-label': 'শিরোনাম' });
+    var bo = h('input', { type: 'text', maxlength: '140', placeholder: 'যেমন: রাত ৯টায় সবাই লাইভে আসুন', 'aria-label': 'বার্তা' });
+    var st = h('p', { class: 'muted small' }, 'নোটিফিকেশন চালু করা সব সদস্যের ফোনে সঙ্গে সঙ্গে যাবে।');
+    var btn = h('button', { class: 'btn block', onclick: async function () {
+      var t = ti.value.trim(), b = bo.value.trim(); if (!b) { toast('বার্তা লিখুন'); return; }
+      btn.disabled = true; st.textContent = 'পাঠানো হচ্ছে…';
+      var r = await ntSend(t || 'SNB ঘোষণা', b, './');
+      btn.disabled = false;
+      if (r.ok) { st.textContent = r.sent + ' জনের ফোনে পাঠানো হয়েছে (মোট ' + r.devices + ' ডিভাইস)।'; bo.value = ''; ti.value = ''; }
+      else st.textContent = 'পাঠানো যায়নি: ' + r.msg;
+    } }, icoEl('bell', 18), 'সবাইকে নোটিফিকেশন পাঠান');
+    return h('section', { class: 'card', style: 'padding:16px;display:flex;flex-direction:column;gap:10px' },
+      h('h3', { class: 'h3' }, hIco('bell', 'ঘোষণা পাঠান')),
+      h('label', { class: 'field' }, 'শিরোনাম', ti), h('label', { class: 'field' }, 'বার্তা', bo), btn, st);
   }
 
   /* ---------- Single-file embedded tournament page ---------- */
@@ -4406,7 +4820,7 @@ input, select, textarea { accent-color:#F4C96B; }
       var photo=nsPhotoData;if(photo&&photo.length>900000){toast('ছবিটি আরও ছোট করে আপলোড করুন');return;}
       nsSaving=true;save.disabled=true;save.textContent='Saving…';
       var isTr=vals['Type']==='Transfer';var data={type:isTr?'transfer':'signing',fromTeam:isTr?vals['From Team']:'',name:vals['Player Name'],userId:vals['User ID'],device:vals['Device'],team:vals['Team'],signingDate:vals['Signing Date'],note:vals['Announcement Note'],photo:photo,updatedAt:Date.now()};
-      try{if(nsEditId){await S.db.doc('newSignings/'+nsEditId).set(data,{merge:true});}else{data.createdAt=Date.now();await S.db.collection('newSignings').add(data);}toast(isTr?'Transfer published':'New Signing published');overlay.remove();}
+      try{if(nsEditId){await S.db.doc('newSignings/'+nsEditId).set(data,{merge:true});}else{data.createdAt=Date.now();await S.db.collection('newSignings').add(data);}if(!nsEditId)ntQueue((data.name||'নতুন প্লেয়ার')+(isTr?' ট্রান্সফার হলো':' ক্লাবে যোগ দিল'));toast(isTr?'Transfer published':'New Signing published');overlay.remove();}
       catch(e){console.error(e);toast(e&&e.code==='permission-denied'?'Firestore Rules আপডেট প্রয়োজন':'Save হয়নি—ছবির সাইজ বা Database connection পরীক্ষা করুন');}
       finally{nsSaving=false;save.disabled=false;save.textContent='Publish';}
     }},'Publish');
@@ -4695,7 +5109,7 @@ input, select, textarea { accent-color:#F4C96B; }
   function listenSignings(){
     if(!S.db||nsListening)return;nsListening=true;
     S.db.collection('newSignings').onSnapshot(function(snap){
-      S.signings=snap.docs.map(function(d){var x=d.data();x.id=d.id;return x;});
+      S.signings=snap.docs.map(function(d){var x=d.data();x.id=d.id;return x;});ntCheckSignings(S.signings);
       S.signingLoaded=true;S.signingErr=false;if(S.tab==='signings'||S.tab==='home')renderView();
     },function(e){console.error(e);S.signingErr=true;S.signingLoaded=true;if(S.tab==='signings')renderView();});
   }
@@ -4712,7 +5126,7 @@ input, select, textarea { accent-color:#F4C96B; }
     if (!S._tfWarm) { S._tfWarm = true; setTimeout(function () { (window.requestIdleCallback || function (f) { f(); })(function () { hpTfEnsure(); var t2 = document.getElementById('tfHost'); if (t2) t2.hidden = S.tab !== 'tournament'; }); }, 2500); }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'ballon' ? bdView() : S.tab === 'signings' ? nsView() : S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : S.tab === 'market' ? marketView() : viewPlayers());
+    v.append(S.tab === 'ballon' ? bdView() : S.tab === 'signings' ? nsView() : S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : S.tab === 'market' ? marketView() : S.tab === 'fantasy' ? fanView() : S.tab === 'feed' ? feedView() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
@@ -4780,6 +5194,7 @@ input, select, textarea { accent-color:#F4C96B; }
       var sg = JSON.stringify(out.map(function (x) { return [x.id, x.type, x.playerId, x.goals, x.ts]; }));
       if (S.loaded.w && lastSig.w === sg) return; lastSig.w = sg;
       S.wins = out;
+      ntCheckWins(out);
       S.loaded.w = true; refresh();
     }, function (e) { console.error(e); S.loaded.w = true; refresh(); });
   }
@@ -4898,7 +5313,7 @@ input, select, textarea { accent-color:#F4C96B; }
     $('#logo').src = LOGO;
     readHashMoment();
     window.addEventListener('hashchange', function () { if (readHashMoment()) { renderTabs(); renderView(); } });
-    renderHeader(); renderTabs(); renderView(); renderInstall();
+    renderHeader(); renderTabs(); renderView(); renderInstall(); offlineBar();
     var cfg = window.NB_CONFIG && window.NB_CONFIG.firebase;
     if (!window.firebase || !cfg || !cfg.apiKey || String(cfg.apiKey).indexOf('PASTE') === 0) {
       S.noDb = true; S.setup = true; renderHeader(); renderView(); return;
@@ -4910,6 +5325,7 @@ input, select, textarea { accent-color:#F4C96B; }
     S.auth = firebase.auth();
     if (S.mom.focus) readHashMoment();
     listen();
+    if (ntOn()) ntRegisterPush();
     listenAC();
     listenSignings();
     bdListenPublic();
