@@ -4060,10 +4060,9 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     var inMain = main.some(function (x) { return x[0] === S.tab; });
     nav.append(h('button', { type: 'button', id: 'bmoreBtn', 'aria-haspopup': 'true', 'aria-current': inMain ? null : 'page', onclick: function () {
       if (document.getElementById('bmore')) { hpCloseMore(); return; }
-      var items = [['feed', 'feed', 'ক্লাব ফিড'], ['tournament', 'trophy', 'টুর্নামেন্ট'], ['market', 'market', 'ট্রান্সফার মার্কেট'], ['fantasy', 'fantasy', 'Fantasy'], ['signings', 'pen', 'New Signings'], ['ballon', 'medal', 'Ballon d’Or']];
+      var items = [['tournament', 'trophy', 'টুর্নামেন্ট'], ['market', 'market', 'ট্রান্সফার মার্কেট'], ['fantasy', 'fantasy', 'Fantasy'], ['signings', 'pen', 'New Signings'], ['ballon', 'medal', 'Ballon d’Or']];
       if (S.canWrite) items.push(['add', 'plus', 'জয় যোগ']);
       items.push(['power', 'bolt', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', 'book', 'হল অফ ফেম'], ['moments', 'camera', 'মুহূর্ত'], ['team', 'crown', 'অ্যাডমিন প্যানেল']);
-      items.push(['theme', themeNow() === 'light' ? 'moon' : 'sun', themeNow() === 'light' ? 'ডার্ক থিম' : 'লাইট থিম']);
       var box = h('div', { id: 'bmore', class: 'bmore', role: 'menu' });
       items.forEach(function (x) {
         box.append(h('button', { type: 'button', role: 'menuitem', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); if (x[0] === 'theme') { themeToggle(); renderTabs(); return; } goTab(x[0]); } }, icoEl(x[1], 20), x[2]));
