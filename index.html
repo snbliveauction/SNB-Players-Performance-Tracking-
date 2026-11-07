@@ -3535,10 +3535,12 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     var NUM = '"Barlow Condensed","Arial Narrow",sans-serif';
     var BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
     var board = card.kind === 'board';
+    var poster = card.kind === 'player' && (card.theme === 'potw' || card.theme === 'potm') && !!(card.leaders && card.leaders[card.idx]);
     cardBg(x, W, H, story ? 980 : 700, card.kind === 'player' && card.theme ? card.theme : card.kind);
 
     var isF = card.kind === 'fifa', logoSize = (board || card.kind === 'dream') ? (story ? 280 : 200) : isF ? (story ? 190 : 150) : (story ? 300 : 230), logoY = story ? (isF ? 285 + 20 : 215) : (isF ? 36 : 34);
     try {
+      if (poster) throw 0;
       var logo = await loadImg(LOGO);
       var lcx = W / 2, lcy = logoY + logoSize / 2, lr = logoSize * 0.58;
       x.save(); x.shadowColor = 'rgba(0,0,0,0.35)'; x.shadowBlur = 40; x.shadowOffsetY = 10;
@@ -3702,6 +3704,80 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
         x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(SP.e + ' ' + lbl, W / 2, py3 + ph3 / 2 + 8); x.textBaseline = 'alphabetic';
       }
       footer(x, W, story ? 1790 : H - 36, NUM);
+    } else if (poster) {
+      var PL = card.leaders[card.idx], PW = card.theme === 'potw';
+      var PC = PW ? { a: '#0A1D2E', b: '#0B6377', c: '#03121D', ac: '#39F5A5', ac2: '#7AE0FF', rgb: '57,245,165' } : { a: '#1B0C36', b: '#5A3396', c: '#0C0619', ac: '#F8E7AE', ac2: '#E7C26A', rgb: '231,194,106' };
+      var phs = story ? 1000 : 860, phy = story ? 240 : 140, phx = story ? 40 : 110, blockY = story ? 1310 : 960, stripH = story ? 640 : 560;
+      /* background */
+      var bgg = x.createLinearGradient(0, 0, W * 0.4, H); bgg.addColorStop(0, PC.b); bgg.addColorStop(0.55, PC.a); bgg.addColorStop(1, PC.c);
+      x.fillStyle = bgg; x.fillRect(0, 0, W, H);
+      var rg = x.createRadialGradient(W * 0.5, phy + phs * 0.45, 40, W * 0.5, phy + phs * 0.45, W * 0.75); rg.addColorStop(0, 'rgba(' + PC.rgb + ',0.34)'); rg.addColorStop(1, 'rgba(' + PC.rgb + ',0)');
+      x.fillStyle = rg; x.fillRect(0, 0, W, H);
+      x.save(); x.fillStyle = 'rgba(255,255,255,0.035)';
+      for (var rI = -2; rI < 9; rI++) { x.beginPath(); x.moveTo(W * 0.5 + (rI - 3.5) * 40, 0); x.lineTo(W * 0.5 + (rI - 3) * 40 + 40, 0); x.lineTo(W * 0.5 + (rI - 3.5) * 330 + 120, H); x.lineTo(W * 0.5 + (rI - 3.5) * 330 - 80, H); x.closePath(); x.fill(); }
+      x.restore();
+      /* photo + ghosts */
+      var pim = null; if (PL.photo) { try { pim = await loadImg(PL.photo); } catch (e) { pim = null; } }
+      function cover(ctx, im, w, hh) {
+        var s = Math.max(w / im.width, hh / im.height), dw = im.width * s, dh = im.height * s;
+        ctx.drawImage(im, (w - dw) / 2, Math.min(0, (hh - dh) * 0.12), dw, dh);
+      }
+      function fadeMask(c2, w, hh) {
+        var g, k = c2.globalCompositeOperation; c2.globalCompositeOperation = 'destination-in';
+        g = c2.createLinearGradient(0, 0, w, 0); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.2, '#000'); g.addColorStop(0.82, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)'); c2.fillStyle = g; c2.fillRect(0, 0, w, hh);
+        g = c2.createLinearGradient(0, 0, 0, hh); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.06, '#000'); g.addColorStop(0.66, '#000'); g.addColorStop(1, 'rgba(0,0,0,0)'); c2.fillStyle = g; c2.fillRect(0, 0, w, hh);
+        c2.globalCompositeOperation = k;
+      }
+      var pc = document.createElement('canvas'); pc.width = phs; pc.height = phs; var px2 = pc.getContext('2d');
+      if (pim) { cover(px2, pim, phs, phs); } else { px2.fillStyle = PC.b; px2.fillRect(0, 0, phs, phs); px2.fillStyle = 'rgba(255,255,255,0.8)'; px2.font = '800 ' + Math.round(phs * 0.5) + 'px ' + BN; px2.textAlign = 'center'; px2.textBaseline = 'middle'; px2.fillText(initial(PL.name), phs / 2, phs / 2); }
+      var sm = document.createElement('canvas'); sm.width = 40; sm.height = 40; var sx2 = sm.getContext('2d'); sx2.drawImage(pc, 0, 0, 40, 40);
+      var gc = document.createElement('canvas'); gc.width = 300; gc.height = 300; var gx = gc.getContext('2d'); gx.imageSmoothingQuality = 'high'; gx.drawImage(sm, 0, 0, 300, 300); fadeMask(gx, 300, 300);
+      var gs = phs * 0.66;
+      x.save(); x.globalAlpha = 0.34; x.drawImage(gc, -150, phy + 110, gs, gs); x.drawImage(gc, W - gs * 0.62, phy + 30, gs, gs); x.restore();
+      /* vertical surname (behind the player) */
+      var parts = String(PL.name || '').trim().split(/\s+/), sur = (parts.length > 1 ? parts[parts.length - 1] : parts[0]).toUpperCase(), fst = parts.length > 1 ? parts.slice(0, -1).join(' ').toUpperCase() : '';
+      var latin = /[A-Za-z]/.test(sur), VF = latin ? NUM : BN, vsz = fitFont(x, sur, story ? 1220 : 900, 260, 800, VF), vcap = vsz * (latin ? 0.7 : 0.62), vbx = W - 54 - vcap;
+      x.save(); x.translate(vbx, story ? 110 : 70); x.rotate(Math.PI / 2); x.textAlign = 'left'; x.font = '800 ' + vsz + 'px ' + VF;
+      var vlen = x.measureText(sur).width, vg = x.createLinearGradient(0, 0, vlen, 0); vg.addColorStop(0, '#FFFFFF'); vg.addColorStop(0.7, '#FFFFFF'); vg.addColorStop(1, 'rgba(' + PC.rgb + ',0.55)');
+      x.lineWidth = 5; x.strokeStyle = 'rgba(255,255,255,0.55)'; x.strokeText(sur, 0, 0); x.fillStyle = vg; x.globalAlpha = 0.94; x.fillText(sur, 0, 0); x.restore();
+      if (fst) {
+        x.save(); x.translate(vbx - 16, story ? 110 : 70); x.rotate(Math.PI / 2); x.textAlign = 'left'; x.fillStyle = 'rgba(255,255,255,0.5)'; x.font = '700 30px ' + (/[A-Za-z]/.test(fst) ? NUM : BN);
+        if ('letterSpacing' in x) x.letterSpacing = '3px'; x.fillText((fst + '  ').repeat(6), 0, 0); x.restore();
+      }
+      /* the player */
+      fadeMask(px2, phs, phs);
+      x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 50; x.drawImage(pc, phx, phy, phs, phs); x.restore();
+      /* left colour strip with number */
+      var sg = x.createLinearGradient(0, 0, 0, stripH); sg.addColorStop(0, 'rgba(' + PC.rgb + ',0.5)'); sg.addColorStop(1, 'rgba(' + PC.rgb + ',0.05)');
+      x.fillStyle = sg; x.fillRect(46, 0, 172, stripH);
+      x.fillStyle = PC.ac; x.fillRect(46, 0, 172, 8);
+      x.textAlign = 'center'; var num = PL.num ? String(PL.num) : '1', nsz = num.length > 2 ? 120 : 176;
+      x.font = '800 ' + nsz + 'px ' + NUM; x.lineWidth = 4; x.strokeStyle = PC.ac; x.fillStyle = 'rgba(' + PC.rgb + ',0.16)'; x.strokeText(num, 132, 190); x.fillText(num, 132, 190);
+      try {
+        var plogo = await loadImg(LOGO), lr2 = 64, lcx2 = 132, lcy2 = 330;
+        x.save(); x.beginPath(); x.arc(lcx2, lcy2, lr2, 0, 7); var lg2 = x.createRadialGradient(lcx2, lcy2 - 20, 6, lcx2, lcy2, lr2); lg2.addColorStop(0, '#22404E'); lg2.addColorStop(1, '#0A1319'); x.fillStyle = lg2; x.fill();
+        x.lineWidth = 5; x.strokeStyle = gg(x, lcx2 - lr2, lcy2 - lr2, lcx2 + lr2, lcy2 + lr2); x.stroke(); x.drawImage(plogo, lcx2 - 50, lcy2 - 50, 100, 100); x.restore();
+      } catch (e) { /* no logo */ }
+      x.textAlign = 'center'; x.fillStyle = '#FFFFFF'; x.font = '800 30px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '4px'; x.fillText('SNB', 134, 440); if ('letterSpacing' in x) x.letterSpacing = '0px';
+      /* title */
+      x.textAlign = 'left'; x.fillStyle = PC.ac; x.fillRect(250, story ? 150 : 82, 10, story ? 112 : 96);
+      x.fillStyle = '#FFFFFF'; x.font = '800 ' + (story ? 44 : 42) + 'px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '3px'; x.fillText(card.title, 282, story ? 202 : 126);
+      x.fillStyle = PC.ac2; x.font = '700 ' + (story ? 34 : 30) + 'px ' + NUM; x.fillText(card.rangeTxt, 282, story ? 252 : 168); if ('letterSpacing' in x) x.letterSpacing = '0px';
+      sparkle(x, 560, phy + 70, 14, 0.9, PC.ac2); sparkle(x, 90, phy + phs * 0.6, 12, 0.8, PC.ac); sparkle(x, 760, phy + phs * 0.78, 10, 0.7, '#FFFFFF');
+      /* bottom block */
+      var bb = x.createLinearGradient(0, blockY - 40, 0, blockY + 120); bb.addColorStop(0, 'rgba(0,0,0,0)'); bb.addColorStop(1, 'rgba(2,10,16,0.72)'); x.fillStyle = bb; x.fillRect(0, blockY - 40, W, H - blockY + 40);
+      x.textAlign = 'left'; x.fillStyle = PC.ac; x.font = '800 30px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '9px'; x.fillText('CONGRATULATIONS', 74, blockY + 34); if ('letterSpacing' in x) x.letterSpacing = '0px';
+      x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24; x.fillStyle = '#FFFFFF'; fitFont(x, PL.name, 930, story ? 128 : 112, 800, BN); x.fillText(PL.name, 70, blockY + (story ? 150 : 140)); x.restore();
+      var pgm = (PL.wins || 0) + (PL.draws || 0) + (PL.losses || 0), pwr = pgm ? Math.round((PL.wins || 0) / pgm * 100) : 0;
+      var pst = [['WINS', PL.wins || 0, '#FFFFFF'], ['DRAWS', PL.draws || 0, '#FFFFFF'], ['GOALS', PL.goals || 0, PC.ac], ['WIN RATE', pwr + '%', PC.ac]], sy = blockY + (story ? 290 : 262), cw2 = 240;
+      pst.forEach(function (t, i) {
+        var cx2 = 70 + i * cw2;
+        if (i) { x.fillStyle = 'rgba(255,255,255,0.18)'; x.fillRect(cx2 - 22, sy - 78, 3, 124); }
+        x.textAlign = 'left'; x.fillStyle = t[2]; x.font = '800 92px ' + NUM; x.fillText(String(t[1]), cx2, sy);
+        x.fillStyle = '#B9D3DC'; x.font = '700 26px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillText(t[0], cx2 + 2, sy + 38); if ('letterSpacing' in x) x.letterSpacing = '0px';
+      });
+      x.fillStyle = PC.ac; x.fillRect(0, H - 12, W, 12);
+      footer(x, W, story ? 1800 : H - 36, NUM);
     } else {
       var L = card.leaders[card.idx];
       var TH = card.theme, isW = TH === 'potw', isM = TH === 'potm';
@@ -3794,7 +3870,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     });
   }
   function openCard(leaders) {
-    startCard(S.period, S.offset, leaders.map(function (r) { return { id: r.id, name: r.p.name, photo: r.p.photo || null, wins: r.wins, draws: r.draws || 0, losses: r.losses || 0, goals: r.goals }; }));
+    startCard(S.period, S.offset, leaders.map(function (r) { return { id: r.id, name: r.p.name, photo: r.p.photo || null, wins: r.wins, draws: r.draws || 0, losses: r.losses || 0, goals: r.goals, num: r.p.number || '' }; }));
   }
   function openBoardCard(active) {
     var rs = range(S.period, S.offset);
