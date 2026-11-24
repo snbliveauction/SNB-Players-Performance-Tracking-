@@ -1389,6 +1389,26 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 .hx-prog2 i{display:block;height:100%;transform-origin:left;background:linear-gradient(90deg,var(--tc),#fff);animation:hxProg var(--pd,5.2s) linear both}
 @media(prefers-reduced-motion:reduce){.hx-beam{animation:none}.hx-sl,.hx-ph2,.hx-in>*,.hx-wmk{transition:opacity .3s!important;transform:none!important}}
 </style>
+<style>
+/* sliding partner / admin strips */
+.hx-mq{overflow:hidden;margin:10px -2px 0;padding:4px 0 8px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.hx-mq.static{display:flex;justify-content:center;gap:12px;overflow:visible;-webkit-mask-image:none;mask-image:none}
+.hx-mqt{display:flex;width:max-content;animation:hxMarq var(--d,30s) linear infinite}
+.hx-mqt>*{margin-right:12px}
+.hx-mq:hover .hx-mqt,.hx-mq:active .hx-mqt{animation-play-state:paused}
+.hx-prow{display:flex;gap:12px;overflow-x:auto;padding:10px 2px 8px;scrollbar-width:none}
+.hx-prow::-webkit-scrollbar{display:none}
+.hx-pcard,.hx-acard{position:relative;flex:0 0 auto;width:152px;display:flex;flex-direction:column;align-items:center;gap:7px;padding:16px 10px 13px;border-radius:18px;border:1px solid var(--line-2);background:linear-gradient(160deg,rgba(255,255,255,.055),transparent 60%),var(--surface);color:inherit;text-decoration:none;text-align:center;font:inherit;cursor:pointer}
+.hx-pcard .lg{display:grid;place-items:center;width:68px;height:68px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--line);overflow:hidden;font:800 28px/1 var(--f-num);color:var(--gold)}
+.hx-pcard .lg img{width:100%;height:100%;object-fit:contain;padding:6px;box-sizing:border-box}
+.hx-pcard strong,.hx-acard strong{font:800 13.5px/1.2 var(--f-num);letter-spacing:.04em;text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hx-pcard small,.hx-acard small{font:700 10.5px/1 var(--f-num);letter-spacing:.16em;color:var(--muted);text-transform:uppercase;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hx-pcard .x{all:unset;position:absolute;top:6px;right:6px;width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:12px;cursor:pointer}
+.hx-acard{width:140px}
+.hx-acard .av{border:2px solid var(--gold)}
+.hx-acard small{color:var(--gold)}
+@media(prefers-reduced-motion:reduce){.hx-mqt{animation:none}.hx-mq{overflow-x:auto}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -4286,12 +4306,10 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
         h('div', null, h('p', { class: 'ac-kick' }, 'MANAGED BY'), h('h3', null, 'SNB ADMIN PANEL')),
         h('button', { type: 'button', class: 'ac-more', onclick: function () { goTab('team'); } }, list.length ? 'View All →' : (S.canWrite ? 'Set up →' : ''))));
     if (!list.length) { sec.append(h('div', { class: 'home-empty' }, 'এখনো কোনো অ্যাডমিন যোগ করা হয়নি।')); return sec; }
-    var row = h('div', { class: 'ac-row' });
-    list.forEach(function (a) {
-      row.append(h('button', { type: 'button', class: 'ac-mini', onclick: function () { goTab('team'); } },
-        acAvatar(a, 58), h('strong', null, a.name), a.role ? h('span', null, a.role) : null));
-    });
-    sec.append(row);
+    sec.append(hxMarquee(list.map(function (a) { return function () {
+      return h('button', { type: 'button', class: 'hx-acard', onclick: function () { goTab('team'); } },
+        acAvatar(a, 64), h('strong', null, a.name), a.role ? h('small', null, a.role) : null);
+    }; })));
     return sec;
   }
   /* More menu: full list (admins can add / edit / remove) */
@@ -4416,23 +4434,66 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     try { patch.ts = Date.now(); await S.db.collection('site').doc('main').set(patch, { merge: true }); toast(okMsg || 'সেভ হয়েছে ✅'); S.site.edit = null; S.site.d = Object.assign({}, S.site.d || {}, patch); renderView(); }
     catch (e) { console.error(e); toast('সেভ হয়নি। Firestore rules-এ site অংশ যোগ করা আছে কি?'); }
   }
+  function hxLogo(file) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader(); fr.onerror = function () { rej(new Error('read')); };
+      fr.onload = function () {
+        var img = new Image(); img.onerror = function () { rej(new Error('image')); };
+        img.onload = function () {
+          var mx = 220, out = '';
+          for (var k = 0; k < 3; k++) {
+            var sc = Math.min(1, mx / Math.max(img.width, img.height)), c = document.createElement('canvas');
+            c.width = Math.max(1, Math.round(img.width * sc)); c.height = Math.max(1, Math.round(img.height * sc));
+            c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+            out = c.toDataURL('image/png'); if (out.length < 90000) break; mx = Math.round(mx * 0.72);
+          }
+          res(out);
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(file);
+    });
+  }
+  function hxMarquee(makers, cls) {
+    var wrap = h('div', { class: 'hx-mq ' + (cls || '') });
+    if (makers.length < 3) { wrap.classList.add('static'); makers.forEach(function (f) { wrap.append(f()); }); return wrap; }
+    var track = h('div', { class: 'hx-mqt', style: '--d:' + Math.max(20, makers.length * 7) + 's' });
+    for (var r = 0; r < 2; r++) makers.forEach(function (f) { var e = f(); if (r) { e.setAttribute('aria-hidden', 'true'); e.tabIndex = -1; } track.append(e); });
+    wrap.append(track); return wrap;
+  }
   function hxPartners() {
     var d = S.site.d || {}, ps = Array.isArray(d.partners) ? d.partners : [];
     if (!ps.length && !S.canWrite) return null;
     var sec = h('section', { class: 'stack' }, hxHead('FRIENDS OF THE CLUB', 'Platforms & Partners', 'Who stands with Sylhet Netbreakers'));
-    var chips = h('div', { class: 'hx-chips hx-rev' });
-    ps.forEach(function (p, i) {
-      var u = hxUrl(p.url), c = h(u ? 'a' : 'span', u ? { class: 'hx-chip', href: u, target: '_blank', rel: 'noopener noreferrer' } : { class: 'hx-chip' }, String(p.name || '').slice(0, 40));
-      if (S.canWrite) c.append(h('button', { type: 'button', 'aria-label': 'মুছুন', onclick: function (e) { e.preventDefault(); e.stopPropagation(); hxSiteSave({ partners: ps.filter(function (_, j) { return j !== i; }) }, 'মুছে ফেলা হয়েছে'); } }, '✕'));
-      chips.append(c);
-    });
-    if (ps.length) sec.append(chips);
+    function card(p, i, del) {
+      var u = hxUrl(p.url), nm = String(p.name || '').slice(0, 40);
+      var lg = p.logo && /^data:image\//.test(p.logo) ? h('img', { src: p.logo, alt: '' }) : h('span', null, initial(nm));
+      var c = h(u ? 'a' : 'div', u ? { class: 'hx-pcard', href: u, target: '_blank', rel: 'noopener noreferrer' } : { class: 'hx-pcard' },
+        h('span', { class: 'lg' }, lg), h('strong', null, nm), h('small', null, String(p.role || 'PARTNER').slice(0, 24)));
+      if (del) c.append(h('button', { type: 'button', class: 'x', 'aria-label': 'মুছুন', onclick: function (e) { e.preventDefault(); e.stopPropagation(); hxSiteSave({ partners: ps.filter(function (_, j) { return j !== i; }) }, 'মুছে ফেলা হয়েছে'); } }, '✕'));
+      return c;
+    }
+    if (ps.length) {
+      if (S.canWrite) { var row = h('div', { class: 'hx-prow hx-rev' }); ps.forEach(function (p, i) { row.append(card(p, i, true)); }); sec.append(row); }
+      else { var mq = hxMarquee(ps.map(function (p, i) { return function () { return card(p, i, false); }; }), 'hx-rev'); sec.append(mq); }
+    }
     if (S.canWrite) {
       if (S.site.edit === 'partner') {
-        var n = h('input', { placeholder: 'পার্টনারের নাম', maxlength: 40 }), u2 = h('input', { placeholder: 'লিংক (ঐচ্ছিক)', inputmode: 'url' });
-        sec.append(h('div', { class: 'hx-form' }, h('label', null, 'নাম'), n, h('label', null, 'লিংক'), u2,
-          h('div', { class: 'row' }, h('button', { class: 'btn', onclick: function () { var nm = n.value.trim(); if (!nm) { toast('নাম লিখুন'); return; } hxSiteSave({ partners: ps.concat([{ name: nm, url: hxUrl(u2.value) }]).slice(0, 12) }); } }, 'সেভ'),
-            h('button', { class: 'btn ghost', onclick: function () { S.site.edit = null; renderView(); } }, 'বাতিল'))));
+        var logo = '', prev = h('span', { class: 'lg', style: 'width:72px;height:72px' }, '＋');
+        var fin = h('input', { type: 'file', accept: 'image/*', style: 'display:none', onchange: async function (ev) {
+          var f = ev.target.files && ev.target.files[0]; if (!f) return;
+          try { logo = await hxLogo(f); prev.textContent = ''; prev.append(h('img', { src: logo, alt: '' })); } catch (e) { toast('ছবিটি পড়া যায়নি, অন্য ছবি বাছুন।'); }
+        } });
+        var n = h('input', { placeholder: 'পার্টনারের নাম', maxlength: 40 }), rl = h('input', { placeholder: 'ধরন: SPONSOR / PARTNER GROUP …', maxlength: 24, value: 'SPONSOR' }), u2 = h('input', { placeholder: 'লিংক (ঐচ্ছিক)', inputmode: 'url' });
+        sec.append(h('div', { class: 'hx-form' },
+          h('label', null, 'লোগো / ছবি'), h('div', { class: 'row', style: 'align-items:center' }, prev, h('button', { type: 'button', class: 'btn ghost', onclick: function () { fin.click(); } }, 'ছবি বাছুন')), fin,
+          h('label', null, 'নাম'), n, h('label', null, 'ধরন'), rl, h('label', null, 'লিংক'), u2,
+          h('div', { class: 'row' }, h('button', { class: 'btn', onclick: function () {
+            var nm = n.value.trim(); if (!nm) { toast('নাম লিখুন'); return; }
+            var next = ps.concat([{ name: nm, role: rl.value.trim().toUpperCase() || 'PARTNER', url: hxUrl(u2.value), logo: logo }]).slice(0, 10);
+            if (JSON.stringify(next).length > 850000) { toast('ছবিগুলো মিলে বেশি বড় হয়ে গেছে। ছোট ছবি দিন বা পুরোনো কিছু মুছুন।'); return; }
+            hxSiteSave({ partners: next });
+          } }, 'সেভ'), h('button', { class: 'btn ghost', onclick: function () { S.site.edit = null; renderView(); } }, 'বাতিল'))));
       } else sec.append(h('button', { type: 'button', class: 'hx-add', onclick: function () { S.site.edit = 'partner'; renderView(); } }, '+  Add partner'));
     }
     return sec;
