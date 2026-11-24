@@ -4361,7 +4361,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   function hxUrl(v, kind) {
     v = String(v || '').trim(); if (!v) return '';
     if (kind === 'email') return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) ? 'mailto:' + v : '';
-    if (kind === 'wa') { var n = v.replace(/[^\d]/g, ''); return n.length >= 8 ? 'https://wa.me/' + n : ''; }
+    if (kind === 'wa') { if (/^(https?:\/\/|chat\.whatsapp\.com|wa\.me)/i.test(v)) { if (!/^https?:\/\//i.test(v)) v = 'https://' + v; try { var wu = new URL(v); return /^https?:$/.test(wu.protocol) ? wu.href : ''; } catch (e) { return ''; } } var n = v.replace(/[^\d]/g, ''); return n.length >= 8 ? 'https://wa.me/' + n : ''; }
     if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
     try { var u = new URL(v); return /^https?:$/.test(u.protocol) ? u.href : ''; } catch (e) { return ''; }
   }
@@ -4400,8 +4400,8 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     if (S.canWrite) {
       if (S.site.edit === 'contact') {
         var f = h('input', { placeholder: 'facebook.com/yourpage', value: d.fb || '', inputmode: 'url' }), w = h('input', { placeholder: '8801XXXXXXXXX', value: d.wa || '', inputmode: 'tel' }), e = h('input', { placeholder: 'name@email.com', value: d.email || '', inputmode: 'email' });
-        sec.append(h('div', { class: 'hx-form' }, h('label', null, 'Facebook পেজ/গ্রুপের লিংক'), f, h('label', null, 'WhatsApp নম্বর (দেশের কোডসহ)'), w, h('label', null, 'ইমেইল'), e,
-          h('div', { class: 'row' }, h('button', { class: 'btn', onclick: function () { hxSiteSave({ fb: hxUrl(f.value), wa: w.value.replace(/[^\d]/g, ''), email: e.value.trim() }); } }, 'সেভ'),
+        sec.append(h('div', { class: 'hx-form' }, h('label', null, 'Facebook পেজ/গ্রুপের লিংক'), f, h('label', null, 'WhatsApp গ্রুপ/চ্যাট লিংক বা নম্বর (দেশের কোডসহ)'), w, h('label', null, 'ইমেইল'), e,
+          h('div', { class: 'row' }, h('button', { class: 'btn', onclick: function () { hxSiteSave({ fb: hxUrl(f.value), wa: w.value.trim().slice(0, 300), email: e.value.trim() }); } }, 'সেভ'),
             h('button', { class: 'btn ghost', onclick: function () { S.site.edit = null; renderView(); } }, 'বাতিল'))));
       } else sec.append(h('button', { type: 'button', class: 'hx-add', onclick: function () { S.site.edit = 'contact'; renderView(); } }, '+  Edit contact links'));
     }
@@ -4593,7 +4593,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     setTimeout(hpCount, 120);
     var hxMid = [hxMovers(), hxForm()].filter(Boolean); hxMid = hxMid.length ? h('div', { class: 'home-two' }, hxMid) : null;
     setTimeout(hxReveal, 150);
-    return h('div', { class: 'stack' }, heroBox, hxTicker(), ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), hxScorers(all), hxTopPlayers(all), hxMid, hxNumbers(), weekly, q, hxPartners(), hxContact(), hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
+    return h('div', { class: 'stack' }, heroBox, hxTicker(), ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), hxScorers(all), hxTopPlayers(all), hxMid, hxNumbers(), q, hxPartners(), hxContact(), hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
   }
   function powerView() {
     var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
