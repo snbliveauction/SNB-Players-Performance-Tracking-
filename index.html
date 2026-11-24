@@ -1294,6 +1294,54 @@ html[data-theme="light"] .av img,html[data-theme="light"] iframe img{filter:none
 @media(prefers-reduced-motion:reduce){.hx-tt,.hx-ph,.hx-prog i{animation:none}}
 html[data-theme="light"] .hx-ph0{opacity:.5}
 </style>
+<style>
+/* home v3: aurora hero, editorial sections */
+.home-hero{--tc:#E7C26A;border-color:color-mix(in srgb,var(--tc) 40%,transparent)!important;box-shadow:0 18px 60px -22px color-mix(in srgb,var(--tc) 55%,transparent);transition:border-color 1.4s,box-shadow 1.4s}
+.hx-amb{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.hx-amb i{position:absolute;width:300px;height:300px;border-radius:50%;filter:blur(70px);opacity:.34;background-color:var(--tc);transition:background-color 1.4s}
+.hx-amb i:nth-child(1){top:-90px;right:-70px;animation:hxDrift 15s ease-in-out infinite alternate}
+.hx-amb i:nth-child(2){bottom:-130px;left:-90px;opacity:.22;animation:hxDrift 19s ease-in-out infinite alternate-reverse}
+.hx-amb i:nth-child(3){top:35%;left:30%;width:180px;height:180px;opacity:.14;background-color:#7CC8CF;animation:hxDrift 23s ease-in-out infinite alternate}
+@keyframes hxDrift{from{transform:translate(0,0) scale(1)}to{transform:translate(-40px,34px) scale(1.25)}}
+.home-hero>*:not(.hx-amb):not(.hp-shine):not(.hp-live){position:relative;z-index:1}
+.hx-sech{display:flex;flex-direction:column;gap:3px;margin:6px 2px 0}
+.hx-sech small{font:700 11.5px/1 var(--f-num);letter-spacing:.22em;text-transform:uppercase;color:#FF6B5E}
+.hx-sech h2{margin:2px 0 0;font:800 clamp(27px,7.4vw,38px)/1.05 var(--f-num);letter-spacing:.01em;text-transform:uppercase;background:linear-gradient(95deg,#fff 10%,var(--gold) 55%,#E59A62);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hx-sech p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.hx-car{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 2px 16px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.hx-car::-webkit-scrollbar{display:none}
+.hx-pc{position:relative;flex:0 0 168px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:8px;padding:18px 12px 14px;border-radius:20px;border:1px solid var(--line-2);background:linear-gradient(160deg,rgba(255,255,255,.05),transparent 55%),var(--surface);color:inherit;font:inherit;cursor:pointer;text-align:center;transition:transform .25s,border-color .25s}
+.hx-pc:active{transform:scale(.97)}
+.hx-pc.r1{border-color:var(--gold);box-shadow:0 0 0 1px rgba(231,194,106,.25),0 16px 40px -18px rgba(231,194,106,.55)}
+.hx-ring{display:grid;place-items:center;width:86px;height:86px;border-radius:50%;padding:3px;background:conic-gradient(from 200deg,var(--gold),#E59A62,#7CC8CF,var(--gold))}
+.hx-ring .av{--s:80px!important;width:80px;height:80px;border:3px solid var(--surface);border-radius:50%!important;overflow:hidden}.hx-ring .av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.hx-pc .rk{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:800 14px/1 var(--f-num);background:rgba(231,194,106,.18);color:var(--gold)}
+.hx-pc.r1 .rk{background:linear-gradient(135deg,#F8E7AE,#C9923A);color:#2A1E05}
+.hx-pc strong{font:800 16px/1.15 var(--f-num);text-transform:uppercase;letter-spacing:.02em;min-height:36px;display:flex;align-items:center;overflow-wrap:anywhere}
+.hx-pc .mini{display:flex;width:100%;justify-content:space-around;padding:8px 6px;border-radius:12px;background:rgba(0,0,0,.28)}
+.hx-pc .mini div{display:flex;flex-direction:column;gap:3px}
+.hx-pc .mini small{font:700 10.5px/1 var(--f-num);letter-spacing:.14em;color:var(--muted)}
+.hx-pc .mini b{font:800 17px/1 var(--f-num)}
+.hx-pc .big small{display:block;font:700 11px/1 var(--f-num);letter-spacing:.2em;color:var(--muted);margin-top:2px}
+.hx-pc .big b{font:800 42px/1 var(--f-num);background:linear-gradient(180deg,#F8C99B,#E59A62);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hx-nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:8px}
+.hx-nt{padding:20px 10px 16px;text-align:center;border-radius:18px;border:1px solid var(--line-2);background:linear-gradient(160deg,rgba(255,255,255,.045),transparent 55%),var(--surface)}
+.hx-nt b{display:block;font:800 clamp(34px,10vw,48px)/1 var(--f-num);background:linear-gradient(180deg,#F8C99B,#E59A62);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hx-nt span{display:block;margin-top:8px;font:700 12px/1 var(--f-num);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.hx-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.hx-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:99px;border:1px solid var(--line-2);background:var(--surface);color:inherit;font:700 14px/1 var(--f-num);letter-spacing:.06em;text-decoration:none}
+.hx-chip button{all:unset;cursor:pointer;color:var(--muted);padding:0 2px}
+.hx-add{display:flex;align-items:center;gap:10px;width:100%;margin-top:10px;padding:16px;border-radius:16px;border:1.5px dashed rgba(231,194,106,.4);background:transparent;color:var(--gold);font:700 15px/1 var(--f-num);letter-spacing:.08em;cursor:pointer}
+.hx-btns{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.hx-cbtn{display:block;text-align:center;padding:17px;border-radius:18px;border:1.5px solid var(--gold);background:linear-gradient(180deg,rgba(231,194,106,.1),transparent);color:var(--gold);font:800 16px/1 var(--f-num);letter-spacing:.16em;text-decoration:none;text-transform:uppercase}
+.hx-form{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding:14px;border-radius:16px;border:1px solid var(--line-2);background:var(--surface)}
+.hx-form input{min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface-2);color:var(--ink);font:inherit;font-size:16px}
+.hx-form label{font-size:13px;color:var(--muted)}
+.hx-form .row{display:flex;gap:8px}
+.hx-rev{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+.hx-rev.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.hx-amb i{animation:none}.hx-rev{opacity:1;transform:none;transition:none}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -1381,7 +1429,8 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
     funTab: 'spin', roast: { cur: null }, game: { mode: null, res: null }, mm: null, sh: null, hl: null, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
-    draft: { name: '', number: '', photo: null, busy: false }
+    draft: { name: '', number: '', photo: null, busy: false },
+    site: { d: null, on: false, edit: null, err: false }
   };
 
   /* ---------- helpers ---------- */
@@ -4265,6 +4314,107 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   }
 
   /* ---------- home v2: spotlight hero, ticker, movers, club form ---------- */
+  /* ---------- home v3: top scorers / top players / numbers / partners / contact ---------- */
+  function hxHead(kick, title, sub) {
+    return h('div', { class: 'hx-sech hx-rev' }, h('small', null, kick), h('h2', null, title), sub ? h('p', null, sub) : null);
+  }
+  function hxCard(x, i, kind) {
+    var mp = x.wins + x.draws + x.losses, big, m2;
+    if (kind === 'gb') { big = [x.goals, 'GOALS FOR']; m2 = ['G/M', mp ? (x.goals / mp).toFixed(2) : '0.00']; }
+    else { big = [ratingFor(x.id), 'RATING']; m2 = ['WIN %', (mp ? Math.round(x.wins / mp * 100) : 0) + '%']; }
+    var ring = h('span', { class: 'hx-ring' }, avatar(x.p, 80));
+    return h('button', { type: 'button', class: 'hx-pc' + (i === 0 ? ' r1' : ''), onclick: function () { openSheet('profile', x.id); } },
+      h('span', { class: 'rk' }, String(i + 1)), ring, h('strong', null, x.p.name),
+      h('div', { class: 'mini' }, h('div', null, h('small', null, 'MP'), h('b', null, String(mp))), h('div', null, h('small', null, m2[0]), h('b', null, m2[1]))),
+      h('div', { class: 'big' }, h('small', null, big[1]), h('b', null, String(big[0]))));
+  }
+  function hxScorers(all) {
+    var l = all.filter(function (x) { return x.goals > 0; }).sort(function (a, b) { return b.goals - a.goals || (b.goals / (b.wins + b.draws + b.losses)) - (a.goals / (a.wins + a.draws + a.losses)) || b.wins - a.wins; }).slice(0, 10);
+    if (l.length < 2) return null;
+    var car = h('div', { class: 'hx-car' }); l.forEach(function (x, i) { car.append(hxCard(x, i, 'gb')); });
+    return h('section', { class: 'stack' }, hxHead('GOLDEN BOOT', 'Top Scorers', 'All-time goals'), car);
+  }
+  function hxTopPlayers(all) {
+    var l = all.slice().sort(function (a, b) { return ratingFor(b.id) - ratingFor(a.id) || b.wins - a.wins || b.goals - a.goals; }).slice(0, 10);
+    if (l.length < 2) return null;
+    var car = h('div', { class: 'hx-car' }); l.forEach(function (x, i) { car.append(hxCard(x, i, 'rt')); });
+    return h('section', { class: 'stack' }, hxHead('THE BEST OF THE BEST', 'Top Players', 'By club rating'), car);
+  }
+  function hxNumbers() {
+    var m = S.wins.length; if (!m) return null;
+    var w = 0, g = 0, hat = 0;
+    S.wins.forEach(function (x) { if (x.type !== 'draw' && x.type !== 'loss') w++; var n = Number(x.goals || 0); g += n; if (n >= 3) hat++; });
+    var t = [[S.players.size, 'Players'], [m, 'Matches'], [g, 'Goals scored'], [Math.round(w / m * 100) + '%', 'Win rate'], [hat, 'Hat-tricks'], [(g / m).toFixed(1), 'Goals / match']];
+    var box = h('div', { class: 'hx-nums' }); t.forEach(function (x) { box.append(h('div', { class: 'hx-nt hx-rev' }, h('b', null, String(x[0])), h('span', null, x[1]))); });
+    return h('section', { class: 'stack' }, hxHead('BY THE NUMBERS', 'Club Stats', 'Everything the club has recorded'), box);
+  }
+  /* editable partners + contact links (collection "site", doc "main") */
+  function hxSiteListen() {
+    if (!S.db || S.site.on) return; S.site.on = true;
+    try {
+      S.db.collection('site').doc('main').onSnapshot(function (d) {
+        S.site.d = d.exists ? d.data() : {}; S.site.err = false;
+        if (S.tab === 'home' && !S.site.edit) renderView();
+      }, function (e) { console.error(e); S.site.err = true; S.site.on = false; });
+    } catch (e) { console.error(e); }
+  }
+  function hxUrl(v, kind) {
+    v = String(v || '').trim(); if (!v) return '';
+    if (kind === 'email') return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v) ? 'mailto:' + v : '';
+    if (kind === 'wa') { var n = v.replace(/[^\d]/g, ''); return n.length >= 8 ? 'https://wa.me/' + n : ''; }
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    try { var u = new URL(v); return /^https?:$/.test(u.protocol) ? u.href : ''; } catch (e) { return ''; }
+  }
+  async function hxSiteSave(patch, okMsg) {
+    try { patch.ts = Date.now(); await S.db.collection('site').doc('main').set(patch, { merge: true }); toast(okMsg || 'সেভ হয়েছে ✅'); S.site.edit = null; S.site.d = Object.assign({}, S.site.d || {}, patch); renderView(); }
+    catch (e) { console.error(e); toast('সেভ হয়নি। Firestore rules-এ site অংশ যোগ করা আছে কি?'); }
+  }
+  function hxPartners() {
+    var d = S.site.d || {}, ps = Array.isArray(d.partners) ? d.partners : [];
+    if (!ps.length && !S.canWrite) return null;
+    var sec = h('section', { class: 'stack' }, hxHead('FRIENDS OF THE CLUB', 'Platforms & Partners', 'Who stands with Sylhet Netbreakers'));
+    var chips = h('div', { class: 'hx-chips hx-rev' });
+    ps.forEach(function (p, i) {
+      var u = hxUrl(p.url), c = h(u ? 'a' : 'span', u ? { class: 'hx-chip', href: u, target: '_blank', rel: 'noopener noreferrer' } : { class: 'hx-chip' }, String(p.name || '').slice(0, 40));
+      if (S.canWrite) c.append(h('button', { type: 'button', 'aria-label': 'মুছুন', onclick: function (e) { e.preventDefault(); e.stopPropagation(); hxSiteSave({ partners: ps.filter(function (_, j) { return j !== i; }) }, 'মুছে ফেলা হয়েছে'); } }, '✕'));
+      chips.append(c);
+    });
+    if (ps.length) sec.append(chips);
+    if (S.canWrite) {
+      if (S.site.edit === 'partner') {
+        var n = h('input', { placeholder: 'পার্টনারের নাম', maxlength: 40 }), u2 = h('input', { placeholder: 'লিংক (ঐচ্ছিক)', inputmode: 'url' });
+        sec.append(h('div', { class: 'hx-form' }, h('label', null, 'নাম'), n, h('label', null, 'লিংক'), u2,
+          h('div', { class: 'row' }, h('button', { class: 'btn', onclick: function () { var nm = n.value.trim(); if (!nm) { toast('নাম লিখুন'); return; } hxSiteSave({ partners: ps.concat([{ name: nm, url: hxUrl(u2.value) }]).slice(0, 12) }); } }, 'সেভ'),
+            h('button', { class: 'btn ghost', onclick: function () { S.site.edit = null; renderView(); } }, 'বাতিল'))));
+      } else sec.append(h('button', { type: 'button', class: 'hx-add', onclick: function () { S.site.edit = 'partner'; renderView(); } }, '+  Add partner'));
+    }
+    return sec;
+  }
+  function hxContact() {
+    var d = S.site.d || {}, links = [['FACEBOOK', hxUrl(d.fb)], ['WHATSAPP', hxUrl(d.wa, 'wa')], ['EMAIL', hxUrl(d.email, 'email')]].filter(function (x) { return x[1]; });
+    if (!links.length && !S.canWrite) return null;
+    var sec = h('section', { class: 'stack' }, hxHead('GET IN TOUCH', 'Contact Us', 'Join the club, sponsor us or ask anything'));
+    var box = h('div', { class: 'hx-btns hx-rev' });
+    links.forEach(function (x) { box.append(h('a', { class: 'hx-cbtn', href: x[1], target: '_blank', rel: 'noopener noreferrer' }, x[0])); });
+    if (links.length) sec.append(box);
+    if (S.canWrite) {
+      if (S.site.edit === 'contact') {
+        var f = h('input', { placeholder: 'facebook.com/yourpage', value: d.fb || '', inputmode: 'url' }), w = h('input', { placeholder: '8801XXXXXXXXX', value: d.wa || '', inputmode: 'tel' }), e = h('input', { placeholder: 'name@email.com', value: d.email || '', inputmode: 'email' });
+        sec.append(h('div', { class: 'hx-form' }, h('label', null, 'Facebook পেজ/গ্রুপের লিংক'), f, h('label', null, 'WhatsApp নম্বর (দেশের কোডসহ)'), w, h('label', null, 'ইমেইল'), e,
+          h('div', { class: 'row' }, h('button', { class: 'btn', onclick: function () { hxSiteSave({ fb: hxUrl(f.value), wa: w.value.replace(/[^\d]/g, ''), email: e.value.trim() }); } }, 'সেভ'),
+            h('button', { class: 'btn ghost', onclick: function () { S.site.edit = null; renderView(); } }, 'বাতিল'))));
+      } else sec.append(h('button', { type: 'button', class: 'hx-add', onclick: function () { S.site.edit = 'contact'; renderView(); } }, '+  Edit contact links'));
+    }
+    return sec;
+  }
+  function hxReveal() {
+    var els = document.querySelectorAll('.hx-rev:not(.in)'); if (!els.length) return;
+    var show = function (e) { e.classList.add('in'); };
+    if (!('IntersectionObserver' in window)) { els.forEach(show); return; }
+    var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) { show(x.target); io.unobserve(x.target); } }); }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
+    els.forEach(function (e, i) { e.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(e); });
+    setTimeout(function () { document.querySelectorAll('.hx-rev:not(.in)').forEach(show); }, 6000);
+  }
   function hxTicker() {
     var items = [];
     var evs = S.wins.slice().sort(function (a, b) { return (b.createdAt || b.ts) - (a.createdAt || a.ts); }).slice(0, 8);
@@ -4333,6 +4483,8 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     var order = S.hpOrder, n = order.length;
     if (!(S.hpIdx >= 0 && S.hpIdx < n)) S.hpIdx = 0;
     var stat = {}; all.forEach(function (x) { stat[x.id] = x; });
+    var heroRef = null;
+    function tint() { if (heroRef) heroRef.style.setProperty('--tc', hpTierCol(ratingFor(order[S.hpIdx]))[0]); }
     var count = h('span', { class: 'hp-count', 'aria-hidden': 'true' });
     var box = h('div', { class: 'hp-show', style: 'min-height:236px;margin:14px 0 0' });
     var prog = h('span', { class: 'hx-prog', 'aria-hidden': 'true' }, h('i'));
@@ -4346,7 +4498,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
         h('div', { class: 'hx-info' }, h('span', { class: 'hx-tag' }, ti.e + ' ' + ti.n), h('h2', { class: 'hx-name' }, p.name),
           h('div', { class: 'hx-ovr' }, h('b', null, String(rt)), h('em', null, 'OVR'), p.number ? h('span', null, '#' + p.number) : null), mini));
     }
-    function paint() { count.textContent = String(S.hpIdx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0'); var b = prog.firstChild; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; }
+    function paint() { count.textContent = String(S.hpIdx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0'); tint(); var b = prog.firstChild; b.style.animation = 'none'; void b.offsetWidth; b.style.animation = ''; }
     function go(dir) {
       var cur = box.firstChild; if (cur) cur.classList.add('out');
       setTimeout(function () {
@@ -4368,13 +4520,14 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     clearInterval(window._hpT);
     window._hpT = setInterval(tick, 3200);
     var line = hlead.length ? h('p', { class: 'hp-leadline' }, '👑 এই সপ্তাহের লিডার: ', h('b', null, hlead.map(function (r) { return r.p.name; }).join(' ও ')), ' · ' + top.wins + ' জয় · ' + top.goals + ' গোল') : null;
-    return h('section', { class: 'home-hero' }, h('span', { class: 'hp-shine', 'aria-hidden': 'true' }), hpLive(),
+    var heroEl = h('section', { class: 'home-hero' }, h('span', { class: 'hx-amb', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')), h('span', { class: 'hp-shine', 'aria-hidden': 'true' }), hpLive(),
       h('div', { class: 'home-kicker' }, 'SYLHET NETBREAKERS • OUR SQUAD', count),
       box, prog, line,
       h('div', { class: 'home-actions' },
         h('button', { class: 'btn lime', onclick: function () { goTab('board'); } }, 'View Rankings  →'),
         h('button', { class: 'btn ghost', onclick: function () { goTab('players'); } }, 'Explore Players'),
         h('button', { class: 'btn ghost', onclick: function () { goTab('hall'); } }, 'Club Records')));
+    heroRef = heroEl; tint(); return heroEl;
   }
   function homeView() {
     var totalWins = 0, totalDraws = 0, totalLosses = 0, totalGoals = 0;
@@ -4439,7 +4592,8 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     q.append(quick);
     setTimeout(hpCount, 120);
     var hxMid = [hxMovers(), hxForm()].filter(Boolean); hxMid = hxMid.length ? h('div', { class: 'home-two' }, hxMid) : null;
-    return h('div', { class: 'stack' }, heroBox, hxTicker(), ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), hxMid, sections, feedPanel(6), q, hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
+    setTimeout(hxReveal, 150);
+    return h('div', { class: 'stack' }, heroBox, hxTicker(), ntBanner(), bdHomeBanner(), nsHomeStrip(), metrics, hpFeatured(), hpPodium(all), hxScorers(all), hxTopPlayers(all), hxMid, hxNumbers(), weekly, q, hxPartners(), hxContact(), hpAdminPanel(), h('p', { class: 'muted small', style: 'text-align:center;padding:8px 0 0' }, 'SYLHET NETBREAKERS · Built around performance, respect and competition'));
   }
   function powerView() {
     var all = ranking(-Infinity, Infinity).filter(function (x) { return x.wins || x.draws || x.losses; });
@@ -5653,6 +5807,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     listen();
     if (ntOn()) ntRegisterPush();
     ntcListen();
+    hxSiteListen();
     listenAC();
     listenSignings();
     bdListenPublic();
