@@ -1408,6 +1408,35 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 .hx-acard .av{border:2px solid var(--gold)}
 .hx-acard small{color:var(--gold)}
 @media(prefers-reduced-motion:reduce){.hx-mqt{animation:none}.hx-mq{overflow-x:auto}}
+
+/* header kinetic title */
+@property --ha{syntax:'<angle>';inherits:false;initial-value:0deg}
+.brand{position:relative}
+.brand .logo{position:relative;animation:hdLogo .9s cubic-bezier(.2,1.5,.4,1) both;cursor:pointer}
+.brand .logo{animation:hdLogo .9s cubic-bezier(.2,1.5,.4,1) both,hdGlow 3.6s ease-in-out 1s infinite}
+@keyframes hdGlow{50%{box-shadow:0 0 0 2px #E7C26A,0 0 22px rgba(231,194,106,.55),0 8px 20px rgba(0,0,0,.4)}}
+.brand h1 .hd-l{background:linear-gradient(180deg,#fff 10%,#CFE9EB 60%,#8FC9D0 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes hdLogo{0%{transform:scale(.3) rotate(-120deg);opacity:0;filter:blur(8px)}100%{transform:none;opacity:1;filter:none}}
+.hd-w{display:inline-block;white-space:nowrap}
+.hd-l{display:inline-block;opacity:0;transform:translateY(-1.1em) scaleY(1.5);filter:blur(10px);
+ animation:hdDrop .75s cubic-bezier(.22,1.6,.36,1) forwards;animation-delay:calc(.45s + var(--i)*.06s)}
+@keyframes hdDrop{0%{opacity:0;transform:translateY(-1.1em) scaleY(1.5);filter:blur(10px)}
+ 55%{opacity:1;transform:translateY(.08em) scaleY(.88);filter:blur(1px)}
+ 100%{opacity:1;transform:none;filter:none}}
+.brand h1{position:relative;overflow:hidden;padding-bottom:2px}
+.brand h1::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,236,170,.75) 50%,transparent 65%);
+ transform:translateX(-120%);mix-blend-mode:overlay;animation:hdShine 5.5s ease-in-out 1.9s infinite;pointer-events:none}
+@keyframes hdShine{0%{transform:translateX(-120%)}30%,100%{transform:translateX(120%)}}
+.city .hd-l{animation-name:hdTrack;animation-duration:.9s;animation-timing-function:cubic-bezier(.2,.9,.2,1);transform:translateX(-.6em);filter:blur(6px)}
+@keyframes hdTrack{0%{opacity:0;transform:translateX(-.8em);filter:blur(6px)}100%{opacity:1;transform:none;filter:none}}
+.city{position:relative;display:flex;align-items:center;gap:8px}
+.city::after{content:"";height:1px;width:0;background:linear-gradient(90deg,var(--gold,#E7C26A),transparent);animation:hdLine 1s ease 1.3s forwards}
+@keyframes hdLine{to{width:46px}}
+.eyebrow{opacity:0;transform:translateY(6px);animation:hdUp .8s ease 1.5s forwards;background:linear-gradient(90deg,var(--muted),#E7C26A 50%,var(--muted)) 0 0/220% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:hdUp .8s ease 1.5s forwards,hdEy 6s linear 2.4s infinite}
+@keyframes hdUp{to{opacity:1;transform:none}}
+@keyframes hdEy{to{background-position:-220% 0}}
+.hdr-tools{animation:hdUp .7s ease 1.2s both}
+@media(prefers-reduced-motion:reduce){.hd-l,.eyebrow,.brand .logo,.hdr-tools{animation:none!important;opacity:1;transform:none;filter:none}.brand h1::after{display:none}.city::after{animation:none;width:46px}}
 </style>
 </head>
 <body>
@@ -1432,6 +1461,18 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 
+<script>
+(function(){
+  function split(el){var t=el.textContent,i=0;t=t.trim();el.setAttribute('aria-label',t);el.textContent='';
+    t.split(' ').forEach(function(w,wi){var ws=document.createElement('span');ws.className='hd-w';ws.setAttribute('aria-hidden','true');
+      for(var c of w){var l=document.createElement('span');l.className='hd-l';l.style.setProperty('--i',i++);l.textContent=c;ws.appendChild(l);}
+      if(wi)el.appendChild(document.createTextNode('\u00A0'));el.appendChild(ws);});}
+  var c=document.querySelector('.brand .city'),h=document.querySelector('.brand h1');
+  if(c)split(c);if(h)split(h);
+  var lg=document.getElementById('logo');
+  if(lg)lg.addEventListener('click',function(){document.querySelectorAll('.hd-l').forEach(function(x){x.style.animation='none';void x.offsetWidth;x.style.animation='';});lg.style.animation='none';void lg.offsetWidth;lg.style.animation='';});
+})();
+</script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
