@@ -884,6 +884,21 @@ body {
 .ac-code{margin:8px 0 0;padding:10px;border-radius:10px;background:#050A11;color:#cfe;font-size:12px;overflow-x:auto;white-space:pre}
 @media(prefers-reduced-motion:reduce){.ac-card:hover{transform:none}}
 @media(max-width:680px){.ac-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ac-panel{padding:18px 14px}}
+.psroot h3{margin:0 0 10px;font-family:var(--f-display);font-size:17px}
+.pstpl{display:flex;width:100%}.pstpl button{flex:1;padding:8px 4px}
+.psgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.psgrid label.field input{width:100%}
+.psslots{display:grid;gap:12px}
+.psslot{display:flex;gap:12px;align-items:flex-start}
+.psth{width:84px;height:104px;flex:none;border-radius:12px;background:rgba(255,255,255,.06) center/cover no-repeat;border:1px dashed var(--line-2)}
+.psslotc{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
+.psslotc .row{display:flex;gap:8px;flex-wrap:wrap}
+.psslotc .btn{min-height:40px;padding:8px 12px;font-size:14px}
+.psacc{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.psdot{width:38px;height:38px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.psdot[aria-pressed="true"]{border-color:#fff}
+.psrow{display:flex;gap:10px;flex-wrap:wrap}
+.psroot .preview img{max-height:70vh}
 </style>
 
 <style>
@@ -1924,6 +1939,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     tabs.push(['ballon', 'Ballon d’Or']);
     tabs.push(['moments', 'মুহূর্ত']);
     tabs.push(['team', 'অ্যাডমিন']);
+    if (S.canWrite) tabs.push(['poster', 'পোস্টার']);
     tabs.push(['fun', '🎉 মজা']);
     tabs.forEach(function (x) {
       var b = h('button', {
@@ -3985,22 +4001,44 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   }
   /* ---------- weekly / monthly / all-time leader poster (same look as the player card) ---------- */
   async function drawLeaderPoster(card, W, H, story) {
-    var L = card.leaders[card.idx], per = card.period, th = card.theme;
-    var AC = th === 'potm' ? '#9B6BFF' : (per === 'all' || !th) ? '#F2C14E' : '#2EE6A6';
-    var l1 = th === 'potm' ? 'PLAYER OF' : (per === 'all' || !th) ? 'BEST PLAYER' : 'PLAYER OF', l2 = th === 'potm' ? 'THE MONTH' : (per === 'all' || !th) ? 'OF ALL TIME' : 'THE WEEK';
-    var tag = per === 'all' ? 'ALL TIME' : (card.rangeTxt || (per === 'month' ? 'MONTH' : 'WEEK'));
-    var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
-    var NUM = '"Barlow Condensed","Arial Narrow",sans-serif', BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif', k = H / 1350, s = story ? 1.05 : 1;
-    function ls(v) { if ('letterSpacing' in x) x.letterSpacing = v + 'px'; }
-    var im = null, logo = null; if (L.photo) { try { im = await loadImg(L.photo); } catch (e) { } } try { logo = await loadImg(LOGO); } catch (e) { }
+    var L = card.leaders[card.idx], per = card.period, th = card.theme, all = (per === 'all' || !th);
+    var AC = th === 'potm' ? '#9B6BFF' : all ? '#F2C14E' : '#2EE6A6';
+    var pl = (L.wins || 0) + (L.draws || 0) + (L.losses || 0), wr = pl ? Math.round((L.wins || 0) / pl * 100) : 0;
+    return psSpot({
+      AC: AC, fit: 'cover', photo: L.photo, num: L.num, name: L.name,
+      l1: th === 'potm' ? 'PLAYER OF' : all ? 'BEST PLAYER' : 'PLAYER OF', l2: th === 'potm' ? 'THE MONTH' : all ? 'OF ALL TIME' : 'THE WEEK',
+      bigVal: L.wins || 0, bigLab: 'WINS', pill: per === 'all' ? 'ALL TIME' : per === 'month' ? 'MONTH' : 'WEEK',
+      stats: [['DRAW', L.draws || 0], ['GOAL', L.goals || 0], ['WIN %', wr + '%'], ['MATCHES', pl]],
+      tag: per === 'all' ? 'ALL TIME' : (card.rangeTxt || ''), tagLab: 'PERIOD'
+    }, W, H);
+  }
+  /* ================= POSTER STUDIO ================= */
+  var PS_ACC = [['গোল্ড', '#F2C14E'], ['এমেরাল্ড', '#2EE6A6'], ['ভায়োলেট', '#9B6BFF'], ['ক্রিমসন', '#FF4D5E'], ['সায়ান', '#23D5F5'], ['অরেঞ্জ', '#FF8A1F']];
+  var PS_NUM = '"Barlow Condensed","Arial Narrow",sans-serif', PS_BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
+  function psLat(s) { return /[A-Za-z0-9]/.test(s) && !/[ঀ-৿]/.test(s); }
+  function psTxt(x, s, maxW, size, wt) { s = String(s || ''); var lat = psLat(s), t = lat ? s.toUpperCase() : s; fitFont(x, t, maxW, size, wt || 800, lat ? PS_NUM : PS_BN); return t; }
+  function psIm(x, im, bx, by, bw, bh, mode, fy) {
+    if (!im) return;
+    if (mode === 'contain') { var s = Math.min((bw - 80) / im.width, (bh - 80) / im.height), dw = im.width * s, dh = im.height * s; x.drawImage(im, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh); }
+    else pCover(x, im, bx, by, bw, bh, fy == null ? 0.1 : fy);
+  }
+  function psCanvas(W, H) { var cv = document.createElement('canvas'); cv.width = W; cv.height = H; return cv; }
+  function psBlob(cv) { return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); }); }
+  function psLs(x, v) { if ('letterSpacing' in x) x.letterSpacing = v + 'px'; }
+  async function psLoad(src) { if (!src) return null; try { return await loadImg(src); } catch (e) { return null; } }
+
+  /* --- profile / spotlight (same look as the player card) --- */
+  async function psSpot(o, W, H) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, s = story ? 1.05 : 1;
+    var im = await psLoad(o.photo), logo = await psLoad(LOGO);
     x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
     if (im) { x.save(); x.globalAlpha = 0.28; x.filter = 'blur(26px)'; pCover(x, im, -60, 120 * k, 560, 900 * k, 0.1); x.restore(); x.filter = 'none'; }
     var gl = x.createLinearGradient(0, 0, 360, 0); gl.addColorStop(0, 'rgba(5,6,7,0.7)'); gl.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = gl; x.fillRect(0, 0, 360, H);
     var P = [[330, 92 * k], [W - 100, 92 * k], [W - 100, 270 * k], [W - 52, 270 * k], [W - 52, 540 * k], [W - 100, 540 * k], [W - 100, H - 110 * k], [190, H - 110 * k]];
     x.save(); pPoly(x, P); x.clip();
     var ag = x.createLinearGradient(330, 0, W, H); ag.addColorStop(0, AC); ag.addColorStop(1, '#120a05'); x.fillStyle = ag; x.fillRect(0, 0, W, H);
-    if (im) { x.save(); pCover(x, im, 290, 92 * k, W - 290, H - 200 * k, 0.1); x.restore(); }
-    else { x.fillStyle = 'rgba(255,255,255,0.85)'; x.font = '800 520px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(L.name), W * 0.62, H * 0.45); x.textBaseline = 'alphabetic'; }
+    if (im) { x.save(); psIm(x, im, 290, 92 * k, W - 290, H - 200 * k, o.fit); x.restore(); }
+    else { x.fillStyle = 'rgba(255,255,255,0.85)'; x.font = '800 520px ' + PS_BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(o.name || 'S'), W * 0.62, H * 0.45); x.textBaseline = 'alphabetic'; }
     var lg = x.createLinearGradient(330, 0, 500, 0); lg.addColorStop(0, 'rgba(5,6,7,0.5)'); lg.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = lg; x.fillRect(0, 0, W, H);
     var bgd = x.createLinearGradient(0, H * 0.72, 0, H - 110 * k); bgd.addColorStop(0, 'rgba(5,6,7,0)'); bgd.addColorStop(1, 'rgba(5,6,7,0.85)'); x.fillStyle = bgd; x.fillRect(0, 0, W, H);
     x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = 2; x.beginPath(); x.moveTo(400, 150 * k); x.lineTo(W - 190, 150 * k); x.lineTo(W - 150, 190 * k); x.lineTo(W - 150, 300 * k); x.stroke();
@@ -4008,34 +4046,185 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     x.restore();
     x.save(); pPoly(x, P); x.lineWidth = 3; x.strokeStyle = AC; x.stroke(); x.restore();
     x.strokeStyle = 'rgba(255,255,255,0.8)'; x.lineWidth = 3; x.beginPath(); x.moveTo(330, 92 * k); x.lineTo(190, H - 110 * k); x.stroke();
-    x.save(); x.translate(W - 70, 405 * k); x.rotate(Math.PI / 2); x.fillStyle = '#0b0c0d'; x.font = '800 28px ' + NUM; x.textAlign = 'center'; ls(7); x.fillText('SNB', 0, 0); x.restore(); ls(0);
-    x.fillStyle = AC; x.font = '800 26px ' + NUM; x.textAlign = 'right'; ls(6); x.fillText(L.num ? '#' + L.num : 'SNB', W - 120, 78 * k); ls(0);
+    x.save(); x.translate(W - 70, 405 * k); x.rotate(Math.PI / 2); x.fillStyle = '#0b0c0d'; x.font = '800 28px ' + PS_NUM; x.textAlign = 'center'; psLs(x, 7); x.fillText('SNB', 0, 0); x.restore(); psLs(x, 0);
+    x.fillStyle = AC; x.font = '800 26px ' + PS_NUM; x.textAlign = 'right'; psLs(x, 6); x.fillText(o.num ? '#' + o.num : 'SNB', W - 120, 78 * k); psLs(x, 0);
     if (logo) x.drawImage(logo, 54, 54 * k, 150, 150);
-    /* heading */
-    x.textAlign = 'left'; x.fillStyle = '#fff'; ls(4); var hf = fitFont(x, l2, 250, 64, 800, NUM); fitFont(x, l1.length > l2.length ? l1 : l2, 250, 64, 800, NUM); x.fillText(l1, 60, 360 * k); x.fillText(l2, 60, 360 * k + 66); ls(0);
+    x.textAlign = 'left'; x.fillStyle = '#fff'; psLs(x, 4);
+    var hs = 64; if (o.l1 || o.l2) { hs = Math.min(fitFont(x, o.l1 || ' ', 250, 64, 800, PS_NUM), fitFont(x, o.l2 || ' ', 250, 64, 800, PS_NUM)); x.font = '800 ' + hs + 'px ' + PS_NUM; }
+    if (o.l1) x.fillText(o.l1.toUpperCase(), 60, 360 * k); if (o.l2) x.fillText(o.l2.toUpperCase(), 60, 360 * k + 66); psLs(x, 0);
     x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(60, 360 * k + 90, 300, 2);
-    /* big wins */
-    var big = String(L.wins || 0), bs = Math.round(340 * s); x.font = '800 ' + bs + 'px ' + NUM; x.fillStyle = '#fff';
-    var bw = x.measureText(big).width, hh = Math.round(bs * 0.92), by = 470 * k + hh;
+    var big = String(o.bigVal == null ? '' : o.bigVal), bs = fitFont(x, big || '0', 290, Math.round(340 * s), 800, PS_NUM), hh = Math.round(bs * 0.92), by = 470 * k + Math.round(340 * s * 0.92);
+    x.fillStyle = '#fff'; x.font = '800 ' + bs + 'px ' + PS_NUM; var bw = x.measureText(big).width;
     x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 30; x.fillText(big, 46, by); x.restore();
-    x.font = '800 62px ' + NUM; x.fillStyle = AC; ls(3); x.fillText('WINS', 46 + bw + 10, by - hh * 0.66); ls(0);
-    /* period pill */
-    var pyt = by + 38 * k; rr(x, 60, pyt, 250, 56, 28); x.fillStyle = AC; x.fill(); x.fillStyle = '#10110f'; x.textBaseline = 'middle'; ls(4); fitFont(x, per === 'all' ? 'ALL TIME' : per === 'month' ? 'MONTH' : 'WEEK', 200, 32, 800, NUM); x.fillText(per === 'all' ? 'ALL TIME' : per === 'month' ? 'MONTH' : 'WEEK', 86, pyt + 30); x.textBaseline = 'alphabetic'; ls(0);
-    /* stats */
-    var pl = (L.wins || 0) + (L.draws || 0) + (L.losses || 0), wr = pl ? Math.round((L.wins || 0) / pl * 100) : 0;
-    var st = [['DRAW', L.draws || 0], ['GOAL', L.goals || 0], ['WIN %', wr + '%'], ['MATCHES', pl]];
+    if (o.bigLab) { x.font = '800 62px ' + PS_NUM; x.fillStyle = AC; psLs(x, 3); x.fillText(String(o.bigLab).toUpperCase(), 46 + bw + 10, by - hh * 0.66); psLs(x, 0); }
+    var pyt = by + 38 * k;
+    if (o.pill) { rr(x, 60, pyt, 250, 56, 28); x.fillStyle = AC; x.fill(); x.fillStyle = '#10110f'; x.textBaseline = 'middle'; psLs(x, 4); var pt = psTxt(x, o.pill, 200, 32, 800); x.fillText(pt, 86, pyt + 30); x.textBaseline = 'alphabetic'; psLs(x, 0); }
     var sy0 = pyt + 118 * s, sh = story ? 92 : 76;
-    st.forEach(function (r, i) { var yy = sy0 + i * sh; x.fillStyle = '#fff'; x.font = '800 ' + (story ? 66 : 58) + 'px ' + NUM; x.fillText(String(r[1]), 60, yy); var vw = x.measureText(String(r[1])).width; x.fillStyle = AC; x.font = '700 28px ' + NUM; ls(5); x.fillText(r[0], 60 + vw + 16, yy - 6); ls(0); });
-    /* name */
-    var nyb = H - 232 * k, nm = String(L.name || ''), lat = /[A-Za-z]/.test(nm);
-    x.fillStyle = '#fff'; x.textAlign = 'left'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24;
-    fitFont(x, lat ? nm.toUpperCase() : nm, W - 520, lat ? 130 : 120, 800, lat ? NUM : BN); x.fillText(lat ? nm.toUpperCase() : nm, 420, nyb); x.restore();
-    /* period tag */
-    var tw = 300, tx = W - 100 - tw, ty2 = H - 110 * k - 74; x.fillStyle = '#fff'; x.fillRect(tx, ty2, tw, 74); x.fillStyle = '#0a0b0c'; x.textAlign = 'center'; fitFont(x, tag, tw - 70, 50, 800, NUM); x.fillText(tag, tx + tw / 2 - 18, ty2 + 54);
-    x.font = '700 18px ' + NUM; x.fillStyle = AC; x.save(); x.translate(tx + tw - 16, ty2 + 62); x.rotate(-Math.PI / 2); ls(3); x.fillText('PERIOD', 0, 0); x.restore(); ls(0);
+    (o.stats || []).forEach(function (r, i) { var yy = sy0 + i * sh; x.textAlign = 'left'; x.fillStyle = '#fff'; x.font = '800 ' + (story ? 66 : 58) + 'px ' + PS_NUM; x.fillText(String(r[1]), 60, yy); var vw = x.measureText(String(r[1])).width; x.fillStyle = AC; x.font = '700 28px ' + PS_NUM; psLs(x, 5); x.fillText(String(r[0]).toUpperCase(), 60 + vw + 16, yy - 6); psLs(x, 0); });
+    var nyb = H - 232 * k; x.fillStyle = '#fff'; x.textAlign = 'left'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24;
+    var nm = psTxt(x, o.name || '', W - 520, 130); x.fillText(nm, 420, nyb); x.restore();
+    if (o.tag) { var tw = 300, tx = W - 100 - tw, ty2 = H - 110 * k - 74; x.fillStyle = '#fff'; x.fillRect(tx, ty2, tw, 74); x.fillStyle = '#0a0b0c'; x.textAlign = 'center'; var tt = psTxt(x, o.tag, tw - 70, 50); x.fillText(tt, tx + tw / 2 - 18, ty2 + 54);
+      if (o.tagLab) { x.font = '700 18px ' + PS_NUM; x.fillStyle = AC; x.save(); x.translate(tx + tw - 16, ty2 + 62); x.rotate(-Math.PI / 2); psLs(x, 3); x.textAlign = 'left'; x.fillText(String(o.tagLab).toUpperCase(), 0, 0); x.restore(); psLs(x, 0); } }
     x.fillStyle = '#fff'; x.fillRect(W - 82, H - 380 * k, 12, 12); for (var tk = 0; tk < 9; tk++) x.fillRect(W - 80, H - 350 * k + tk * 20, 8, 2);
-    var dm = pDomain(); x.textAlign = 'left'; x.fillStyle = 'rgba(255,255,255,0.8)'; x.font = '700 22px ' + NUM; ls(5); x.fillText('SYLHET NET BREAKERS' + (dm ? '  ·  ' + dm : ''), 60, H - 42 * k); ls(0);
-    return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
+    var dm = pDomain(); x.textAlign = 'left'; x.fillStyle = 'rgba(255,255,255,0.8)'; x.font = '700 22px ' + PS_NUM; psLs(x, 5); x.fillText('SYLHET NET BREAKERS' + (dm ? '  ·  ' + dm : ''), 60, H - 42 * k); psLs(x, 0);
+    return psBlob(cv);
+  }
+
+  /* --- versus / result --- */
+  async function psVS(o, W, H) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, cx = W / 2;
+    var ia = await psLoad(o.a.src), ib = await psLoad(o.b.src), logo = await psLoad(LOGO);
+    x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
+    var rg = x.createRadialGradient(cx, 640 * k, 30, cx, 640 * k, 760); rg.addColorStop(0, AC); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.save(); x.globalAlpha = 0.22; x.fillStyle = rg; x.fillRect(0, 0, W, H); x.restore();
+    if (logo) x.drawImage(logo, 54, 54 * k, 120, 120);
+    x.fillStyle = 'rgba(255,255,255,0.8)'; x.font = '700 24px ' + PS_NUM; x.textAlign = 'right'; psLs(x, 6); x.fillText('SYLHET NET BREAKERS', W - 60, 112 * k); psLs(x, 0);
+    x.textAlign = 'center'; x.fillStyle = '#fff'; psLs(x, 10); var tg = psTxt(x, o.tag || '', W - 200, story ? 170 : 150); x.save(); x.shadowColor = AC; x.shadowBlur = 40; x.fillText(tg, cx + 5, 300 * k); x.restore(); psLs(x, 0);
+    x.fillStyle = AC; x.fillRect(cx - 80, 330 * k, 160, 6);
+    var y0 = 400 * k, y1 = y0 + (story ? 980 : 620), sl = 70, g = 12, mid = (y0 + y1) / 2;
+    function panel(poly, bx, bw, im, col, dim, name, left, nm2) {
+      x.save(); pPoly(x, poly); x.clip();
+      var gr = x.createLinearGradient(bx, y0, bx + bw, y1); gr.addColorStop(0, col); gr.addColorStop(1, '#0d1016'); x.fillStyle = gr; x.fillRect(bx, y0, bw, y1 - y0);
+      if (im) psIm(x, im, bx, y0, bw, y1 - y0, o.fit); else { x.fillStyle = 'rgba(255,255,255,0.22)'; x.font = '800 420px ' + PS_BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(name || 'S'), bx + bw / 2, mid); x.textBaseline = 'alphabetic'; }
+      var bd = x.createLinearGradient(0, y1 - 300, 0, y1); bd.addColorStop(0, 'rgba(5,6,7,0)'); bd.addColorStop(1, 'rgba(5,6,7,0.88)'); x.fillStyle = bd; x.fillRect(bx, y1 - 300, bw, 300);
+      if (dim) { x.fillStyle = 'rgba(5,6,7,0.5)'; x.fillRect(bx, y0, bw, y1 - y0); }
+      x.restore();
+      x.save(); pPoly(x, poly); x.lineWidth = 3; x.strokeStyle = col; x.stroke(); x.restore();
+      x.fillStyle = '#fff'; x.textAlign = left ? 'left' : 'right'; x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 20;
+      var tt = psTxt(x, name || '', cx - 130, 110); x.fillText(tt, left ? 84 : W - 84, y1 - 36); x.restore();
+    }
+    var lp = [[50, y0], [cx + sl - g, y0], [cx - sl - g, y1], [50, y1]], rp = [[cx + sl + g, y0], [W - 50, y0], [W - 50, y1], [cx - sl + g, y1]];
+    panel(lp, 50, cx + sl - 50, ia, AC, o.win === 'b', o.a.name, true);
+    panel(rp, cx - sl, W - 50 - (cx - sl), ib, o.col2 || '#D3D9E0', o.win === 'a', o.b.name, false);
+    if (o.win) { var wl = o.win === 'a', wn = wl ? o.a.name : o.b.name; x.save(); rr(x, wl ? 84 : W - 84 - 210, y1 - 36 - 150, 210, 46, 23); x.fillStyle = wl ? AC : '#fff'; x.fill(); x.fillStyle = '#10110f'; x.font = '800 28px ' + PS_NUM; x.textAlign = 'center'; psLs(x, 6); x.fillText('WINNER', (wl ? 84 : W - 84 - 210) + 108, y1 - 36 - 116); psLs(x, 0); x.restore(); sparkle(x, wl ? 330 : W - 330, y0 + 70, 18, 0.9, '#fff'); }
+    rr(x, cx - 175, mid - 100, 350, 200, 30); x.fillStyle = 'rgba(5,6,7,0.88)'; x.fill(); x.lineWidth = 4; x.strokeStyle = AC; x.stroke();
+    x.textAlign = 'center'; x.fillStyle = '#fff'; x.save(); x.shadowColor = AC; x.shadowBlur = 24; var ms = fitFont(x, o.mid, 300, 180, 800, PS_NUM); x.fillText(o.mid, cx, mid + ms * 0.34); x.restore();
+    x.textAlign = 'center'; var dy = y1 + 112 * k;
+    x.fillStyle = AC; x.fillRect(cx - 60, y1 + 36, 120, 4);
+    if (o.l1) { x.fillStyle = '#fff'; psLs(x, 4); var a1 = psTxt(x, o.l1, W - 140, 88); x.fillText(a1, cx + 2, dy); psLs(x, 0); }
+    if (o.l2) { x.fillStyle = AC; psLs(x, 4); var a2 = psTxt(x, o.l2, W - 140, 46, 700); x.fillText(a2, cx + 2, dy + 64); psLs(x, 0); }
+    if (o.l3) { x.fillStyle = 'rgba(255,255,255,0.7)'; psLs(x, 6); var a3 = psTxt(x, o.l3, W - 140, 30, 700); x.fillText(a3, cx + 3, dy + 120); psLs(x, 0); }
+    if (!o.l3) { var dm = pDomain(); x.fillStyle = 'rgba(255,255,255,0.55)'; x.font = '700 22px ' + PS_NUM; psLs(x, 5); x.fillText(dm || 'SYLHET NET BREAKERS', cx + 2, H - 42 * k); psLs(x, 0); }
+    return psBlob(cv);
+  }
+
+  /* --- announcement / custom --- */
+  async function psAnn(o, W, H) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350;
+    var im = await psLoad(o.photo), logo = await psLoad(LOGO);
+    x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
+    var P = [[190, 92 * k], [W - 60, 92 * k], [W - 60, H - 110 * k], [60, H - 110 * k]];
+    x.save(); pPoly(x, P); x.clip();
+    var ag = x.createLinearGradient(190, 0, W, H); ag.addColorStop(0, AC); ag.addColorStop(1, '#120a05'); x.fillStyle = ag; x.fillRect(0, 0, W, H);
+    if (im) psIm(x, im, 60, 92 * k, W - 120, H - 200 * k, o.fit, 0.05); else if (logo) { x.globalAlpha = 0.18; x.drawImage(logo, W / 2 - 330, 200 * k, 660, 660); x.globalAlpha = 1; }
+    var tg = x.createLinearGradient(0, 92 * k, 0, H - 110 * k); tg.addColorStop(0, 'rgba(5,6,7,0.05)'); tg.addColorStop(0.3, 'rgba(5,6,7,0.2)'); tg.addColorStop(0.55, 'rgba(5,6,7,0.9)'); tg.addColorStop(1, 'rgba(5,6,7,0.96)'); x.fillStyle = tg; x.fillRect(0, 0, W, H);
+    x.restore();
+    x.save(); pPoly(x, P); x.lineWidth = 3; x.strokeStyle = AC; x.stroke(); x.restore();
+    if (logo) x.drawImage(logo, 54, 40 * k, 130, 130);
+    x.fillStyle = AC; x.font = '800 26px ' + PS_NUM; x.textAlign = 'right'; psLs(x, 6); x.fillText('SYLHET NET BREAKERS', W - 80, 76 * k); psLs(x, 0);
+    var chips = [['DATE', o.date], ['TIME', o.time], ['VENUE', o.venue]].filter(function (c) { return c[1]; });
+    var chipH = 92, chipY = H - 110 * k - chipH - 16;
+    var ty = (story ? 0.4 : 0.4) * H;
+    x.textAlign = 'left';
+    if (o.tag) { psLs(x, 6); x.font = '800 34px ' + PS_NUM; var tt = psTxt(x, o.tag, 560, 34); var tw = x.measureText(tt).width + 56; rr(x, 90, ty, tw, 60, 30); x.fillStyle = AC; x.fill(); x.fillStyle = '#10110f'; x.textBaseline = 'middle'; x.fillText(tt, 118, ty + 32); x.textBaseline = 'alphabetic'; psLs(x, 0); }
+    var ly = ty + 60 + 100, tl = (o.title || []).filter(Boolean);
+    tl.forEach(function (t, i) { x.fillStyle = '#fff'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24; var s = psTxt(x, t, W - 220, tl.length > 2 ? 108 : 140); x.fillText(s, 90, ly + i * (tl.length > 2 ? 100 : 130)); x.restore(); });
+    var cy = ly + (tl.length ? (tl.length - 1) * (tl.length > 2 ? 100 : 130) : 0) + 20;
+    if (o.sub) { cy += 56; x.fillStyle = AC; psLs(x, 3); var ss = psTxt(x, o.sub, W - 220, 48, 700); x.fillText(ss, 90, cy); psLs(x, 0); }
+    (o.body || []).filter(Boolean).forEach(function (b) { cy += 62; x.fillStyle = AC; x.fillRect(90, cy - 24, 16, 16); x.fillStyle = 'rgba(255,255,255,0.9)'; var bs = psTxt(x, b, W - 280, 42, 600); x.fillText(bs, 124, cy); });
+    if (chips.length) {
+      var gap = 14, wts = chips.map(function (c) { return Math.max(String(c[1]).length, 7); }), wsum = wts.reduce(function (p, q) { return p + q; }, 0), acc = 60;
+      chips.forEach(function (c, i) { var cw = (W - 120 - gap * (chips.length - 1)) * wts[i] / wsum, bx = acc; acc += cw + gap; x.fillStyle = '#fff'; x.fillRect(bx, chipY, cw, chipH); x.fillStyle = AC; x.fillRect(bx, chipY, 8, chipH); x.textAlign = 'left'; x.fillStyle = '#6b7280'; x.font = '700 20px ' + PS_NUM; psLs(x, 4); x.fillText(c[0], bx + 28, chipY + 34); psLs(x, 0); x.fillStyle = '#0a0b0c'; var v = psTxt(x, c[1], cw - 50, 40); x.fillText(v, bx + 28, chipY + 80); });
+    }
+    var dm = pDomain(); x.textAlign = 'center'; x.fillStyle = 'rgba(255,255,255,0.6)'; x.font = '700 22px ' + PS_NUM; psLs(x, 5); x.fillText(dm || 'SYLHET NET BREAKERS', W / 2 + 2, H - 44 * k); psLs(x, 0);
+    return psBlob(cv);
+  }
+
+  /* --- state + templates --- */
+  var PS_TPL = [
+    ['vs', 'ম্যাচ ডে', [['tag', 'হেডলাইন', 'FINAL'], ['aName', 'বাম পক্ষ', 'TEAM A'], ['bName', 'ডান পক্ষ', 'TEAM B'], ['date', 'তারিখ', '28 NOV 2026'], ['time', 'সময়', '9:00 PM'], ['venue', 'ভেন্যু / লাইন', 'eFootball Mobile'], ['note', 'নিচের ছোট লাইন', 'SYLHET NET BREAKERS LEAGUE']], [['a', 'বাম পক্ষের ছবি'], ['b', 'ডান পক্ষের ছবি']]],
+    ['result', 'রেজাল্ট', [['tag', 'হেডলাইন', 'FULL TIME'], ['aName', 'বাম পক্ষ', 'TEAM A'], ['bName', 'ডান পক্ষ', 'TEAM B'], ['aScore', 'বাম স্কোর', '3'], ['bScore', 'ডান স্কোর', '1'], ['l1', 'বড় লাইন', 'CHAMPIONS'], ['l2', 'দ্বিতীয় লাইন', 'SNB CUP 2026'], ['note', 'নিচের ছোট লাইন', '28 NOV 2026']], [['a', 'বাম পক্ষের ছবি'], ['b', 'ডান পক্ষের ছবি']]],
+    ['spot', 'প্রোফাইল', [['h1', 'হেডিং লাইন ১', 'PLAYER'], ['h2', 'হেডিং লাইন ২', 'SPOTLIGHT'], ['name', 'নাম', 'PLAYER NAME'], ['num', 'জার্সি নম্বর', '10'], ['bigVal', 'বড় সংখ্যা', '12'], ['bigLab', 'বড় সংখ্যার লেবেল', 'WINS'], ['pill', 'পিল লেখা', 'SEASON 1'], ['s1l', 'স্ট্যাট ১ নাম', 'GOAL'], ['s1v', 'স্ট্যাট ১ মান', '34'], ['s2l', 'স্ট্যাট ২ নাম', 'DRAW'], ['s2v', 'স্ট্যাট ২ মান', '4'], ['s3l', 'স্ট্যাট ৩ নাম', 'MATCHES'], ['s3v', 'স্ট্যাট ৩ মান', '20'], ['s4l', 'স্ট্যাট ৪ নাম', ''], ['s4v', 'স্ট্যাট ৪ মান', ''], ['tag', 'ডান নিচের ট্যাগ', 'CAPTAIN'], ['tagLab', 'ট্যাগের ছোট লেবেল', 'ROLE']], [['m', 'প্লেয়ার / টিমের ছবি']]],
+    ['ann', 'ঘোষণা', [['tag', 'ট্যাগ', 'ANNOUNCEMENT'], ['t1', 'টাইটেল লাইন ১', 'SNB CUP'], ['t2', 'টাইটেল লাইন ২', 'REGISTRATION'], ['t3', 'টাইটেল লাইন ৩', 'OPEN NOW'], ['sub', 'সাব-টাইটেল', 'Limited slots, join today'], ['b1', 'পয়েন্ট ১', 'Entry free for all members'], ['b2', 'পয়েন্ট ২', 'Knockout format'], ['b3', 'পয়েন্ট ৩', ''], ['date', 'তারিখ', '30 NOV'], ['time', 'সময়', '9:00 PM'], ['venue', 'ভেন্যু', 'eFootball Mobile']], [['m', 'ছবি (ঐচ্ছিক)']]]
+  ];
+  function psState() {
+    if (!S.ps) {
+      S.ps = { tpl: 'vs', fmt: 'post', acc: 0, fit: 'cover', f: {}, src: {}, url: null, blob: null, tick: 0, busy: false, err: false };
+      PS_TPL.forEach(function (t) { S.ps.f[t[0]] = {}; t[2].forEach(function (f) { S.ps.f[t[0]][f[0]] = f[2]; }); });
+    }
+    return S.ps;
+  }
+  async function psRender(P) {
+    var W = 1080, H = P.fmt === 'story' ? 1920 : 1350, f = P.f[P.tpl], AC = PS_ACC[P.acc][1], my = ++P.tick;
+    await ensureFonts();
+    var blob;
+    if (P.tpl === 'vs') blob = await psVS({ AC: AC, fit: P.fit, tag: f.tag, a: { name: f.aName, src: P.src.a }, b: { name: f.bName, src: P.src.b }, mid: 'VS', win: null, l1: [f.date, f.time].filter(Boolean).join('  ·  '), l2: f.venue, l3: f.note }, W, H);
+    else if (P.tpl === 'result') { var as = parseInt(f.aScore, 10), bs = parseInt(f.bScore, 10), win = (isNaN(as) || isNaN(bs) || as === bs) ? null : (as > bs ? 'a' : 'b'); blob = await psVS({ AC: AC, fit: P.fit, tag: f.tag, a: { name: f.aName, src: P.src.a }, b: { name: f.bName, src: P.src.b }, mid: (f.aScore || '0') + ' - ' + (f.bScore || '0'), win: win, l1: f.l1, l2: f.l2, l3: f.note }, W, H); }
+    else if (P.tpl === 'spot') blob = await psSpot({ AC: AC, fit: P.fit, photo: P.src.m, l1: f.h1, l2: f.h2, name: f.name, num: f.num, bigVal: f.bigVal, bigLab: f.bigLab, pill: f.pill, tag: f.tag, tagLab: f.tagLab, stats: [[f.s1l, f.s1v], [f.s2l, f.s2v], [f.s3l, f.s3v], [f.s4l, f.s4v]].filter(function (r) { return r[1] !== '' && r[1] != null; }) }, W, H);
+    else blob = await psAnn({ AC: AC, fit: P.fit, photo: P.src.m, tag: f.tag, title: [f.t1, f.t2, f.t3], sub: f.sub, body: [f.b1, f.b2, f.b3], date: f.date, time: f.time, venue: f.venue }, W, H);
+    if (my !== P.tick) return null;
+    if (P.url) { try { URL.revokeObjectURL(P.url); } catch (e) { /* ignore */ } }
+    P.blob = blob; P.url = URL.createObjectURL(blob); return P.url;
+  }
+  function psSchedule(img, st, delay) {
+    var P = psState(); clearTimeout(P.t); P.busy = true; st.textContent = 'প্রিভিউ তৈরি হচ্ছে…';
+    P.t = setTimeout(function () {
+      psRender(P).then(function (u) { if (u) { P.busy = false; P.err = false; img.src = u; img.hidden = false; st.textContent = ''; } }).catch(function (e) { console.error(e); P.busy = false; P.err = true; st.textContent = 'পোস্টার বানানো যায়নি, আবার চেষ্টা করুন।'; });
+    }, delay == null ? 350 : delay);
+  }
+  function psPick(file, cb) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      var im = new Image(); im.onload = function () {
+        var m = 1600, sc = Math.min(1, m / Math.max(im.width, im.height)), c = psCanvas(Math.round(im.width * sc), Math.round(im.height * sc));
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        cb(c.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.92));
+      }; im.onerror = function () { toast('ছবি পড়া যায়নি'); }; im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  function posterView() {
+    if (!S.canWrite) return h('div', { class: 'notice' }, 'পোস্টার বানাতে পারে শুধু অ্যাডমিনরা।');
+    var P = psState(), T = PS_TPL.filter(function (t) { return t[0] === P.tpl; })[0], f = P.f[P.tpl];
+    var img = h('img', { alt: 'পোস্টার প্রিভিউ', hidden: !P.url, src: P.url || '' }), st = h('p', { class: 'muted small' });
+    function again() { psSchedule(img, st); }
+    var tpls = h('div', { class: 'seg pstpl', role: 'group', 'aria-label': 'টেমপ্লেট' });
+    PS_TPL.forEach(function (t) { tpls.append(h('button', { 'aria-pressed': P.tpl === t[0] ? 'true' : 'false', onclick: function () { P.tpl = t[0]; renderView(); } }, t[1])); });
+    var grid = h('div', { class: 'psgrid' });
+    T[2].forEach(function (fd) {
+      var inp = h('input', { type: 'text', value: f[fd[0]] || '', placeholder: fd[2] || '', 'aria-label': fd[1], oninput: function (e) { f[fd[0]] = e.target.value; again(); } });
+      grid.append(h('label', { class: 'field' }, fd[1], inp));
+    });
+    var slots = h('div', { class: 'psslots' });
+    T[3].forEach(function (sl) {
+      var nameKey = sl[0] === 'a' ? 'aName' : sl[0] === 'b' ? 'bName' : 'name';
+      var sel = h('select', { 'aria-label': 'প্লেয়ার থেকে ছবি নিন', onchange: function (e) {
+        var p = S.players.get(e.target.value); if (!p) return; P.src[sl[0]] = p.photo || null; if (nameKey in f) f[nameKey] = p.name; if (P.tpl === 'spot' && p.number) f.num = String(p.number); renderView();
+      } }, h('option', { value: '' }, 'প্লেয়ার থেকে নিন…'));
+      sortedPlayers().forEach(function (e) { sel.append(h('option', { value: e[0] }, e[1].name)); });
+      var file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: function (e) { var fl = e.target.files && e.target.files[0]; if (!fl) return; psPick(fl, function (d) { P.src[sl[0]] = d; renderView(); }); } });
+      var th = h('div', { class: 'psth' }); if (P.src[sl[0]]) th.style.backgroundImage = 'url("' + P.src[sl[0]] + '")';
+      slots.append(h('div', { class: 'psslot' }, th, h('div', { class: 'psslotc' }, h('strong', null, sl[1]), sel,
+        h('div', { class: 'row' }, h('button', { class: 'btn ghost', type: 'button', onclick: function () { file.click(); } }, '📷 গ্যালারি থেকে'), P.src[sl[0]] ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[sl[0]] = null; renderView(); } }, 'মুছুন') : null), file)));
+    });
+    var sw = h('div', { class: 'psacc', role: 'group', 'aria-label': 'রঙ' });
+    PS_ACC.forEach(function (a, i) { sw.append(h('button', { type: 'button', class: 'psdot', 'aria-label': a[0], 'aria-pressed': P.acc === i ? 'true' : 'false', style: 'background:' + a[1], onclick: function () { P.acc = i; renderView(); } })); });
+    var fmt = h('div', { class: 'seg', role: 'group', 'aria-label': 'মাপ' },
+      h('button', { 'aria-pressed': P.fmt === 'post' ? 'true' : 'false', onclick: function () { P.fmt = 'post'; renderView(); } }, 'পোস্ট 4:5'),
+      h('button', { 'aria-pressed': P.fmt === 'story' ? 'true' : 'false', onclick: function () { P.fmt = 'story'; renderView(); } }, 'স্টোরি 9:16'));
+    var fit = h('div', { class: 'seg', role: 'group', 'aria-label': 'ছবির ধরন' },
+      h('button', { 'aria-pressed': P.fit === 'cover' ? 'true' : 'false', onclick: function () { P.fit = 'cover'; renderView(); } }, 'ফটো (ভরাট)'),
+      h('button', { 'aria-pressed': P.fit === 'contain' ? 'true' : 'false', onclick: function () { P.fit = 'contain'; renderView(); } }, 'লোগো (পুরো)'));
+    var nm = function () { return 'net-breakers-poster-' + P.tpl + '-' + P.fmt + '.png'; };
+    var acts = h('div', { class: 'actions' },
+      h('button', { class: 'btn', onclick: function () { if (!P.url) return; var a = document.createElement('a'); a.href = P.url; a.download = nm(); document.body.appendChild(a); a.click(); a.remove(); toast('ডাউনলোড শুরু হয়েছে'); } }, icon('down'), 'PNG ডাউনলোড'),
+      canShareFiles() ? h('button', { class: 'btn ghost', onclick: async function () { if (!P.blob) return; try { await navigator.share({ files: [new File([P.blob], nm(), { type: 'image/png' })] }); } catch (e) { /* cancelled */ } } }, 'শেয়ার করুন') : null);
+    psSchedule(img, st, 30);
+    return h('div', { class: 'stack psroot' },
+      h('section', { class: 'card panel' }, h('h2', null, 'পোস্টার স্টুডিও'), h('p', { class: 'muted small' }, 'টেমপ্লেট বেছে লিখে দিন, নিচে সাথে সাথে পোস্টার দেখা যাবে।'), tpls),
+      h('section', { class: 'card panel' }, h('h3', null, 'ছবি'), slots),
+      h('section', { class: 'card panel psform' }, h('h3', null, 'লেখা'), grid),
+      h('section', { class: 'card panel' }, h('h3', null, 'স্টাইল'), sw, h('div', { class: 'psrow' }, fmt, fit)),
+      h('section', { class: 'card panel' }, h('h3', null, 'প্রিভিউ'), h('div', { class: 'preview' }, img), st, acts));
   }
   async function drawCard(card) {
     var story = card.fmt === 'story';
@@ -4653,6 +4842,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
       var items = [['tournament', 'trophy', 'টুর্নামেন্ট'], ['market', 'market', 'ট্রান্সফার মার্কেট'], ['fantasy', 'fantasy', 'Fantasy'], ['signings', 'pen', 'New Signings'], ['ballon', 'medal', 'Ballon d’Or']];
       if (S.canWrite) items.push(['add', 'plus', 'জয় যোগ']);
       items.push(['power', 'bolt', 'পাওয়ার র‍্যাঙ্কিং'], ['hall', 'book', 'হল অফ ফেম'], ['moments', 'camera', 'মুহূর্ত'], ['team', 'crown', 'অ্যাডমিন প্যানেল']);
+      if (S.canWrite) items.push(['poster', 'pen', 'পোস্টার স্টুডিও']);
       var box = h('div', { id: 'bmore', class: 'bmore', role: 'menu' });
       items.forEach(function (x) {
         box.append(h('button', { type: 'button', role: 'menuitem', 'aria-current': S.tab === x[0] ? 'page' : null, onclick: function () { hpCloseMore(); if (x[0] === 'theme') { themeToggle(); renderTabs(); return; } goTab(x[0]); } }, icoEl(x[1], 20), x[2]));
@@ -6167,6 +6357,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 
   function renderView() {
     var v = $('#view');
+    if (S.tab === 'poster' && S.canWrite) { var ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && v.contains(ae)) return; }
     var tfh = document.getElementById('tfHost'); if (tfh) tfh.hidden = S.tab !== 'tournament';
     v.textContent = '';
     if (S.tab !== 'notifs' && S.ntc) S.ntc.inView = false;
@@ -6178,12 +6369,12 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     if (!S._tfWarm) { S._tfWarm = true; setTimeout(function () { (window.requestIdleCallback || function (f) { f(); })(function () { hpTfEnsure(); var t2 = document.getElementById('tfHost'); if (t2) t2.hidden = S.tab !== 'tournament'; }); }, 2500); }
     if (S.tab === 'fun' && S.spin.busy) return;
     var af = document.activeElement, keepId = af && af.getAttribute && af.getAttribute('data-sid'), keepPos = keepId ? af.selectionStart : 0;
-    v.append(S.tab === 'ballon' ? bdView() : S.tab === 'signings' ? nsView() : S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : S.tab === 'market' ? marketView() : S.tab === 'fantasy' ? fanView() : S.tab === 'feed' ? feedView() : S.tab === 'notifs' ? ntcView() : viewPlayers());
+    v.append(S.tab === 'ballon' ? bdView() : S.tab === 'signings' ? nsView() : S.tab === 'tournament' ? tournamentView() : S.tab === 'home' ? homeView() : S.tab === 'board' ? viewBoard() : S.tab === 'power' ? powerView() : S.tab === 'poster' ? posterView() : S.tab === 'add' ? viewAdd() : S.tab === 'hall' ? viewHall() : S.tab === 'fun' ? viewFun() : S.tab === 'moments' ? viewMoments() : S.tab === 'team' ? teamView() : S.tab === 'market' ? marketView() : S.tab === 'fantasy' ? fanView() : S.tab === 'feed' ? feedView() : S.tab === 'notifs' ? ntcView() : viewPlayers());
     var cs = v.querySelector('.chips.scroll'); if (cs) cs.scrollTop = S.chipScroll || 0;
     if (keepId) { var ni = v.querySelector('[data-sid="' + keepId + '"]'); if (ni) { try { ni.focus(); ni.setSelectionRange(keepPos, keepPos); } catch (e) { /* ignore */ } } }
   }
   function refresh() {
-    if (!S.canWrite && S.tab === 'add') S.tab = 'board';
+    if (!S.canWrite && (S.tab === 'add' || S.tab === 'poster')) S.tab = 'board';
     renderHeader();
     renderTabs();
     if (!(S.tab === 'fun' && (S.guess.run || S.spin.busy))) renderView();
