@@ -3983,70 +3983,73 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     if (F.vdelta) { x.textAlign = 'right'; x.fillStyle = AC; x.font = '700 26px ' + NUM; x.fillText(F.vdelta, W - 100, H - 42 * k); }
     return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
   }
-  async function drawPlayerPoster(card, W, H, story) {
-    var L = card.leaders[card.idx];
-    var TH = card.theme === 'potw' ? { bg: '#0A4A47', dk: '#031A1A', mid: '#0E6B63', tint: '57,245,165', cream: '#EAF7EE', gold: '#8DF2C4', ink: '#073432' }
-      : card.theme === 'potm' ? { bg: '#4A2486', dk: '#150A2E', mid: '#6B3BB5', tint: '170,120,255', cream: '#F3ECFF', gold: '#F6D77A', ink: '#2A1250' }
-      : { bg: '#8E0F16', dk: '#2A0407', mid: '#B3161F', tint: '255,70,60', cream: '#FBF3E1', gold: '#F6D77A', ink: '#5A0A10' };
+  /* ---------- premium award poster (POTW / POTM / best player) ---------- */
+  async function drawPremiumPoster(card, W, H, story) {
+    var L = card.leaders[card.idx], th = card.theme, per = card.period;
+    var PAL = th === 'potm' ? { a: '#9B6BFF', b: '#3B1C8C', d: '#0B0620', word: 'MONTH', lab: 'PLAYER OF THE MONTH' }
+      : (per === 'all' || !th) ? { a: '#FF4D5E', b: '#8E1020', d: '#12040A', word: 'LEGEND', lab: 'BEST PLAYER OF ALL TIME' }
+      : { a: '#2EE6A6', b: '#0B6B63', d: '#031311', word: 'WEEK', lab: 'PLAYER OF THE WEEK' };
+    var GOLD = ['#FFF3C4', '#F2D27A', '#C99A2E', '#F7DE95'];
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
     var NUM = '"Barlow Condensed","Arial Narrow",sans-serif', BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
-    var sx = W / 1200, sy = H / 1500;
-    function P(pts) { return pts.map(function (q) { return [q[0] * sx, q[1] * sy]; }); }
     var im = null, logo = null; if (L.photo) { try { im = await loadImg(L.photo); } catch (e) { } } try { logo = await loadImg(LOGO); } catch (e) { }
+    function foil(y0, y1) { var g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, GOLD[0]); g.addColorStop(0.45, GOLD[1]); g.addColorStop(0.75, GOLD[2]); g.addColorStop(1, GOLD[3]); return g; }
+    function track(px) { if ('letterSpacing' in x) x.letterSpacing = px + 'px'; }
+    var panelH = story ? 640 : 500, panelTop = H - panelH, photoTop = story ? 420 : 390;
     /* base */
-    var bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, TH.mid); bg.addColorStop(0.5, TH.bg); bg.addColorStop(1, TH.dk); x.fillStyle = bg; x.fillRect(0, 0, W, H);
-    var vg = x.createRadialGradient(W * 0.3, H * 0.3, 80, W * 0.5, H * 0.5, H * 0.85); vg.addColorStop(0, 'rgba(' + TH.tint + ',0.22)'); vg.addColorStop(1, 'rgba(0,0,0,0.45)'); x.fillStyle = vg; x.fillRect(0, 0, W, H);
-    /* soft diagonal bands */
-    x.fillStyle = 'rgba(255,255,255,0.045)'; pPoly(x, P([[0, 520], [430, 515], [0, 700]])); x.fill();
-    x.fillStyle = 'rgba(0,0,0,0.16)'; pPoly(x, P([[520, 1500], [1200, 880], [1200, 1500]])); x.fill();
-    /* cream triangles */
-    x.fillStyle = TH.cream;
-    pPoly(x, P([[795, 320], [1130, 0], [1200, 0], [1200, 320]])); x.fill();
-    pPoly(x, P([[0, 0], [230, 0], [0, 150]])); x.fill();
-    pPoly(x, P([[800, 1290], [915, 1290], [800, 1445], [725, 1445]])); x.fill();
-    /* photo */
-    var bw = W * 0.74, bh = H * 0.9;
-    var pc = document.createElement('canvas'); pc.width = Math.round(bw); pc.height = Math.round(bh); var px = pc.getContext('2d');
-    if (im) { pCover(px, im, 0, 0, pc.width, pc.height, 0.08); }
-    else { px.fillStyle = 'rgba(255,255,255,0.14)'; px.font = '800 ' + Math.round(bh * 0.7) + 'px ' + BN; px.textAlign = 'center'; px.textBaseline = 'middle'; px.fillText(initial(L.name), pc.width * 0.5, pc.height * 0.5); }
-    px.globalCompositeOperation = 'multiply'; px.fillStyle = 'rgba(' + TH.tint + ',0.30)'; px.fillRect(0, 0, pc.width, pc.height);
-    px.globalCompositeOperation = 'destination-in';
-    var g1 = px.createLinearGradient(0, 0, pc.width, 0); g1.addColorStop(0, '#000'); g1.addColorStop(0.7, '#000'); g1.addColorStop(1, 'rgba(0,0,0,0)'); px.fillStyle = g1; px.fillRect(0, 0, pc.width, pc.height);
-    var g2 = px.createLinearGradient(0, 0, 0, pc.height); g2.addColorStop(0, '#000'); g2.addColorStop(0.72, '#000'); g2.addColorStop(1, 'rgba(0,0,0,0)'); px.fillStyle = g2; px.fillRect(0, 0, pc.width, pc.height);
-    x.save(); x.shadowColor = 'rgba(' + TH.tint + ',0.55)'; x.shadowBlur = 60; x.drawImage(pc, -6, 30 * sy); x.restore(); x.drawImage(pc, -6, 30 * sy);
-    /* big gold number */
-    var gx = W - 62, gy = 590 * sy;
-    x.textAlign = 'right'; var gfs = 360 * sx;
-    x.font = '700 ' + gfs + 'px ' + NUM; var gg2 = x.createLinearGradient(0, gy - gfs * 0.8, 0, gy); gg2.addColorStop(0, '#FFF3C0'); gg2.addColorStop(1, TH.gold);
-    x.save(); x.shadowColor = 'rgba(0,0,0,0.4)'; x.shadowBlur = 30; x.fillStyle = gg2; x.fillText('1.', gx, gy); x.restore();
-    /* name */
-    var parts = String(L.name || '').trim().split(/\s+/), last = parts.length > 1 ? parts[parts.length - 1] : parts[0], first = parts.length > 1 ? parts.slice(0, -1).join(' ') : '';
-    var lat = /[A-Za-z]/.test(L.name), nf = lat ? NUM : BN, colX = 650 * sx, colW = W - colX - 50;
-    x.textAlign = 'left'; x.fillStyle = '#fff';
-    x.save(); x.shadowColor = 'rgba(0,0,0,0.45)'; x.shadowBlur = 20;
-    var y1 = 735 * sy;
-    if (first) { var s1 = fitFont(x, lat ? first.toUpperCase() : first, colW * 0.62, 118, 800, nf); x.fillText(lat ? first.toUpperCase() : first, colX, y1); }
-    var s2 = fitFont(x, lat ? last.toUpperCase() : last, colW, 150, 800, nf); x.fillText(lat ? last.toUpperCase() : last, colX, y1 + (first ? 118 : 0) * 1);
+    var bg = x.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, PAL.d); bg.addColorStop(0.55, '#050709'); bg.addColorStop(1, '#020304'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    var rg = x.createRadialGradient(W / 2, photoTop + (panelTop - photoTop) * 0.45, 20, W / 2, photoTop + (panelTop - photoTop) * 0.45, W * 0.78);
+    rg.addColorStop(0, PAL.b); rg.addColorStop(0.55, 'rgba(0,0,0,0)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.globalAlpha = 0.85; x.fillStyle = rg; x.fillRect(0, 0, W, H); x.globalAlpha = 1;
+    /* spot beams */
+    x.save(); x.globalCompositeOperation = 'lighter';
+    [[W * 0.5, 0.10], [W * 0.5, 0.06]].forEach(function (s, i) { var sp = i ? 520 : 300, g = x.createLinearGradient(0, 0, 0, panelTop); g.addColorStop(0, 'rgba(255,255,255,' + s[1] + ')'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; pPoly(x, [[s[0] - 40, 0], [s[0] + 40, 0], [s[0] + sp, panelTop], [s[0] - sp, panelTop]]); x.fill(); });
     x.restore();
-    var ysub = y1 + (first ? 118 : 0) + 50;
-    x.fillStyle = TH.gold; if ('letterSpacing' in x) x.letterSpacing = '3px'; fitFont(x, card.title, colW - 10, 30, 700, NUM); x.fillText(card.title, colX + 4, ysub);
-    x.fillStyle = 'rgba(255,255,255,0.75)'; x.font = '600 26px ' + NUM; x.fillText(card.rangeTxt, colX + 4, ysub + 38); if ('letterSpacing' in x) x.letterSpacing = '0px';
+    /* giant outlined word */
+    x.save(); x.textAlign = 'center'; x.font = '800 ' + (story ? 520 : 430) + 'px ' + NUM; var ww = x.measureText(PAL.word).width; if (ww > W * 1.02) x.font = '800 ' + Math.floor((story ? 520 : 430) * W * 1.02 / ww) + 'px ' + NUM;
+    x.lineWidth = 3; x.strokeStyle = PAL.a; x.globalAlpha = 0.28; x.strokeText(PAL.word, W / 2, photoTop + (story ? 520 : 430)); x.restore();
+    /* photo */
+    var pw = W * 0.92, ph = panelTop - photoTop + (story ? 260 : 200), pc = document.createElement('canvas'); pc.width = Math.round(pw); pc.height = Math.round(ph); var px = pc.getContext('2d');
+    if (im) pCover(px, im, 0, 0, pc.width, pc.height, 0.04); else { px.fillStyle = 'rgba(255,255,255,0.3)'; px.font = '800 ' + Math.round(ph * 0.5) + 'px ' + BN; px.textAlign = 'center'; px.textBaseline = 'middle'; px.fillText(initial(L.name), pc.width / 2, pc.height * 0.4); }
+    px.globalCompositeOperation = 'destination-in';
+    var em = px.createRadialGradient(pc.width / 2, pc.height * 0.38, pc.width * 0.10, pc.width / 2, pc.height * 0.44, pc.width * 0.50); em.addColorStop(0, '#000'); em.addColorStop(0.5, '#000'); em.addColorStop(1, 'rgba(0,0,0,0)'); px.fillStyle = em; px.fillRect(0, 0, pc.width, pc.height);
+    var vm = px.createLinearGradient(0, 0, 0, pc.height); vm.addColorStop(0, 'rgba(0,0,0,0.0)'); vm.addColorStop(0.07, '#000'); vm.addColorStop(0.72, '#000'); vm.addColorStop(1, 'rgba(0,0,0,0)'); px.fillStyle = vm; px.fillRect(0, 0, pc.width, pc.height);
+    x.save(); x.shadowColor = PAL.a; x.shadowBlur = 70; x.globalAlpha = 0.55; x.drawImage(pc, (W - pw) / 2, photoTop, pw, ph); x.restore(); x.drawImage(pc, (W - pw) / 2, photoTop, pw, ph);
+    /* floor glow */
+    var fg = x.createRadialGradient(W / 2, panelTop + 6, 10, W / 2, panelTop + 6, W * 0.5); fg.addColorStop(0, PAL.a); fg.addColorStop(1, 'rgba(0,0,0,0)'); x.save(); x.globalAlpha = 0.4; x.scale(1, 0.18); x.fillStyle = fg; x.fillRect(0, (panelTop + 6) / 0.18 - 300, W, 600); x.restore();
+    /* panel */
+    var pg = x.createLinearGradient(0, panelTop - 40, 0, H); pg.addColorStop(0, 'rgba(3,5,7,0)'); pg.addColorStop(0.22, 'rgba(3,5,7,0.82)'); pg.addColorStop(1, 'rgba(2,3,4,0.98)'); x.fillStyle = pg; x.fillRect(0, panelTop - 40, W, panelH + 40);
+    /* frame */
+    x.save(); x.lineWidth = 3; x.strokeStyle = foil(0, H); x.strokeRect(30, 30, W - 60, H - 60); x.lineWidth = 1; x.strokeStyle = 'rgba(242,210,122,0.35)'; x.strokeRect(46, 46, W - 92, H - 92);
+    x.lineWidth = 6; x.strokeStyle = foil(0, 200); [[30, 30, 1, 1], [W - 30, 30, -1, 1], [30, H - 30, 1, -1], [W - 30, H - 30, -1, -1]].forEach(function (c) { x.beginPath(); x.moveTo(c[0], c[1] + c[3] * 70); x.lineTo(c[0], c[1]); x.lineTo(c[0] + c[2] * 70, c[1]); x.stroke(); }); x.restore();
+    /* header */
+    var hy = 128;
+    if (logo) { x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24; x.beginPath(); x.arc(W / 2, hy, 62, 0, 7); x.fillStyle = '#0A1319'; x.fill(); x.restore(); x.beginPath(); x.arc(W / 2, hy, 62, 0, 7); x.lineWidth = 5; x.strokeStyle = foil(hy - 62, hy + 62); x.stroke(); x.drawImage(logo, W / 2 - 53, hy - 53, 106, 106); }
+    x.textAlign = 'center'; x.fillStyle = 'rgba(255,255,255,0.78)'; x.font = '700 28px ' + NUM; track(12); x.fillText('SYLHET NET BREAKERS', W / 2 + 6, hy + 112); track(0);
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 18; x.font = '800 ' + (story ? 84 : 76) + 'px ' + NUM; var lsz = fitFont(x, PAL.lab, W - 200, story ? 84 : 76, 800, NUM); x.fillStyle = foil(hy + 150, hy + 210); track(5); x.fillText(PAL.lab, W / 2 + 2, hy + 200 + (story ? 8 : 0)); track(0); x.restore();
+    var ry = hy + 252 + (story ? 8 : 0); if (per === 'all') card.rangeTxt = ''; x.font = '700 30px ' + NUM; track(6); var rw = x.measureText(card.rangeTxt || '').width; x.fillStyle = PAL.a; x.fillText(card.rangeTxt || '', W / 2 + 3, ry); track(0);
+    if (card.rangeTxt) { x.fillStyle = 'rgba(242,210,122,0.5)'; x.fillRect(W / 2 - rw / 2 - 90, ry - 10, 64, 2); x.fillRect(W / 2 + rw / 2 + 26, ry - 10, 64, 2); }
+    /* seal */
+    var scx = W - 170, scy = photoTop + (story ? 130 : 100), sr = 66;
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 24; x.beginPath(); x.arc(scx, scy, sr, 0, 7); x.fillStyle = foil(scy - sr, scy + sr); x.fill(); x.restore();
+    x.beginPath(); x.arc(scx, scy, sr - 9, 0, 7); x.lineWidth = 2; x.strokeStyle = 'rgba(70,40,0,0.55)'; x.stroke();
+    x.fillStyle = '#2A1B00'; x.textAlign = 'center'; x.font = '800 62px ' + NUM; x.fillText(L.num ? '#' + L.num : '#1', scx, scy + 14); x.font = '800 20px ' + NUM; track(5); x.fillText('SNB', scx + 2, scy + 42); track(0);
+    /* name */
+    var nm = String(L.name || ''), lat = /[A-Za-z]/.test(nm), nf = lat ? NUM : BN, dn = lat ? nm.toUpperCase() : nm, ny = panelTop + (story ? 190 : 150);
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 28; x.fillStyle = '#FFFFFF'; if (lat) track(4); fitFont(x, dn, W - 150, story ? 156 : 138, 800, nf); x.textAlign = 'center'; x.fillText(dn, W / 2 + (lat ? 2 : 0), ny); x.restore(); track(0);
+    var ly = ny + 34; var lg = x.createLinearGradient(W * 0.2, 0, W * 0.8, 0); lg.addColorStop(0, 'rgba(242,210,122,0)'); lg.addColorStop(0.5, 'rgba(242,210,122,1)'); lg.addColorStop(1, 'rgba(242,210,122,0)'); x.fillStyle = lg; x.fillRect(W * 0.2, ly, W * 0.6, 3);
+    sparkle(x, W / 2 - 330, ly + 1, 14, 0.9, '#F7DE95'); sparkle(x, W / 2 + 330, ly + 1, 14, 0.9, '#F7DE95');
     /* stats */
-    var st = [[L.wins || 0, 'WINS'], [L.draws || 0, 'DRAWS'], [L.goals || 0, 'GOALS']], cw = colW / 3, sy0 = ysub + 150;
-    st.forEach(function (s, i) {
-      var cx = colX + i * cw; x.fillStyle = '#fff'; x.font = '800 78px ' + NUM; x.fillText(String(s[0]), cx + 4, sy0);
-      x.fillStyle = TH.gold; x.font = '700 24px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillText(s[1], cx + 6, sy0 + 36); if ('letterSpacing' in x) x.letterSpacing = '0px';
-      if (i) { x.fillStyle = 'rgba(255,255,255,0.25)'; x.fillRect(cx - 14, sy0 - 62, 2, 110); }
+    var pl = (L.wins || 0) + (L.draws || 0) + (L.losses || 0), wr = pl ? Math.round((L.wins || 0) / pl * 100) : 0;
+    var ST = [[L.wins || 0, 'WINS'], [L.draws || 0, 'DRAWS'], [L.goals || 0, 'GOALS'], [wr + '%', 'WIN RATE']], cw = (W - 160) / 4, sy0 = ly + (story ? 190 : 148);
+    ST.forEach(function (s, i) {
+      var cx = 80 + cw * i + cw / 2; x.textAlign = 'center'; x.font = '800 ' + (story ? 128 : 108) + 'px ' + NUM; x.fillStyle = foil(sy0 - 100, sy0); x.fillText(String(s[0]), cx, sy0);
+      x.fillStyle = 'rgba(255,255,255,0.72)'; x.font = '700 26px ' + NUM; track(6); x.fillText(s[1], cx + 3, sy0 + 40); track(0);
+      if (i) { x.fillStyle = 'rgba(242,210,122,0.28)'; x.fillRect(80 + cw * i, sy0 - 88, 2, 130); }
     });
-    var pl = (L.wins || 0) + (L.draws || 0) + (L.losses || 0);
-    /* top-right label inside cream */
-    x.textAlign = 'right'; x.fillStyle = TH.ink; x.font = '800 24px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '6px'; x.fillText(card.period === 'week' ? 'WEEKLY' : card.period === 'month' ? 'MONTHLY' : 'ALL TIME', W - 40, 66 * sy); if ('letterSpacing' in x) x.letterSpacing = '0px';
-    /* bottom */
-    if (logo) { var lr = 62; x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 20; x.beginPath(); x.arc(W / 2, H - 132 * sy * 0.9 - 20, lr, 0, 7); x.fillStyle = '#0A1319'; x.fill(); x.restore(); x.beginPath(); x.arc(W / 2, H - 132 * sy * 0.9 - 20, lr, 0, 7); x.lineWidth = 5; x.strokeStyle = TH.gold; x.stroke(); x.drawImage(logo, W / 2 - lr * 0.86, H - 132 * sy * 0.9 - 20 - lr * 0.86, lr * 1.72, lr * 1.72); }
-    x.textAlign = 'center'; x.fillStyle = 'rgba(255,255,255,0.85)'; x.font = '700 22px ' + (lat ? NUM : BN); if ('letterSpacing' in x) x.letterSpacing = '3px';
-    x.fillText('SYLHET NET BREAKERS  //  ' + (lat ? L.name.toUpperCase() : L.name) + '  //  SYLHET NET BREAKERS', W / 2, H - 52 * sy * 0.8 - 8); if ('letterSpacing' in x) x.letterSpacing = '0px';
-    var dm = pDomain(); if (dm) { x.fillStyle = 'rgba(255,255,255,0.5)'; x.font = '600 18px ' + NUM; if ('letterSpacing' in x) x.letterSpacing = '3px'; x.fillText(dm, W / 2, H - 22); if ('letterSpacing' in x) x.letterSpacing = '0px'; }
-    var bx = W - 150, by2 = H - 190 * sy * 0.9 - 70; x.fillStyle = 'rgba(0,0,0,0.28)'; x.fillRect(bx, by2, 100, 140); x.fillStyle = TH.cream; x.font = '800 28px ' + NUM; x.textAlign = 'left'; ['SNB', 'EFB', '26'].forEach(function (t, i) { x.fillText(t, bx + 18, by2 + 44 + i * 38); });
+    /* footer */
+    x.fillStyle = 'rgba(255,255,255,0.45)'; x.font = '600 20px ' + NUM; track(6); x.textAlign = 'center'; x.fillText(pDomain() || 'SYLHET NET BREAKERS', W / 2 + 3, H - 74); track(0);
+    /* sparkles */
+    sparkle(x, 120, photoTop + 120, 16, 0.8, PAL.a); sparkle(x, W - 110, photoTop + 420, 12, 0.7, '#fff'); sparkle(x, 170, panelTop - 40, 11, 0.7, '#F7DE95');
     return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
   }
   async function drawCard(card) {
@@ -4054,7 +4057,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     var W = 1080, H = story ? 1920 : 1350;
     if (card.kind === 'nsign') return nsDraw(card, W, H);
     if (card.kind === 'ballon') return drawBallon(card, W, H);
-    if (card.kind === 'player' && card.leaders && card.leaders[card.idx]) return drawPlayerPoster(card, W, H, story);
+    if (card.kind === 'player' && card.leaders && card.leaders[card.idx]) return drawPremiumPoster(card, W, H, story);
     if (card.kind === 'board') return drawBoardPoster(card, W, H, story);
     if (card.kind === 'fifa') return drawFifaPoster(card, W, H, story);
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
