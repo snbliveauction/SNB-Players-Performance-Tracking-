@@ -3999,10 +3999,10 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     var P = [[330, 92 * k], [W - 100, 92 * k], [W - 100, 270 * k], [W - 52, 270 * k], [W - 52, 540 * k], [W - 100, 540 * k], [W - 100, H - 110 * k], [190, H - 110 * k]];
     x.save(); pPoly(x, P); x.clip();
     var ag = x.createLinearGradient(330, 0, W, H); ag.addColorStop(0, AC); ag.addColorStop(1, '#120a05'); x.fillStyle = ag; x.fillRect(0, 0, W, H);
-    if (im) { x.save(); pCover(x, im, 290, 92 * k, W - 290, H - 200 * k, 0.1); x.restore(); x.globalCompositeOperation = 'overlay'; x.fillStyle = AC; x.globalAlpha = 0.28; x.fillRect(0, 0, W, H); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; }
+    if (im) { x.save(); pCover(x, im, 290, 92 * k, W - 290, H - 200 * k, 0.1); x.restore(); }
     else { x.fillStyle = 'rgba(255,255,255,0.85)'; x.font = '800 520px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(L.name), W * 0.62, H * 0.45); x.textBaseline = 'alphabetic'; }
-    var lg = x.createLinearGradient(330, 0, 760, 0); lg.addColorStop(0, 'rgba(5,6,7,0.65)'); lg.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = lg; x.fillRect(0, 0, W, H);
-    var bgd = x.createLinearGradient(0, H * 0.62, 0, H - 110 * k); bgd.addColorStop(0, 'rgba(5,6,7,0)'); bgd.addColorStop(1, 'rgba(5,6,7,0.92)'); x.fillStyle = bgd; x.fillRect(0, 0, W, H);
+    var lg = x.createLinearGradient(330, 0, 500, 0); lg.addColorStop(0, 'rgba(5,6,7,0.5)'); lg.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = lg; x.fillRect(0, 0, W, H);
+    var bgd = x.createLinearGradient(0, H * 0.72, 0, H - 110 * k); bgd.addColorStop(0, 'rgba(5,6,7,0)'); bgd.addColorStop(1, 'rgba(5,6,7,0.85)'); x.fillStyle = bgd; x.fillRect(0, 0, W, H);
     x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = 2; x.beginPath(); x.moveTo(400, 150 * k); x.lineTo(W - 190, 150 * k); x.lineTo(W - 150, 190 * k); x.lineTo(W - 150, 300 * k); x.stroke();
     x.beginPath(); x.moveTo(W - 190, H - 170 * k); x.lineTo(430, H - 170 * k); x.lineTo(390, H - 130 * k); x.stroke();
     x.restore();
