@@ -3983,73 +3983,58 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     if (F.vdelta) { x.textAlign = 'right'; x.fillStyle = AC; x.font = '700 26px ' + NUM; x.fillText(F.vdelta, W - 100, H - 42 * k); }
     return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
   }
-  /* ---------- premium award poster (POTW / POTM / best player) ---------- */
-  async function drawPremiumPoster(card, W, H, story) {
-    var L = card.leaders[card.idx], th = card.theme, per = card.period;
-    var PAL = th === 'potm' ? { a: '#9B6BFF', b: '#3B1C8C', d: '#0B0620', word: 'MONTH', lab: 'PLAYER OF THE MONTH' }
-      : (per === 'all' || !th) ? { a: '#FF4D5E', b: '#8E1020', d: '#12040A', word: 'LEGEND', lab: 'BEST PLAYER OF ALL TIME' }
-      : { a: '#2EE6A6', b: '#0B6B63', d: '#031311', word: 'WEEK', lab: 'PLAYER OF THE WEEK' };
-    var GOLD = ['#FFF3C4', '#F2D27A', '#C99A2E', '#F7DE95'];
+  /* ---------- weekly / monthly / all-time leader poster (same look as the player card) ---------- */
+  async function drawLeaderPoster(card, W, H, story) {
+    var L = card.leaders[card.idx], per = card.period, th = card.theme;
+    var AC = th === 'potm' ? '#9B6BFF' : (per === 'all' || !th) ? '#F2C14E' : '#2EE6A6';
+    var l1 = th === 'potm' ? 'PLAYER OF' : (per === 'all' || !th) ? 'BEST PLAYER' : 'PLAYER OF', l2 = th === 'potm' ? 'THE MONTH' : (per === 'all' || !th) ? 'OF ALL TIME' : 'THE WEEK';
+    var tag = per === 'all' ? 'ALL TIME' : (card.rangeTxt || (per === 'month' ? 'MONTH' : 'WEEK'));
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H; var x = cv.getContext('2d');
-    var NUM = '"Barlow Condensed","Arial Narrow",sans-serif', BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif';
+    var NUM = '"Barlow Condensed","Arial Narrow",sans-serif', BN = '"Anek Bangla","Hind Siliguri",system-ui,sans-serif', k = H / 1350, s = story ? 1.05 : 1;
+    function ls(v) { if ('letterSpacing' in x) x.letterSpacing = v + 'px'; }
     var im = null, logo = null; if (L.photo) { try { im = await loadImg(L.photo); } catch (e) { } } try { logo = await loadImg(LOGO); } catch (e) { }
-    function foil(y0, y1) { var g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, GOLD[0]); g.addColorStop(0.45, GOLD[1]); g.addColorStop(0.75, GOLD[2]); g.addColorStop(1, GOLD[3]); return g; }
-    function track(px) { if ('letterSpacing' in x) x.letterSpacing = px + 'px'; }
-    var panelH = story ? 640 : 500, panelTop = H - panelH, photoTop = story ? 420 : 390;
-    /* base */
-    var bg = x.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, PAL.d); bg.addColorStop(0.55, '#050709'); bg.addColorStop(1, '#020304'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
-    var rg = x.createRadialGradient(W / 2, photoTop + (panelTop - photoTop) * 0.45, 20, W / 2, photoTop + (panelTop - photoTop) * 0.45, W * 0.78);
-    rg.addColorStop(0, PAL.b); rg.addColorStop(0.55, 'rgba(0,0,0,0)'); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.globalAlpha = 0.85; x.fillStyle = rg; x.fillRect(0, 0, W, H); x.globalAlpha = 1;
-    /* spot beams */
-    x.save(); x.globalCompositeOperation = 'lighter';
-    [[W * 0.5, 0.10], [W * 0.5, 0.06]].forEach(function (s, i) { var sp = i ? 520 : 300, g = x.createLinearGradient(0, 0, 0, panelTop); g.addColorStop(0, 'rgba(255,255,255,' + s[1] + ')'); g.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = g; pPoly(x, [[s[0] - 40, 0], [s[0] + 40, 0], [s[0] + sp, panelTop], [s[0] - sp, panelTop]]); x.fill(); });
+    x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
+    if (im) { x.save(); x.globalAlpha = 0.28; x.filter = 'blur(26px)'; pCover(x, im, -60, 120 * k, 560, 900 * k, 0.1); x.restore(); x.filter = 'none'; }
+    var gl = x.createLinearGradient(0, 0, 360, 0); gl.addColorStop(0, 'rgba(5,6,7,0.7)'); gl.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = gl; x.fillRect(0, 0, 360, H);
+    var P = [[330, 92 * k], [W - 100, 92 * k], [W - 100, 270 * k], [W - 52, 270 * k], [W - 52, 540 * k], [W - 100, 540 * k], [W - 100, H - 110 * k], [190, H - 110 * k]];
+    x.save(); pPoly(x, P); x.clip();
+    var ag = x.createLinearGradient(330, 0, W, H); ag.addColorStop(0, AC); ag.addColorStop(1, '#120a05'); x.fillStyle = ag; x.fillRect(0, 0, W, H);
+    if (im) { x.save(); pCover(x, im, 290, 92 * k, W - 290, H - 200 * k, 0.1); x.restore(); x.globalCompositeOperation = 'overlay'; x.fillStyle = AC; x.globalAlpha = 0.28; x.fillRect(0, 0, W, H); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; }
+    else { x.fillStyle = 'rgba(255,255,255,0.85)'; x.font = '800 520px ' + BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(L.name), W * 0.62, H * 0.45); x.textBaseline = 'alphabetic'; }
+    var lg = x.createLinearGradient(330, 0, 760, 0); lg.addColorStop(0, 'rgba(5,6,7,0.65)'); lg.addColorStop(1, 'rgba(5,6,7,0)'); x.fillStyle = lg; x.fillRect(0, 0, W, H);
+    var bgd = x.createLinearGradient(0, H * 0.62, 0, H - 110 * k); bgd.addColorStop(0, 'rgba(5,6,7,0)'); bgd.addColorStop(1, 'rgba(5,6,7,0.92)'); x.fillStyle = bgd; x.fillRect(0, 0, W, H);
+    x.strokeStyle = 'rgba(255,255,255,0.55)'; x.lineWidth = 2; x.beginPath(); x.moveTo(400, 150 * k); x.lineTo(W - 190, 150 * k); x.lineTo(W - 150, 190 * k); x.lineTo(W - 150, 300 * k); x.stroke();
+    x.beginPath(); x.moveTo(W - 190, H - 170 * k); x.lineTo(430, H - 170 * k); x.lineTo(390, H - 130 * k); x.stroke();
     x.restore();
-    /* giant outlined word */
-    x.save(); x.textAlign = 'center'; x.font = '800 ' + (story ? 520 : 430) + 'px ' + NUM; var ww = x.measureText(PAL.word).width; if (ww > W * 1.02) x.font = '800 ' + Math.floor((story ? 520 : 430) * W * 1.02 / ww) + 'px ' + NUM;
-    x.lineWidth = 3; x.strokeStyle = PAL.a; x.globalAlpha = 0.28; x.strokeText(PAL.word, W / 2, photoTop + (story ? 520 : 430)); x.restore();
-    /* photo */
-    var pw = W * 0.92, ph = panelTop - photoTop + (story ? 260 : 200), pc = document.createElement('canvas'); pc.width = Math.round(pw); pc.height = Math.round(ph); var px = pc.getContext('2d');
-    if (im) pCover(px, im, 0, 0, pc.width, pc.height, 0.04); else { px.fillStyle = 'rgba(255,255,255,0.3)'; px.font = '800 ' + Math.round(ph * 0.5) + 'px ' + BN; px.textAlign = 'center'; px.textBaseline = 'middle'; px.fillText(initial(L.name), pc.width / 2, pc.height * 0.4); }
-    px.globalCompositeOperation = 'destination-in';
-    var em = px.createRadialGradient(pc.width / 2, pc.height * 0.38, pc.width * 0.10, pc.width / 2, pc.height * 0.44, pc.width * 0.50); em.addColorStop(0, '#000'); em.addColorStop(0.5, '#000'); em.addColorStop(1, 'rgba(0,0,0,0)'); px.fillStyle = em; px.fillRect(0, 0, pc.width, pc.height);
-    var vm = px.createLinearGradient(0, 0, 0, pc.height); vm.addColorStop(0, 'rgba(0,0,0,0.0)'); vm.addColorStop(0.07, '#000'); vm.addColorStop(0.72, '#000'); vm.addColorStop(1, 'rgba(0,0,0,0)'); px.fillStyle = vm; px.fillRect(0, 0, pc.width, pc.height);
-    x.save(); x.shadowColor = PAL.a; x.shadowBlur = 70; x.globalAlpha = 0.55; x.drawImage(pc, (W - pw) / 2, photoTop, pw, ph); x.restore(); x.drawImage(pc, (W - pw) / 2, photoTop, pw, ph);
-    /* floor glow */
-    var fg = x.createRadialGradient(W / 2, panelTop + 6, 10, W / 2, panelTop + 6, W * 0.5); fg.addColorStop(0, PAL.a); fg.addColorStop(1, 'rgba(0,0,0,0)'); x.save(); x.globalAlpha = 0.4; x.scale(1, 0.18); x.fillStyle = fg; x.fillRect(0, (panelTop + 6) / 0.18 - 300, W, 600); x.restore();
-    /* panel */
-    var pg = x.createLinearGradient(0, panelTop - 40, 0, H); pg.addColorStop(0, 'rgba(3,5,7,0)'); pg.addColorStop(0.22, 'rgba(3,5,7,0.82)'); pg.addColorStop(1, 'rgba(2,3,4,0.98)'); x.fillStyle = pg; x.fillRect(0, panelTop - 40, W, panelH + 40);
-    /* frame */
-    x.save(); x.lineWidth = 3; x.strokeStyle = foil(0, H); x.strokeRect(30, 30, W - 60, H - 60); x.lineWidth = 1; x.strokeStyle = 'rgba(242,210,122,0.35)'; x.strokeRect(46, 46, W - 92, H - 92);
-    x.lineWidth = 6; x.strokeStyle = foil(0, 200); [[30, 30, 1, 1], [W - 30, 30, -1, 1], [30, H - 30, 1, -1], [W - 30, H - 30, -1, -1]].forEach(function (c) { x.beginPath(); x.moveTo(c[0], c[1] + c[3] * 70); x.lineTo(c[0], c[1]); x.lineTo(c[0] + c[2] * 70, c[1]); x.stroke(); }); x.restore();
-    /* header */
-    var hy = 128;
-    if (logo) { x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24; x.beginPath(); x.arc(W / 2, hy, 62, 0, 7); x.fillStyle = '#0A1319'; x.fill(); x.restore(); x.beginPath(); x.arc(W / 2, hy, 62, 0, 7); x.lineWidth = 5; x.strokeStyle = foil(hy - 62, hy + 62); x.stroke(); x.drawImage(logo, W / 2 - 53, hy - 53, 106, 106); }
-    x.textAlign = 'center'; x.fillStyle = 'rgba(255,255,255,0.78)'; x.font = '700 28px ' + NUM; track(12); x.fillText('SYLHET NET BREAKERS', W / 2 + 6, hy + 112); track(0);
-    x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 18; x.font = '800 ' + (story ? 84 : 76) + 'px ' + NUM; var lsz = fitFont(x, PAL.lab, W - 200, story ? 84 : 76, 800, NUM); x.fillStyle = foil(hy + 150, hy + 210); track(5); x.fillText(PAL.lab, W / 2 + 2, hy + 200 + (story ? 8 : 0)); track(0); x.restore();
-    var ry = hy + 252 + (story ? 8 : 0); if (per === 'all') card.rangeTxt = ''; x.font = '700 30px ' + NUM; track(6); var rw = x.measureText(card.rangeTxt || '').width; x.fillStyle = PAL.a; x.fillText(card.rangeTxt || '', W / 2 + 3, ry); track(0);
-    if (card.rangeTxt) { x.fillStyle = 'rgba(242,210,122,0.5)'; x.fillRect(W / 2 - rw / 2 - 90, ry - 10, 64, 2); x.fillRect(W / 2 + rw / 2 + 26, ry - 10, 64, 2); }
-    /* seal */
-    var scx = W - 170, scy = photoTop + (story ? 130 : 100), sr = 66;
-    x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 24; x.beginPath(); x.arc(scx, scy, sr, 0, 7); x.fillStyle = foil(scy - sr, scy + sr); x.fill(); x.restore();
-    x.beginPath(); x.arc(scx, scy, sr - 9, 0, 7); x.lineWidth = 2; x.strokeStyle = 'rgba(70,40,0,0.55)'; x.stroke();
-    x.fillStyle = '#2A1B00'; x.textAlign = 'center'; x.font = '800 62px ' + NUM; x.fillText(L.num ? '#' + L.num : '#1', scx, scy + 14); x.font = '800 20px ' + NUM; track(5); x.fillText('SNB', scx + 2, scy + 42); track(0);
-    /* name */
-    var nm = String(L.name || ''), lat = /[A-Za-z]/.test(nm), nf = lat ? NUM : BN, dn = lat ? nm.toUpperCase() : nm, ny = panelTop + (story ? 190 : 150);
-    x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 28; x.fillStyle = '#FFFFFF'; if (lat) track(4); fitFont(x, dn, W - 150, story ? 156 : 138, 800, nf); x.textAlign = 'center'; x.fillText(dn, W / 2 + (lat ? 2 : 0), ny); x.restore(); track(0);
-    var ly = ny + 34; var lg = x.createLinearGradient(W * 0.2, 0, W * 0.8, 0); lg.addColorStop(0, 'rgba(242,210,122,0)'); lg.addColorStop(0.5, 'rgba(242,210,122,1)'); lg.addColorStop(1, 'rgba(242,210,122,0)'); x.fillStyle = lg; x.fillRect(W * 0.2, ly, W * 0.6, 3);
-    sparkle(x, W / 2 - 330, ly + 1, 14, 0.9, '#F7DE95'); sparkle(x, W / 2 + 330, ly + 1, 14, 0.9, '#F7DE95');
+    x.save(); pPoly(x, P); x.lineWidth = 3; x.strokeStyle = AC; x.stroke(); x.restore();
+    x.strokeStyle = 'rgba(255,255,255,0.8)'; x.lineWidth = 3; x.beginPath(); x.moveTo(330, 92 * k); x.lineTo(190, H - 110 * k); x.stroke();
+    x.save(); x.translate(W - 70, 405 * k); x.rotate(Math.PI / 2); x.fillStyle = '#0b0c0d'; x.font = '800 28px ' + NUM; x.textAlign = 'center'; ls(7); x.fillText('SNB', 0, 0); x.restore(); ls(0);
+    x.fillStyle = AC; x.font = '800 26px ' + NUM; x.textAlign = 'right'; ls(6); x.fillText(L.num ? '#' + L.num : 'SNB', W - 120, 78 * k); ls(0);
+    if (logo) x.drawImage(logo, 54, 54 * k, 150, 150);
+    /* heading */
+    x.textAlign = 'left'; x.fillStyle = '#fff'; ls(4); var hf = fitFont(x, l2, 250, 64, 800, NUM); fitFont(x, l1.length > l2.length ? l1 : l2, 250, 64, 800, NUM); x.fillText(l1, 60, 360 * k); x.fillText(l2, 60, 360 * k + 66); ls(0);
+    x.fillStyle = 'rgba(255,255,255,0.35)'; x.fillRect(60, 360 * k + 90, 300, 2);
+    /* big wins */
+    var big = String(L.wins || 0), bs = Math.round(340 * s); x.font = '800 ' + bs + 'px ' + NUM; x.fillStyle = '#fff';
+    var bw = x.measureText(big).width, hh = Math.round(bs * 0.92), by = 470 * k + hh;
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 30; x.fillText(big, 46, by); x.restore();
+    x.font = '800 62px ' + NUM; x.fillStyle = AC; ls(3); x.fillText('WINS', 46 + bw + 10, by - hh * 0.66); ls(0);
+    /* period pill */
+    var pyt = by + 38 * k; rr(x, 60, pyt, 250, 56, 28); x.fillStyle = AC; x.fill(); x.fillStyle = '#10110f'; x.textBaseline = 'middle'; ls(4); fitFont(x, per === 'all' ? 'ALL TIME' : per === 'month' ? 'MONTH' : 'WEEK', 200, 32, 800, NUM); x.fillText(per === 'all' ? 'ALL TIME' : per === 'month' ? 'MONTH' : 'WEEK', 86, pyt + 30); x.textBaseline = 'alphabetic'; ls(0);
     /* stats */
     var pl = (L.wins || 0) + (L.draws || 0) + (L.losses || 0), wr = pl ? Math.round((L.wins || 0) / pl * 100) : 0;
-    var ST = [[L.wins || 0, 'WINS'], [L.draws || 0, 'DRAWS'], [L.goals || 0, 'GOALS'], [wr + '%', 'WIN RATE']], cw = (W - 160) / 4, sy0 = ly + (story ? 190 : 148);
-    ST.forEach(function (s, i) {
-      var cx = 80 + cw * i + cw / 2; x.textAlign = 'center'; x.font = '800 ' + (story ? 128 : 108) + 'px ' + NUM; x.fillStyle = foil(sy0 - 100, sy0); x.fillText(String(s[0]), cx, sy0);
-      x.fillStyle = 'rgba(255,255,255,0.72)'; x.font = '700 26px ' + NUM; track(6); x.fillText(s[1], cx + 3, sy0 + 40); track(0);
-      if (i) { x.fillStyle = 'rgba(242,210,122,0.28)'; x.fillRect(80 + cw * i, sy0 - 88, 2, 130); }
-    });
-    /* footer */
-    x.fillStyle = 'rgba(255,255,255,0.45)'; x.font = '600 20px ' + NUM; track(6); x.textAlign = 'center'; x.fillText(pDomain() || 'SYLHET NET BREAKERS', W / 2 + 3, H - 74); track(0);
-    /* sparkles */
-    sparkle(x, 120, photoTop + 120, 16, 0.8, PAL.a); sparkle(x, W - 110, photoTop + 420, 12, 0.7, '#fff'); sparkle(x, 170, panelTop - 40, 11, 0.7, '#F7DE95');
+    var st = [['DRAW', L.draws || 0], ['GOAL', L.goals || 0], ['WIN %', wr + '%'], ['MATCHES', pl]];
+    var sy0 = pyt + 118 * s, sh = story ? 92 : 76;
+    st.forEach(function (r, i) { var yy = sy0 + i * sh; x.fillStyle = '#fff'; x.font = '800 ' + (story ? 66 : 58) + 'px ' + NUM; x.fillText(String(r[1]), 60, yy); var vw = x.measureText(String(r[1])).width; x.fillStyle = AC; x.font = '700 28px ' + NUM; ls(5); x.fillText(r[0], 60 + vw + 16, yy - 6); ls(0); });
+    /* name */
+    var nyb = H - 232 * k, nm = String(L.name || ''), lat = /[A-Za-z]/.test(nm);
+    x.fillStyle = '#fff'; x.textAlign = 'left'; x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24;
+    fitFont(x, lat ? nm.toUpperCase() : nm, W - 520, lat ? 130 : 120, 800, lat ? NUM : BN); x.fillText(lat ? nm.toUpperCase() : nm, 420, nyb); x.restore();
+    /* period tag */
+    var tw = 300, tx = W - 100 - tw, ty2 = H - 110 * k - 74; x.fillStyle = '#fff'; x.fillRect(tx, ty2, tw, 74); x.fillStyle = '#0a0b0c'; x.textAlign = 'center'; fitFont(x, tag, tw - 70, 50, 800, NUM); x.fillText(tag, tx + tw / 2 - 18, ty2 + 54);
+    x.font = '700 18px ' + NUM; x.fillStyle = AC; x.save(); x.translate(tx + tw - 16, ty2 + 62); x.rotate(-Math.PI / 2); ls(3); x.fillText('PERIOD', 0, 0); x.restore(); ls(0);
+    x.fillStyle = '#fff'; x.fillRect(W - 82, H - 380 * k, 12, 12); for (var tk = 0; tk < 9; tk++) x.fillRect(W - 80, H - 350 * k + tk * 20, 8, 2);
+    var dm = pDomain(); x.textAlign = 'left'; x.fillStyle = 'rgba(255,255,255,0.8)'; x.font = '700 22px ' + NUM; ls(5); x.fillText('SYLHET NET BREAKERS' + (dm ? '  ·  ' + dm : ''), 60, H - 42 * k); ls(0);
     return new Promise(function (res, rej) { cv.toBlob(function (b) { b ? res(b) : rej(new Error('blob')); }, 'image/png'); });
   }
   async function drawCard(card) {
@@ -4057,7 +4042,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     var W = 1080, H = story ? 1920 : 1350;
     if (card.kind === 'nsign') return nsDraw(card, W, H);
     if (card.kind === 'ballon') return drawBallon(card, W, H);
-    if (card.kind === 'player' && card.leaders && card.leaders[card.idx]) return drawPremiumPoster(card, W, H, story);
+    if (card.kind === 'player' && card.leaders && card.leaders[card.idx]) return drawLeaderPoster(card, W, H, story);
     if (card.kind === 'board') return drawBoardPoster(card, W, H, story);
     if (card.kind === 'fifa') return drawFifaPoster(card, W, H, story);
     var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
