@@ -894,26 +894,13 @@ body {
 .psth{width:84px;height:104px;flex:none;border-radius:12px;background:rgba(255,255,255,.06) center/cover no-repeat;border:1px dashed var(--line-2)}
 .psslotc{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
 .psslotc .row{display:flex;gap:8px;flex-wrap:wrap}
-.pscut{display:flex;flex-direction:column;gap:6px}.psrange input{width:100%}
+.pscut{display:flex;flex-direction:column;gap:6px}.psauto{display:flex;gap:10px;align-items:center;margin:0 0 12px;font-size:14px}.psauto input{width:20px;height:20px}
 .psslotc .btn{min-height:40px;padding:8px 12px;font-size:14px}
 .psacc{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
 .psdot{width:38px;height:38px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
 .psdot[aria-pressed="true"]{border-color:#fff}
 .psrow{display:flex;gap:10px;flex-wrap:wrap}
 .psroot .preview img{max-height:70vh}
-.psed{position:fixed;inset:0;z-index:9999;background:#07090d;display:flex;flex-direction:column;color:#fff}
-.edtop{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;background:#0d1117;border-bottom:1px solid rgba(255,255,255,.1)}
-.edtop .btn{min-height:40px;padding:8px 14px;font-size:14px}
-.edwrap{flex:1;min-height:0;overflow:auto;background:#111;-webkit-overflow-scrolling:touch}
-.edcv{display:block;margin:0 auto}
-.edtools{padding:10px 12px calc(env(safe-area-inset-bottom,0px) + 12px);background:#0d1117;border-top:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;gap:8px}
-.edrow{display:flex;flex-wrap:wrap;gap:6px}
-.edrow button{flex:1 1 auto;min-height:40px;padding:6px 10px;font-size:14px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-family:inherit}
-.edrow button[aria-pressed="true"]{background:linear-gradient(135deg,#FFF1B8,#E7C26A,#C9923A);color:#2A1E05;border-color:transparent}
-.edrow.seg{display:flex;border:0;background:none;padding:0}
-.edmsg{font-size:13px;color:#cbd5e1}
-.edsl{display:grid;grid-template-columns:90px 1fr 32px;align-items:center;gap:8px;font-size:13px;color:#cbd5e1}
-.edsl input{width:100%}
 </style>
 
 <style>
@@ -4464,7 +4451,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(w - 1, x1 + pad); y1 = Math.min(h - 1, y1 + pad);
     var o = psCanvas(x1 - x0 + 1, y1 - y0 + 1); o.getContext('2d').drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height); return o;
   }
-  async function psCut(src, tol, raw) {
+  async function psCut(src, tol, raw, strict) {
     var im = await loadImg(src), sc = Math.min(1, 720 / Math.max(im.width, im.height)), w = Math.max(8, Math.round(im.width * sc)), h = Math.max(8, Math.round(im.height * sc));
     var c = psCanvas(w, h), g = c.getContext('2d'); g.drawImage(im, 0, 0, w, h);
     var d = g.getImageData(0, 0, w, h).data, n = w * h, i;
@@ -4472,6 +4459,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     function addB(p) { var key = (d[p * 4] >> 4) * 256 + (d[p * 4 + 1] >> 4) * 16 + (d[p * 4 + 2] >> 4), o = bins[key] || (bins[key] = [0, 0, 0, 0]); o[0]++; o[1] += d[p * 4]; o[2] += d[p * 4 + 1]; o[3] += d[p * 4 + 2]; tot++; }
     for (i = 0; i < w; i++) { addB(i); addB((h - 1) * w + i); } for (i = 0; i < h; i++) { addB(i * w); addB(i * w + w - 1); }
     var bl = Object.keys(bins).map(function (k2) { return bins[k2]; }).sort(function (u, v) { return v[0] - u[0]; });
+    if (strict && bl[0][0] / tot < 0.38) throw new Error('complex');
     bl.forEach(function (o, ix) { if (ix === 0 || o[0] >= tot * 0.22) refs.push([o[1] / o[0], o[2] / o[0], o[3] / o[0]]); });
     function dd(p, q) { var a = d[p * 4] - d[q * 4], b = d[p * 4 + 1] - d[q * 4 + 1], e = d[p * 4 + 2] - d[q * 4 + 2]; return Math.sqrt(a * a + b * b + e * e); }
     function dm(p) { var best = 1e9; for (var j = 0; j < refs.length; j++) { var a = d[p * 4] - refs[j][0], b = d[p * 4 + 1] - refs[j][1], e = d[p * 4 + 2] - refs[j][2], v = Math.sqrt(a * a + b * b + e * e); if (v < best) best = v; } return best; }
@@ -4496,81 +4484,36 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     return psTrimCanvas(out, 6).toDataURL('image/png');
   }
   async function psAiCut(src, onp) {
-    var m = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm');
-    var blob = await (await fetch(src)).blob();
-    var out = await m.removeBackground(blob, { progress: function (key, cur, tot) { if (onp && tot) onp(Math.round(cur / tot * 100)); }, output: { format: 'image/png' } });
-    var url = URL.createObjectURL(out), im = await loadImg(url), c = psCanvas(im.width, im.height); c.getContext('2d').drawImage(im, 0, 0); URL.revokeObjectURL(url);
+    var im = await loadImg(src), sc = Math.min(1, 1400 / Math.max(im.width, im.height)), c0 = psCanvas(Math.round(im.width * sc), Math.round(im.height * sc)); c0.getContext('2d').drawImage(im, 0, 0, c0.width, c0.height);
+    var blob = await new Promise(function (r) { c0.toBlob(r, 'image/png'); });
+    var mod = null, cfg = null, err = null, vers = [['1.5.5', { model: 'isnet_quint8' }], ['1.4.5', {}]];
+    for (var v = 0; v < vers.length && !mod; v++) { try { mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@' + vers[v][0] + '/+esm'); cfg = vers[v][1]; } catch (e) { err = e; } }
+    if (!mod) throw err || new Error('no lib');
+    var conf = { progress: function (key, cur, tot) { if (onp && tot) onp(Math.min(99, Math.round(cur / tot * 100))); }, output: { format: 'image/png' } }; for (var kk in cfg) conf[kk] = cfg[kk];
+    var out = await mod.removeBackground(blob, conf);
+    var url = URL.createObjectURL(out), r2 = await loadImg(url), c = psCanvas(r2.width, r2.height); c.getContext('2d').drawImage(r2, 0, 0); URL.revokeObjectURL(url);
     return psTrimCanvas(c, 6).toDataURL('image/png');
   }
-
-  /* ---------- cut-out editor (magic wand + brushes) ---------- */
-  async function psOpenEditor(baseSrc, curSrc, cb) { return psEdImpl(baseSrc, curSrc, cb, h); }
-  async function psEdImpl(baseSrc, curSrc, cb, mk) {
-    var im = await loadImg(baseSrc), sc = Math.min(1, 1100 / Math.max(im.width, im.height)), w = Math.round(im.width * sc), h = Math.round(im.height * sc), N = w * h, i;
-    var work = psCanvas(w, h), wg = work.getContext('2d'); wg.drawImage(im, 0, 0, w, h);
-    var img = wg.getImageData(0, 0, w, h), D = img.data, M = new Uint8Array(N);
-    for (i = 0; i < N; i++) M[i] = D[i * 4 + 3];
-    if (curSrc && curSrc !== baseSrc) { try { var ci = await loadImg(curSrc), tc = psCanvas(w, h), tg = tc.getContext('2d'); tg.drawImage(ci, 0, 0, w, h); var cd = tg.getImageData(0, 0, w, h).data; for (i = 0; i < N; i++) M[i] = cd[i * 4 + 3]; } catch (e) { /* keep */ } }
-    var hist = [], tool = 'wandx', size = 34, tol = 38, glob = false, zoom = 1, bgm = 0, lastP = null, drawing = false;
-    var BGS = ['checker', '#0b0d12', '#22c55e', '#ff00ff', '#ffffff'], BGN = ['⬜ চেকার', '⬛ কালো', '🟩 সবুজ', '🟪 ম্যাজেন্টা', '⬜ সাদা'];
-    function pushH() { hist.push(new Uint8Array(M)); if (hist.length > 15) hist.shift(); }
-    function syncAll() { for (var j = 0; j < N; j++) D[j * 4 + 3] = M[j]; wg.putImageData(img, 0, 0); redraw(); }
-    function syncRect(x0, y0, x1, y1) { x0 = Math.max(0, x0 | 0); y0 = Math.max(0, y0 | 0); x1 = Math.min(w, Math.ceil(x1)); y1 = Math.min(h, Math.ceil(y1)); for (var yy = y0; yy < y1; yy++) for (var xx = x0; xx < x1; xx++) D[(yy * w + xx) * 4 + 3] = M[yy * w + xx]; wg.putImageData(img, 0, 0, x0, y0, x1 - x0, y1 - y0); redraw(); }
-    var disp = mk('canvas', { class: 'edcv' }), dctx = disp.getContext('2d'), wrap = mk('div', { class: 'edwrap' }, disp), pat = null;
-    function layout() { var cw = Math.max(200, wrap.clientWidth), cssW = cw * zoom, cssH = cssW * h / w, dpr = Math.min(2, window.devicePixelRatio || 1); disp.style.width = cssW + 'px'; disp.style.height = cssH + 'px'; disp.width = Math.round(cssW * dpr); disp.height = Math.round(cssH * dpr); redraw(); }
-    function redraw() {
-      var b = BGS[bgm]; if (b === 'checker') { if (!pat) { var pc = psCanvas(32, 32), pg = pc.getContext('2d'); pg.fillStyle = '#2a2d34'; pg.fillRect(0, 0, 32, 32); pg.fillStyle = '#3a3e47'; pg.fillRect(0, 0, 16, 16); pg.fillRect(16, 16, 16, 16); pat = dctx.createPattern(pc, 'repeat'); } dctx.fillStyle = pat; } else dctx.fillStyle = b;
-      dctx.fillRect(0, 0, disp.width, disp.height); dctx.drawImage(work, 0, 0, disp.width, disp.height);
-    }
-    function pt(ev) { var r = disp.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width * w, (ev.clientY - r.top) / r.height * h, r.width]; }
-    function brush(x, y, rad, erase) {
-      var x0 = Math.floor(x - rad), y0 = Math.floor(y - rad), x1 = Math.ceil(x + rad), y1 = Math.ceil(y + rad);
-      for (var yy = Math.max(0, y0); yy < Math.min(h, y1); yy++) for (var xx = Math.max(0, x0); xx < Math.min(w, x1); xx++) { var dd = Math.sqrt((xx - x) * (xx - x) + (yy - y) * (yy - y)); if (dd > rad) continue; var wt = Math.min(1, (rad - dd) / (rad * 0.4)), o = yy * w + xx; M[o] = erase ? Math.round(M[o] * (1 - wt)) : Math.round(M[o] + (255 - M[o]) * wt); }
-      syncRect(x0, y0, x1, y1);
-    }
-    function wand(x, y, keep) {
-      x = Math.max(0, Math.min(w - 1, Math.round(x))); y = Math.max(0, Math.min(h - 1, Math.round(y)));
-      var s = y * w + x, sr = D[s * 4], sg2 = D[s * 4 + 1], sb = D[s * 4 + 2], step = 9 + tol * 0.2, sel = new Uint8Array(N), q = new Int32Array(N), qh = 0, qt = 0;
-      function dS(p) { var a = D[p * 4] - sr, b = D[p * 4 + 1] - sg2, c = D[p * 4 + 2] - sb; return Math.sqrt(a * a + b * b + c * c); }
-      function dP(p, o) { var a = D[p * 4] - D[o * 4], b = D[p * 4 + 1] - D[o * 4 + 1], c = D[p * 4 + 2] - D[o * 4 + 2]; return Math.sqrt(a * a + b * b + c * c); }
-      if (glob) { for (var j = 0; j < N; j++) if (dS(j) < tol) sel[j] = 1; }
-      else { sel[s] = 1; q[qt++] = s; while (qh < qt) { var p = q[qh++], px = p % w, py = (p / w) | 0, nb = [px > 0 ? p - 1 : -1, px < w - 1 ? p + 1 : -1, py > 0 ? p - w : -1, py < h - 1 ? p + w : -1]; for (var k = 0; k < 4; k++) { var r = nb[k]; if (r < 0 || sel[r]) continue; var ds = dS(r); if (ds < tol || (dP(r, p) < step && ds < tol * 1.9)) { sel[r] = 1; q[qt++] = r; } } } }
-      pushH(); for (var m = 0; m < N; m++) if (sel[m]) M[m] = keep ? 255 : 0; syncAll();
-    }
-    var msg = mk('span', { class: 'edmsg' }, 'ছবিতে ট্যাপ/আঁকুন');
-    function setTool(t) { tool = t; disp.style.touchAction = t === 'pan' ? 'auto' : 'none'; tbtns.forEach(function (b) { b[1].setAttribute('aria-pressed', b[0] === t ? 'true' : 'false'); }); msg.textContent = { wandx: 'যে রঙ মুছতে চান তাতে ট্যাপ করুন', wandk: 'যে অংশ ফেরাতে চান তাতে ট্যাপ করুন', erase: 'আঙুল দিয়ে ঘষে মুছুন', keep: 'আঙুল দিয়ে ঘষে ফেরান', pan: 'জুম করা ছবি স্ক্রল করে সরান' }[t]; }
-    var tdef = [['wandx', '🪄 ট্যাপে মুছুন'], ['wandk', '🪄 ট্যাপে ফেরান'], ['erase', '🧽 ব্রাশে মুছুন'], ['keep', '✏️ ব্রাশে ফেরান'], ['pan', '✋ সরান']];
-    var tbtns = tdef.map(function (t) { return [t[0], mk('button', { type: 'button', 'aria-pressed': t[0] === tool ? 'true' : 'false', onclick: function () { setTool(t[0]); } }, t[1])]; });
-    disp.addEventListener('pointerdown', function (ev) {
-      if (tool === 'pan') return; ev.preventDefault(); try { disp.setPointerCapture(ev.pointerId); } catch (e) { /* ignore */ }
-      var p = pt(ev);
-      if (tool === 'wandx' || tool === 'wandk') { wand(p[0], p[1], tool === 'wandk'); return; }
-      pushH(); drawing = true; lastP = p; brush(p[0], p[1], size / 2 * (w / p[2]), tool === 'erase');
-    });
-    disp.addEventListener('pointermove', function (ev) { if (!drawing) return; ev.preventDefault(); var p = pt(ev), rad = size / 2 * (w / p[2]), dx = p[0] - lastP[0], dy = p[1] - lastP[1], dist = Math.sqrt(dx * dx + dy * dy), n = Math.max(1, Math.ceil(dist / (rad * 0.35))); for (var j = 1; j <= n; j++) brush(lastP[0] + dx * j / n, lastP[1] + dy * j / n, rad, tool === 'erase'); lastP = p; });
-    function up() { drawing = false; } disp.addEventListener('pointerup', up); disp.addEventListener('pointercancel', up);
-    function slider(label, min, max, val, fn) { var out = mk('b', null, String(val)); return mk('label', { class: 'edsl' }, mk('span', null, label), mk('input', { type: 'range', min: min, max: max, value: val, oninput: function (e) { fn(+e.target.value); out.textContent = e.target.value; } }), out); }
-    var gbtn = mk('button', { type: 'button', 'aria-pressed': 'false', onclick: function (e) { glob = !glob; e.currentTarget.setAttribute('aria-pressed', glob ? 'true' : 'false'); msg.textContent = glob ? 'এই রঙের সব জায়গা একসাথে বাছবে' : 'শুধু লাগোয়া অংশ বাছবে'; } }, '🎯 সব জায়গার একই রঙ');
-    var zb = mk('button', { type: 'button', onclick: function (e) { zoom = zoom === 1 ? 2 : zoom === 2 ? 3 : 1; e.currentTarget.textContent = '🔍 জুম ' + zoom + 'x'; layout(); } }, '🔍 জুম 1x');
-    var bb = mk('button', { type: 'button', onclick: function (e) { bgm = (bgm + 1) % BGS.length; e.currentTarget.textContent = BGN[bgm]; redraw(); } }, BGN[0]);
-    var ov = mk('div', { class: 'psed', role: 'dialog', 'aria-label': 'কাটআউট এডিটর' });
-    function close() { document.body.style.overflow = prevOv; ov.remove(); }
-    var prevOv = document.body.style.overflow; document.body.style.overflow = 'hidden';
-    ov.append(
-      mk('div', { class: 'edtop' }, mk('button', { type: 'button', class: 'btn ghost', onclick: close }, '✕ বাতিল'), mk('strong', null, 'ব্যাকগ্রাউন্ড মুছুন'), mk('button', { type: 'button', class: 'btn', onclick: function () {
-        var out = psCanvas(w, h), og = out.getContext('2d'); syncAll(); og.drawImage(work, 0, 0); var sm = psCanvas(w, h), sg = sm.getContext('2d'); sg.filter = 'blur(0.8px)'; sg.drawImage(out, 0, 0); var res = psTrimCanvas(sm, 6).toDataURL('image/png'); close(); cb(res); } }, '✅ ব্যবহার করুন')),
-      wrap,
-      mk('div', { class: 'edtools' }, mk('div', { class: 'edrow seg' }, tbtns.map(function (t) { return t[1]; })), msg,
-        slider('ব্রাশ সাইজ', 10, 90, size, function (v) { size = v; }), slider('ট্যাপের মাত্রা', 5, 120, tol, function (v) { tol = v; }),
-        mk('div', { class: 'edrow edacts' }, gbtn, zb, bb,
-          mk('button', { type: 'button', onclick: function () { if (hist.length) { M = hist.pop(); syncAll(); } } }, '↩ আন্ডু'),
-          mk('button', { type: 'button', onclick: function () { pushH(); M.fill(255); for (var j = 0; j < N; j++) M[j] = 255; syncAll(); } }, '♻️ রিসেট'),
-          mk('button', { type: 'button', onclick: function (e) { var b = e.currentTarget; b.disabled = true; msg.textContent = 'অটো কাট চলছে…'; psCut(baseSrc, tol, true).then(function (cv) { var tc = psCanvas(w, h), tg = tc.getContext('2d'); tg.drawImage(cv, 0, 0, w, h); var ad = tg.getImageData(0, 0, w, h).data; pushH(); for (var j = 0; j < N; j++) M[j] = ad[j * 4 + 3]; syncAll(); b.disabled = false; msg.textContent = 'অটো হয়েছে, এবার নিজে ঠিক করুন'; }).catch(function () { b.disabled = false; msg.textContent = 'অটো হয়নি'; }); } }, '⚙️ অটো'))));
-    document.body.append(ov); setTool('wandx'); syncAll(); layout();
-    window.addEventListener('resize', layout);
-    return ov;
+  var PS_CUTCACHE = {};
+  function psKey(src) { return src.length + ':' + src.slice(-40) + src.slice(40, 72); }
+  async function psAutoCut(src, onp) {
+    var k = psKey(src); if (PS_CUTCACHE[k]) return PS_CUTCACHE[k];
+    var res;
+    try { res = { url: await psAiCut(src, onp), how: 'ai' }; }
+    catch (e) { console.warn('AI cut unavailable', e); res = { url: await psCut(src, 40), how: 'local' }; }
+    PS_CUTCACHE[k] = res; return res;
   }
-
+  function psSetMsg(P, key, t) { P.cm[key] = t; var el = document.getElementById('pscm-' + key); if (el) el.textContent = t; }
+  function psAuto(P, key) {
+    var base = P.src[key]; if (!base || key === 'lg') return;
+    var tok = (P.ct[key] = (P.ct[key] || 0) + 1);
+    psSetMsg(P, key, '🤖 ব্যাকগ্রাউন্ড মুছছে… প্রথমবার ১–২ মিনিট লাগতে পারে (ইন্টারনেট লাগবে)');
+    psAutoCut(base, function (p) { psSetMsg(P, key, '🤖 AI ডাউনলোড/প্রসেস… ' + p + '%'); }).then(function (r) {
+      if (P.ct[key] !== tok || P.src[key] !== base) return;
+      P.orig[key] = base; P.src[key] = r.url; psSetMsg(P, key, r.how === 'ai' ? '✅ ব্যাকগ্রাউন্ড মোছা হয়েছে (AI)' : '✅ ব্যাকগ্রাউন্ড মোছা হয়েছে (ইন্টারনেট ছাড়া সাধারণ পদ্ধতি)');
+      S.psForce = true; try { renderView(); } finally { S.psForce = false; }
+    }).catch(function (e) { console.error(e); if (P.ct[key] === tok) psSetMsg(P, key, '⚠️ অটো কাট হয়নি (ইন্টারনেট দরকার বা ব্যাকগ্রাউন্ড জটিল)। ছবি যেমন আছে তেমনই বসানো হয়েছে।'); });
+  }
   /* --- state + templates --- */
   var PS_VS = [['grand', 'গ্র্যান্ড ফাইনাল'], ['arena', 'অ্যারেনা'], ['duel', 'ডুয়েল'], ['split', 'স্প্লিট'], ['royal', 'রয়্যাল'], ['neon', 'নিয়ন'], ['fire', 'ফায়ার']];
   var PS_PAIR = [['#22D67A', '#FF3B4E'], ['#2EE6A6', '#9B6BFF'], ['#9B6BFF', '#FFB020'], ['#FF4D5E', '#23D5F5'], ['#23D5F5', '#FF2E9A'], ['#FF8A1F', '#2E86FF']];
@@ -4583,7 +4526,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   ];
   function psState() {
     if (!S.ps) {
-      S.ps = { tpl: 'vs', st: { vs: 0, result: 0, spot: 0, ann: 0 }, orig: {}, tol: 40, fmt: 'post', acc: 0, fit: 'cover', f: {}, src: {}, url: null, blob: null, tick: 0, busy: false, err: false };
+      S.ps = { tpl: 'vs', st: { vs: 0, result: 0, spot: 0, ann: 0 }, orig: {}, cm: {}, ct: {}, auto: true, fmt: 'post', acc: 0, fit: 'cover', f: {}, src: {}, url: null, blob: null, tick: 0, busy: false, err: false };
       PS_TPL.forEach(function (t) { S.ps.f[t[0]] = {}; t[2].forEach(function (f) { S.ps.f[t[0]][f[0]] = f[2]; }); });
     }
     return S.ps;
@@ -4641,26 +4584,23 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
       grid.append(h('label', { class: 'field' }, fd[1], inp));
     });
     function cutRow(key) {
-      var msg = h('p', { class: 'muted small' }, P.orig[key] ? 'ব্যাকগ্রাউন্ড মোছা হয়েছে। ঠিক না হলে স্লাইডার নাড়িয়ে আবার চাপুন।' : 'ছবিতে ব্যাকগ্রাউন্ড থাকলে মুছে নিন, তাহলে পোস্টারে ঠিকমতো বসবে।');
-      var rg = h('input', { type: 'range', min: 12, max: 90, value: P.tol, 'aria-label': 'কতটা মুছবে', oninput: function (e) { P.tol = +e.target.value; } });
-      function run(fn) { return function (ev) { var b = ev.currentTarget; if (b.disabled) return; var base = P.orig[key] || P.src[key]; b.disabled = true; msg.textContent = 'কাজ চলছে… একটু অপেক্ষা করুন'; fn(base, msg).then(function (d) { P.orig[key] = base; P.src[key] = d; renderView(); }).catch(function (e) { console.error(e); b.disabled = false; msg.textContent = 'হয়নি। অন্য ছবি বা স্লাইডার বদলে আবার চেষ্টা করুন।'; }); }; }
-      return h('div', { class: 'pscut' }, msg, h('label', { class: 'field psrange' }, 'মোছার মাত্রা (কম = সাবধানে, বেশি = বেশি মুছবে)', rg),
+      return h('div', { class: 'pscut' }, h('p', { class: 'muted small', id: 'pscm-' + key }, P.cm[key] || ''),
         h('div', { class: 'row' },
-          h('button', { class: 'btn', type: 'button', onclick: function () { var base = P.orig[key] || P.src[key]; psOpenEditor(base, P.src[key], function (d) { P.orig[key] = base; P.src[key] = d; renderView(); }).catch(function (e) { console.error(e); toast('এডিটর খোলা যায়নি'); }); } }, '🖌 এডিটর (নিজে ঠিক করুন)'),
-          h('button', { class: 'btn ghost', type: 'button', onclick: run(function (b) { return psCut(b, P.tol); }) }, '✂️ অটো মুছুন'),
-          h('button', { class: 'btn ghost', type: 'button', onclick: run(function (b, m) { return psAiCut(b, function (p) { m.textContent = 'AI ডাউনলোড/প্রসেস… ' + p + '%'; }); }) }, '🤖 AI কাট (ইন্টারনেট)'),
-          P.orig[key] ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[key] = P.orig[key]; delete P.orig[key]; renderView(); } }, '↩ আগের ছবি') : null));
+          h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[key] = P.orig[key] || P.src[key]; delete P.orig[key]; delete PS_CUTCACHE[psKey(P.src[key])]; renderView(); psAuto(P, key); } }, '🔄 আবার অটো কাট'),
+          P.orig[key] ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[key] = P.orig[key]; delete P.orig[key]; P.ct[key] = (P.ct[key] || 0) + 1; P.cm[key] = 'আগের ছবি ফিরিয়ে আনা হয়েছে'; renderView(); } }, '↩ আগের ছবি') : null));
     }
+    var autoIn = h('input', { type: 'checkbox', onchange: function (e) { P.auto = e.target.checked; } }); autoIn.checked = !!P.auto;
+    var autoBox = h('label', { class: 'psauto' }, autoIn, h('span', null, 'ছবি দিলে ব্যাকগ্রাউন্ড নিজে নিজে মুছবে (AI)'));
     var slots = h('div', { class: 'psslots' });
     T[3].forEach(function (sl) {
       var nameKey = sl[0] === 'a' ? 'aName' : sl[0] === 'b' ? 'bName' : P.tpl === 'spot' ? 'name' : null, saved = psSaved();
       var sel = h('select', { 'aria-label': 'প্লেয়ার থেকে ছবি নিন', onchange: function (e) {
-        var v = e.target.value, p = v.indexOf('s:') === 0 ? psSaved()[+v.slice(2)] : S.players.get(v); if (!p) return; P.src[sl[0]] = p.photo || null; delete P.orig[sl[0]]; if (nameKey) f[nameKey] = p.name; if (P.tpl === 'spot' && p.number) f.num = String(p.number); renderView();
+        var v = e.target.value, p = v.indexOf('s:') === 0 ? psSaved()[+v.slice(2)] : S.players.get(v); if (!p) return; P.src[sl[0]] = p.photo || null; delete P.orig[sl[0]]; P.cm[sl[0]] = ''; if (nameKey) f[nameKey] = p.name; if (P.tpl === 'spot' && p.number) f.num = String(p.number); renderView(); if (P.auto) psAuto(P, sl[0]);
       } }, h('option', { value: '' }, 'ক্লাবের প্লেয়ার / সেভ করা থেকে নিন…'));
       if (saved.length) { var og = h('optgroup', { label: 'সেভ করা' }); saved.forEach(function (sv, i) { og.append(h('option', { value: 's:' + i }, sv.name)); }); sel.append(og); }
       var og2 = h('optgroup', { label: 'ক্লাব প্লেয়ার' }); sortedPlayers().forEach(function (e) { og2.append(h('option', { value: e[0] }, e[1].name)); }); sel.append(og2);
       var nin = nameKey ? h('input', { type: 'text', value: f[nameKey] || '', placeholder: 'নাম লিখুন (যে কেউ হতে পারে)', 'aria-label': 'নাম', oninput: function (e) { f[nameKey] = e.target.value; again(); } }) : null;
-      var file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: function (e) { var fl = e.target.files && e.target.files[0]; if (!fl) return; psPick(fl, function (d) { P.src[sl[0]] = d; delete P.orig[sl[0]]; renderView(); }); } });
+      var file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: function (e) { var fl = e.target.files && e.target.files[0]; if (!fl) return; psPick(fl, function (d) { P.src[sl[0]] = d; delete P.orig[sl[0]]; P.cm[sl[0]] = ''; renderView(); if (P.auto) psAuto(P, sl[0]); }); } });
       var th = h('div', { class: 'psth' }); if (P.src[sl[0]]) th.style.backgroundImage = 'url("' + P.src[sl[0]] + '")';
       slots.append(h('div', { class: 'psslot' }, th, h('div', { class: 'psslotc' }, h('strong', null, sl[1]), nin, sel,
         h('div', { class: 'row' }, h('button', { class: 'btn ghost', type: 'button', onclick: function () { file.click(); } }, '📷 গ্যালারি থেকে'), P.src[sl[0]] ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[sl[0]] = null; delete P.orig[sl[0]]; renderView(); } }, 'মুছুন') : null, nameKey ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { psSave(f[nameKey], P.src[sl[0]]); renderView(); } }, '💾 সেভ রাখুন') : null),
@@ -4682,7 +4622,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     return h('div', { class: 'stack psroot' },
       h('section', { class: 'card panel' }, h('h2', null, 'পোস্টার স্টুডিও'), h('p', { class: 'muted small' }, 'টেমপ্লেট বেছে লিখে দিন, নিচে সাথে সাথে পোস্টার দেখা যাবে।'), tpls),
       h('section', { class: 'card panel' }, h('h3', null, 'ডিজাইন'), styl),
-      h('section', { class: 'card panel' }, h('h3', null, 'ছবি ও নাম'), slots),
+      h('section', { class: 'card panel' }, h('h3', null, 'ছবি ও নাম'), autoBox, slots),
       h('section', { class: 'card panel psform' }, h('h3', null, 'লেখা'), grid),
       h('section', { class: 'card panel' }, h('h3', null, 'স্টাইল'), sw, h('div', { class: 'psrow' }, fmt, fit)),
       h('section', { class: 'card panel' }, h('h3', null, 'প্রিভিউ'), h('div', { class: 'preview' }, img), st, acts));
@@ -6818,7 +6758,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 
   function renderView() {
     var v = $('#view');
-    if (S.tab === 'poster' && S.canWrite) { var ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && v.contains(ae)) return; }
+    if (S.tab === 'poster' && S.canWrite && !S.psForce) { var ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && v.contains(ae)) return; }
     var tfh = document.getElementById('tfHost'); if (tfh) tfh.hidden = S.tab !== 'tournament';
     v.textContent = '';
     if (S.tab !== 'notifs' && S.ntc) S.ntc.inView = false;
@@ -7047,6 +6987,81 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     });
   }
   init();
+})();
+</script>
+<!-- SNB background music -->
+<style>
+#snbMusic{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:40;width:44px;height:44px;border-radius:50%;border:1px solid rgba(231,194,106,.45);background:rgba(12,18,26,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--gold,#E7C26A);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 6px 20px rgba(0,0,0,.45);transition:transform .15s ease,background .2s ease}
+#snbMusic:hover{transform:scale(1.07)}
+#snbMusic:focus-visible{outline:2px solid var(--aqua,#7CC8CF);outline-offset:2px}
+#snbMusic svg{width:22px;height:22px;display:block}
+#snbMusic .eq{display:none}
+#snbMusic[data-on="1"] .eq{display:block}
+#snbMusic[data-on="1"] .mute{display:none}
+#snbMusic[data-on="0"] .eq{display:none}
+#snbMusic .eq rect{transform-box:fill-box;transform-origin:bottom;animation:snbEq 1s ease-in-out infinite}
+#snbMusic .eq rect:nth-child(2){animation-delay:.2s}
+#snbMusic .eq rect:nth-child(3){animation-delay:.4s}
+#snbMusic .eq rect:nth-child(4){animation-delay:.6s}
+@keyframes snbEq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+#snbMusicHint{position:fixed;top:calc(62px + env(safe-area-inset-top,0px));right:12px;z-index:40;max-width:230px;padding:8px 12px;border-radius:12px;background:rgba(12,18,26,.92);border:1px solid rgba(231,194,106,.35);color:var(--ink,#ECE8D3);font:500 13px/1.4 var(--f-body,system-ui);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+@media (prefers-reduced-motion:reduce){#snbMusic .eq rect{animation:none}}
+</style>
+<button id="snbMusic" type="button" data-on="0" aria-label="ব্যাকগ্রাউন্ড মিউজিক চালু/বন্ধ করুন" aria-pressed="false" title="Music">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <g class="eq"><rect x="3" y="4" width="3" height="16" rx="1.5"/><rect x="8" y="4" width="3" height="16" rx="1.5"/><rect x="13" y="4" width="3" height="16" rx="1.5"/><rect x="18" y="4" width="3" height="16" rx="1.5"/></g>
+    <g class="mute"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6m0-6l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></g>
+  </svg>
+</button>
+<script>
+(function(){
+  var SRC='snb-theme.mp3', KEY='snb_music', VOL=0.45;
+  var btn=document.getElementById('snbMusic'); if(!btn) return;
+  var a=new Audio(); a.src=SRC; a.loop=true; a.preload='auto'; a.volume=0;
+  var want=true, hint=null, fadeT=null;
+  try{ if(localStorage.getItem(KEY)==='off') want=false; }catch(e){}
+  function save(v){ try{ localStorage.setItem(KEY,v?'on':'off'); }catch(e){} }
+  function ui(on){ btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); }
+  function fade(to,done){
+    clearInterval(fadeT);
+    fadeT=setInterval(function(){
+      var d=to-a.volume;
+      if(Math.abs(d)<0.03){ a.volume=to; clearInterval(fadeT); if(done) done(); }
+      else a.volume=Math.max(0,Math.min(1,a.volume+(d>0?0.03:-0.03)));
+    },60);
+  }
+  function hideHint(){ if(hint){ hint.remove(); hint=null; } }
+  function showHint(){
+    if(hint||!want) return;
+    hint=document.createElement('div'); hint.id='snbMusicHint';
+    hint.textContent='🎵 মিউজিক শুরু করতে স্ক্রিনে যেকোনো জায়গায় ট্যাপ করুন';
+    document.body.appendChild(hint);
+  }
+  function start(){
+    if(!want) return Promise.resolve();
+    var p=a.play();
+    if(p&&p.then){
+      return p.then(function(){ ui(true); hideHint(); fade(VOL); unlock(false); })
+              .catch(function(){ ui(false); showHint(); unlock(true); });
+    }
+    ui(true); fade(VOL); return Promise.resolve();
+  }
+  var evs=['pointerdown','touchend','keydown','click'];
+  function onGesture(){ if(want) start(); }
+  function unlock(on){
+    evs.forEach(function(e){ document.removeEventListener(e,onGesture,true); if(on) document.addEventListener(e,onGesture,true); });
+  }
+  function stop(){ fade(0,function(){ a.pause(); }); ui(false); }
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation(); hideHint();
+    if(!a.paused && a.volume>0 && want){ want=false; save(false); stop(); }
+    else { want=true; save(true); start(); }
+  });
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ if(!a.paused) a.pause(); }
+    else if(want){ a.play().then(function(){ ui(true); fade(VOL); }).catch(function(){}); }
+  });
+  if(want){ start(); unlock(true); } else ui(false);
 })();
 </script>
 </body>
