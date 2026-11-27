@@ -7013,30 +7013,42 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 </button>
 <script>
 (function(){
-  var KEY='snb_music', btn=document.getElementById('snbMusic'); if(!btn) return;
-  var a=new Audio('snb-theme.mp3'); a.loop=true; a.preload='auto'; try{a.volume=0.5;}catch(e){}
-  var want=true, hint=null;
+  var SRC='snb-theme.mp3', KEY='snb_music', btn=document.getElementById('snbMusic'); if(!btn) return;
+  var a=new Audio(); a.loop=true; a.preload='auto'; a.setAttribute('playsinline','');
+  var want=true, hint=null, ready=false, failed=false;
   try{ if(localStorage.getItem(KEY)==='off') want=false; }catch(e){}
   function save(v){ try{ localStorage.setItem(KEY,v?'on':'off'); }catch(e){} }
-  function ui(){ var on=!a.paused; btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); if(on&&hint){hint.remove();hint=null;} }
-  a.addEventListener('playing',ui); a.addEventListener('pause',ui); a.addEventListener('play',ui);
-  function showHint(){
-    if(hint||!want) return;
-    hint=document.createElement('div'); hint.id='snbMusicHint';
-    hint.textContent='🎵 গান শুরু করতে স্ক্রিনে একবার ট্যাপ করুন';
-    document.body.appendChild(hint);
+  function ui(){ var on=!a.paused&&ready&&!failed; btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); if(on) clearHint(); }
+  function clearHint(){ if(hint){ hint.remove(); hint=null; } }
+  function showHint(t){
+    if(!want&&!failed) return;
+    if(!hint){ hint=document.createElement('div'); hint.id='snbMusicHint'; document.body.appendChild(hint); }
+    hint.textContent=t;
   }
+  a.addEventListener('playing',ui); a.addEventListener('pause',ui);
+  a.addEventListener('error',function(){ failed=true; ui(); showHint('⚠️ গানের ফাইল চালানো যায়নি'); });
+  // Load the file as a blob: avoids service-worker / Range-request problems (esp. iPhone Safari)
+  fetch(SRC,{cache:'force-cache'}).then(function(r){
+    var ct=(r.headers.get('content-type')||'').toLowerCase();
+    if(!r.ok||ct.indexOf('text/html')>-1) throw new Error('missing');
+    return r.blob();
+  }).then(function(b){
+    a.src=URL.createObjectURL(new Blob([b],{type:'audio/mpeg'}));
+    ready=true; a.load();
+    if(want&&a.paused&&!document.hidden) tryPlay();
+  }).catch(function(){ failed=true; ui(); showHint('⚠️ snb-theme.mp3 ফাইলটা সাইটে পাওয়া যায়নি — index.html-এর পাশে upload করুন'); });
   function tryPlay(){
-    var p; try{ p=a.play(); }catch(e){ showHint(); return; }
-    if(p&&p.catch) p.catch(function(){ showHint(); });
+    if(!ready) return;
+    var p; try{ p=a.play(); }catch(e){ showHint('🎵 গান শুরু করতে স্ক্রিনে একবার ট্যাপ করুন'); return; }
+    if(p&&p.catch) p.catch(function(){ showHint('🎵 গান শুরু করতে স্ক্রিনে একবার ট্যাপ করুন'); });
   }
-  // First touch/click/key anywhere on the page starts the music (browsers require a user gesture for sound)
   function onGesture(e){
     if(btn.contains(e.target)) return;
-    if(want && a.paused && !document.hidden) tryPlay();
+    if(want&&a.paused&&!document.hidden) tryPlay();
   }
   ['pointerup','touchend','click','keydown'].forEach(function(ev){ document.addEventListener(ev,onGesture,true); });
   btn.addEventListener('click',function(){
+    if(failed){ showHint('⚠️ snb-theme.mp3 ফাইলটা সাইটে পাওয়া যায়নি — index.html-এর পাশে upload করুন'); return; }
     if(a.paused){ want=true; save(true); tryPlay(); }
     else { want=false; save(false); a.pause(); }
   });
@@ -7045,7 +7057,6 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     else if(want) tryPlay();
   });
   ui();
-  if(want) tryPlay();
 })();
 </script>
 </body>
