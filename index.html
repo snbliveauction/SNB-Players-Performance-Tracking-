@@ -4028,7 +4028,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   async function psLoad(src) { if (!src) return null; try { return await loadImg(src); } catch (e) { return null; } }
 
   /* --- profile / spotlight (same look as the player card) --- */
-  async function psSpot(o, W, H) {
+  async function psSpotCard(o, W, H) {
     var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, s = story ? 1.05 : 1;
     var im = await psLoad(o.photo), logo = await psLoad(LOGO);
     x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
@@ -4071,9 +4071,9 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   }
 
   /* --- versus / result --- */
-  async function psVS(o, W, H) {
+  async function psVSsplit(o, W, H, I) {
     var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, cx = W / 2;
-    var ia = await psLoad(o.a.src), ib = await psLoad(o.b.src), logo = await psLoad(LOGO);
+    var ia = I.ia, ib = I.ib, logo = I.logo;
     x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
     var rg = x.createRadialGradient(cx, 640 * k, 30, cx, 640 * k, 760); rg.addColorStop(0, AC); rg.addColorStop(1, 'rgba(0,0,0,0)'); x.save(); x.globalAlpha = 0.22; x.fillStyle = rg; x.fillRect(0, 0, W, H); x.restore();
     if (logo) x.drawImage(logo, 54, 54 * k, 120, 120);
@@ -4090,14 +4090,14 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
       x.restore();
       x.save(); pPoly(x, poly); x.lineWidth = 3; x.strokeStyle = col; x.stroke(); x.restore();
       x.fillStyle = '#fff'; x.textAlign = left ? 'left' : 'right'; x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 20;
-      var tt = psTxt(x, name || '', cx - 130, 110); x.fillText(tt, left ? 84 : W - 84, y1 - 36); x.restore();
+      var tt = psTxt(x, name || '', cx - 190, 110); x.fillText(tt, left ? 84 : W - 84, y1 - 36); x.restore();
     }
     var lp = [[50, y0], [cx + sl - g, y0], [cx - sl - g, y1], [50, y1]], rp = [[cx + sl + g, y0], [W - 50, y0], [W - 50, y1], [cx - sl + g, y1]];
     panel(lp, 50, cx + sl - 50, ia, AC, o.win === 'b', o.a.name, true);
     panel(rp, cx - sl, W - 50 - (cx - sl), ib, o.col2 || '#D3D9E0', o.win === 'a', o.b.name, false);
     if (o.win) { var wl = o.win === 'a', wn = wl ? o.a.name : o.b.name; x.save(); rr(x, wl ? 84 : W - 84 - 210, y1 - 36 - 150, 210, 46, 23); x.fillStyle = wl ? AC : '#fff'; x.fill(); x.fillStyle = '#10110f'; x.font = '800 28px ' + PS_NUM; x.textAlign = 'center'; psLs(x, 6); x.fillText('WINNER', (wl ? 84 : W - 84 - 210) + 108, y1 - 36 - 116); psLs(x, 0); x.restore(); sparkle(x, wl ? 330 : W - 330, y0 + 70, 18, 0.9, '#fff'); }
-    rr(x, cx - 175, mid - 100, 350, 200, 30); x.fillStyle = 'rgba(5,6,7,0.88)'; x.fill(); x.lineWidth = 4; x.strokeStyle = AC; x.stroke();
-    x.textAlign = 'center'; x.fillStyle = '#fff'; x.save(); x.shadowColor = AC; x.shadowBlur = 24; var ms = fitFont(x, o.mid, 300, 180, 800, PS_NUM); x.fillText(o.mid, cx, mid + ms * 0.34); x.restore();
+    var bY = y1 - 70; rr(x, cx - 95, bY - 50, 190, 100, 22); x.fillStyle = 'rgba(5,6,7,0.92)'; x.fill(); x.lineWidth = 4; x.strokeStyle = AC; x.stroke();
+    x.textAlign = 'center'; x.fillStyle = '#fff'; x.save(); x.shadowColor = AC; x.shadowBlur = 20; var ms = fitFont(x, o.mid, 150, 84, 800, PS_NUM); x.fillText(o.mid, cx, bY + ms * 0.34); x.restore();
     x.textAlign = 'center'; var dy = y1 + 112 * k;
     x.fillStyle = AC; x.fillRect(cx - 60, y1 + 36, 120, 4);
     if (o.l1) { x.fillStyle = '#fff'; psLs(x, 4); var a1 = psTxt(x, o.l1, W - 140, 88); x.fillText(a1, cx + 2, dy); psLs(x, 0); }
@@ -4107,8 +4107,15 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     return psBlob(cv);
   }
 
+  async function psVS(o, W, H) {
+    var I = { ia: await psLoad(o.a.src), ib: await psLoad(o.b.src), logo: await psLoad(LOGO) };
+    var fn = { royal: psVSroyal, neon: psVSneon, fire: psVSfire }[o.style] || psVSsplit;
+    return fn(o, W, H, I);
+  }
+  async function psSpot(o, W, H) { return (o.style === 'gold' ? psSpotGold : o.style === 'neon' ? psSpotNeon : psSpotCard)(o, W, H); }
+  async function psAnn(o, W, H) { return (o.style === 'gold' ? psAnnGold : o.style === 'bold' ? psAnnBold : psAnnPanel)(o, W, H); }
   /* --- announcement / custom --- */
-  async function psAnn(o, W, H) {
+  async function psAnnPanel(o, W, H) {
     var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350;
     var im = await psLoad(o.photo), logo = await psLoad(LOGO);
     x.fillStyle = '#050607'; x.fillRect(0, 0, W, H);
@@ -4139,7 +4146,212 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     return psBlob(cv);
   }
 
+  /* ---------- extra poster styles ---------- */
+  function psRgb(h) { var n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+  function psHex(c) { return '#' + c.map(function (v) { v = Math.max(0, Math.min(255, Math.round(v))); return (v < 16 ? '0' : '') + v.toString(16); }).join(''); }
+  function psMix(a, b, t) { var A = psRgb(a), B = psRgb(b); return psHex([0, 1, 2].map(function (i) { return A[i] + (B[i] - A[i]) * t; })); }
+  function psA(h, a) { return 'rgba(' + psRgb(h).join(',') + ',' + a + ')'; }
+  function psAlt(h) { var c = psRgb(h); return psHex([c[2], c[0], c[1]]); }
+  function psFoil(x, y0, y1) { var g = x.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#FFF3C4'); g.addColorStop(0.45, '#F2D27A'); g.addColorStop(0.75, '#C99A2E'); g.addColorStop(1, '#F7DE95'); return g; }
+  function psHexGrid(x, W, H, col, a) { x.save(); x.strokeStyle = psA(col, a); x.lineWidth = 2; for (var r = 0; r < H / 130 + 1; r++) for (var c = 0; c < W / 150 + 1; c++) { var cx = c * 150 + (r % 2 ? 75 : 0), cy = r * 130 + 40; x.beginPath(); for (var q = 0; q < 6; q++) { var an = Math.PI / 3 * q + Math.PI / 6; x.lineTo(cx + 86 * Math.cos(an), cy + 86 * Math.sin(an)); } x.closePath(); x.stroke(); } x.restore(); }
+  function psDots(x, bx, by, bw, bh, a) { x.save(); x.fillStyle = 'rgba(0,0,0,' + a + ')'; for (var yy = by; yy < by + bh; yy += 26) for (var xx = bx + ((yy - by) / 26 % 2) * 13; xx < bx + bw; xx += 26) { x.beginPath(); x.arc(xx, yy, 3.5, 0, 7); x.fill(); } x.restore(); }
+  function psGoldFrame(x, W, H) { x.save(); x.lineWidth = 3; x.strokeStyle = psFoil(x, 0, H); x.strokeRect(30, 30, W - 60, H - 60); x.lineWidth = 1; x.strokeStyle = 'rgba(242,210,122,0.35)'; x.strokeRect(46, 46, W - 92, H - 92); x.lineWidth = 6; x.strokeStyle = psFoil(x, 0, 200); [[30, 30, 1, 1], [W - 30, 30, -1, 1], [30, H - 30, 1, -1], [W - 30, H - 30, -1, -1]].forEach(function (c) { x.beginPath(); x.moveTo(c[0], c[1] + c[3] * 70); x.lineTo(c[0], c[1]); x.lineTo(c[0] + c[2] * 70, c[1]); x.stroke(); }); x.restore(); }
+  function psFoot(x, W, H, col) { var dm = pDomain(); x.textAlign = 'center'; x.fillStyle = col || 'rgba(255,255,255,0.5)'; x.font = '700 22px ' + PS_NUM; psLs(x, 5); x.fillText(dm || 'SYLHET NET BREAKERS', W / 2 + 2, H - 56); psLs(x, 0); }
+  function psDetails(x, o, W, y, big, accent, foil) {
+    var cx = W / 2; x.textAlign = 'center';
+    if (o.l1) { psLs(x, 4); var a = psTxt(x, o.l1, W - 140, big || 80); x.fillStyle = foil ? psFoil(x, y - 70, y + 6) : '#fff'; x.fillText(a, cx + 2, y); psLs(x, 0); }
+    if (o.l2) { psLs(x, 4); x.fillStyle = accent; var b = psTxt(x, o.l2, W - 140, 44, 700); x.fillText(b, cx + 2, y + 58); psLs(x, 0); }
+    if (o.l3) { psLs(x, 6); x.fillStyle = 'rgba(255,255,255,0.7)'; var c = psTxt(x, o.l3, W - 140, 30, 700); x.fillText(c, cx + 3, y + 108); psLs(x, 0); }
+  }
+
+  /* VS: royal medallions */
+  async function psVSroyal(o, W, H, I) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, cx = W / 2, cy = story ? 960 : 700, R = 185, DX = 300;
+    var bg = x.createRadialGradient(cx, cy, 40, cx, cy, 1100); bg.addColorStop(0, psMix(AC, '#000000', 0.45)); bg.addColorStop(0.6, psMix(AC, '#000000', 0.82)); bg.addColorStop(1, '#030406'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    for (var i = 0; i < 40; i++) { var a0 = i / 40 * Math.PI * 2, a1 = a0 + Math.PI / 40; x.fillStyle = i % 2 ? 'rgba(0,0,0,0)' : 'rgba(255,233,160,0.07)'; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + 2000 * Math.cos(a0), cy + 2000 * Math.sin(a0)); x.lineTo(cx + 2000 * Math.cos(a1), cy + 2000 * Math.sin(a1)); x.fill(); }
+    psGoldFrame(x, W, H);
+    var ly = 118 * k; if (I.logo) { x.save(); x.beginPath(); x.arc(cx, ly, 58, 0, 7); x.fillStyle = '#0A1319'; x.fill(); x.lineWidth = 5; x.strokeStyle = psFoil(x, ly - 58, ly + 58); x.stroke(); x.restore(); x.drawImage(I.logo, cx - 48, ly - 48, 96, 96); }
+    x.textAlign = 'center'; psLs(x, 8); var tg = psTxt(x, o.tag || '', W - 200, 120); x.fillStyle = psFoil(x, 240 * k, 330 * k); x.fillText(tg, cx + 4, 310 * k); psLs(x, 0);
+    x.fillStyle = 'rgba(255,255,255,0.7)'; x.font = '700 26px ' + PS_NUM; psLs(x, 12); x.fillText('SYLHET NET BREAKERS', cx + 6, 360 * k); psLs(x, 0);
+    function med(mx, im, name, dim, win) {
+      x.save(); x.shadowColor = psFoil(x, 0, 1) && '#F2D27A'; x.shadowBlur = win ? 60 : 30; x.beginPath(); x.arc(mx, cy, R, 0, 7); x.fillStyle = '#10131a'; x.fill(); x.restore();
+      x.save(); x.beginPath(); x.arc(mx, cy, R, 0, 7); x.clip(); var g = x.createLinearGradient(mx - R, cy - R, mx + R, cy + R); g.addColorStop(0, AC); g.addColorStop(1, '#0d1016'); x.fillStyle = g; x.fillRect(mx - R, cy - R, 2 * R, 2 * R);
+      if (im) psIm(x, im, mx - R, cy - R, 2 * R, 2 * R, o.fit); else { x.fillStyle = 'rgba(255,255,255,0.3)'; x.font = '800 300px ' + PS_BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(name || 'S'), mx, cy + 10); x.textBaseline = 'alphabetic'; }
+      if (dim) { x.fillStyle = 'rgba(5,6,7,0.5)'; x.fillRect(mx - R, cy - R, 2 * R, 2 * R); } x.restore();
+      x.lineWidth = 10; x.strokeStyle = psFoil(x, cy - R, cy + R); x.beginPath(); x.arc(mx, cy, R + 2, 0, 7); x.stroke(); x.lineWidth = 2; x.setLineDash([3, 14]); x.strokeStyle = 'rgba(242,210,122,0.8)'; x.beginPath(); x.arc(mx, cy, R + 26, 0, 7); x.stroke(); x.setLineDash([]);
+      var ry = cy + R + 38, w = 420, hh = 86; x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 20; x.fillStyle = psFoil(x, ry, ry + hh); pPoly(x, [[mx - w / 2, ry], [mx + w / 2, ry], [mx + w / 2 - 26, ry + hh / 2], [mx + w / 2, ry + hh], [mx - w / 2, ry + hh], [mx - w / 2 + 26, ry + hh / 2]]); x.fill(); x.restore();
+      x.fillStyle = '#1b1204'; x.textAlign = 'center'; var nn = psTxt(x, name || '', w - 90, 64); x.fillText(nn, mx, ry + hh / 2 + 22);
+      if (win) { x.fillStyle = '#F7DE95'; x.font = '800 30px ' + PS_NUM; psLs(x, 8); x.fillText('WINNER', mx + 4, cy - R - 34); psLs(x, 0); sparkle(x, mx - 120, cy - R - 42, 14, 0.9, '#FFE9A0'); sparkle(x, mx + 120, cy - R - 42, 14, 0.9, '#FFE9A0'); }
+    }
+    med(cx - DX, I.ia, o.a.name, o.win === 'b', o.win === 'a'); med(cx + DX, I.ib, o.b.name, o.win === 'a', o.win === 'b');
+    if (o.mid === 'VS') { x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 24; x.beginPath(); x.arc(cx, cy, 78, 0, 7); x.fillStyle = psFoil(x, cy - 78, cy + 78); x.fill(); x.restore(); x.lineWidth = 3; x.strokeStyle = 'rgba(70,40,0,0.5)'; x.beginPath(); x.arc(cx, cy, 66, 0, 7); x.stroke(); x.fillStyle = '#2A1B00'; x.textAlign = 'center'; x.font = '800 78px ' + PS_NUM; x.fillText('VS', cx, cy + 26); }
+    else { x.textAlign = 'center'; x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 20; var ms = fitFont(x, o.mid, 150, 120, 800, PS_NUM); x.fillStyle = psFoil(x, cy - 60, cy + 40); x.fillText(o.mid, cx, cy + ms * 0.34); x.restore(); }
+    psDetails(x, o, W, cy + R + 38 + 86 + 100 * k, 80, '#F2D27A', true); if (!o.l3) psFoot(x, W, H + 20);
+    return psBlob(cv);
+  }
+
+  /* VS: neon arena */
+  async function psVSneon(o, W, H, I) {
+    var story = H > 1500, AC = o.AC, C2 = psAlt(AC), cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, cx = W / 2, sk = 60;
+    var bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, psMix(AC, '#000000', 0.9)); bg.addColorStop(1, psMix(C2, '#000000', 0.88)); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    psHexGrid(x, W, H, AC, 0.09);
+    x.fillStyle = psA(AC, 0.15); pPoly(x, [[W * 0.5, 0], [W, 0], [W, 600 * k], [W * 0.2, 900 * k]]); x.fill(); x.fillStyle = psA(C2, 0.14); pPoly(x, [[W * 0.7, 0], [W, 0], [W, 360 * k], [W * 0.45, 700 * k]]); x.fill();
+    if (I.logo) x.drawImage(I.logo, 54, 40 * k, 100, 100);
+    x.fillStyle = AC; x.font = '700 26px ' + PS_NUM; x.textAlign = 'right'; psLs(x, 8); x.fillText('SYLHET NET BREAKERS  //  VS', W - 60, 100 * k); psLs(x, 0);
+    x.textAlign = 'left'; psLs(x, 6); var tg = psTxt(x, o.tag || '', W - 140, 170); [[-5, C2], [5, AC], [0, '#fff']].forEach(function (p) { x.fillStyle = p[1]; x.fillText(tg, 70 + p[0], 310 * k); }); psLs(x, 0);
+    x.fillStyle = C2; x.fillRect(70, 340 * k, 150, 6); x.fillStyle = AC; x.fillRect(228, 340 * k, 40, 6);
+    var y0 = 420 * k, y1 = y0 + (story ? 900 : 560);
+    function pan(poly, bx, bw, im, col, name, left, win, dim) {
+      x.save(); pPoly(x, poly); x.clip(); var g = x.createLinearGradient(bx, y0, bx + bw, y1); g.addColorStop(0, psMix(col, '#000000', 0.35)); g.addColorStop(1, '#07080f'); x.fillStyle = g; x.fillRect(bx, y0, bw, y1 - y0);
+      if (im) psIm(x, im, bx, y0, bw, y1 - y0, o.fit); else { x.fillStyle = 'rgba(255,255,255,0.2)'; x.font = '800 380px ' + PS_BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(name || 'S'), bx + bw / 2, (y0 + y1) / 2); x.textBaseline = 'alphabetic'; }
+      if (dim) { x.fillStyle = 'rgba(5,6,12,0.55)'; x.fillRect(bx, y0, bw, y1 - y0); } x.restore();
+      x.save(); x.shadowColor = col; x.shadowBlur = 30; x.lineWidth = 4; x.strokeStyle = col; pPoly(x, poly); x.stroke(); x.restore();
+      var by = y1 + 24, bh = 100, bp = left ? [[50 + sk * 0.2, by], [cx - 14, by], [cx - 14 - sk * 0.25, by + bh], [50, by + bh]] : [[cx + 14 + sk * 0.25, by], [W - 50, by], [W - 50 - sk * 0.2, by + bh], [cx + 14, by + bh]];
+      pPoly(x, bp); x.fillStyle = 'rgba(5,6,12,0.92)'; x.fill(); x.lineWidth = 3; x.strokeStyle = col; x.stroke();
+      x.fillStyle = '#fff'; x.textAlign = left ? 'left' : 'right'; var nn = psTxt(x, name || '', 330, 72); x.fillText(nn, left ? 84 : W - 84, by + 72);
+      if (win) { rr(x, left ? 80 : W - 80 - 170, y0 + 24, 170, 44, 22); x.fillStyle = col; x.fill(); x.fillStyle = '#05060c'; x.font = '800 26px ' + PS_NUM; x.textAlign = 'center'; psLs(x, 6); x.fillText('WINNER', (left ? 80 : W - 80 - 170) + 88, y0 + 55); psLs(x, 0); }
+    }
+    pan([[50 + sk, y0], [cx - 14, y0], [cx - 14 - sk, y1], [50, y1]], 50, cx - 64, I.ia, AC, o.a.name, true, o.win === 'a', o.win === 'b');
+    pan([[cx + 14 + sk, y0], [W - 50, y0], [W - 50 - sk, y1], [cx + 14, y1]], cx + 14, W - 64 - cx, I.ib, C2, o.b.name, false, o.win === 'b', o.win === 'a');
+    var hy = y1 + 74; x.save(); x.shadowColor = AC; x.shadowBlur = 30; x.beginPath(); for (var q = 0; q < 6; q++) { var an = Math.PI / 3 * q; x.lineTo(cx + 64 * Math.cos(an), hy + 64 * Math.sin(an)); } x.closePath(); x.fillStyle = '#05060c'; x.fill(); x.lineWidth = 4; x.strokeStyle = AC; x.stroke(); x.restore();
+    x.textAlign = 'center'; x.fillStyle = '#fff'; var ms = fitFont(x, o.mid, 96, 64, 800, PS_NUM); x.fillText(o.mid, cx, hy + ms * 0.34);
+    psDetails(x, o, W, y1 + 24 + 100 + 100, 78, AC, false); if (!o.l3) psFoot(x, W, H + 20);
+    return psBlob(cv);
+  }
+
+  /* VS: fire */
+  async function psVSfire(o, W, H, I) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350, cx = W / 2, sk = 50;
+    x.fillStyle = '#0A0A0C'; x.fillRect(0, 0, W, H);
+    var bt = 560 * k, bg = x.createLinearGradient(0, 0, W, bt); bg.addColorStop(0, AC); bg.addColorStop(1, psMix(AC, '#000000', 0.6)); x.fillStyle = bg; pPoly(x, [[0, 0], [W, 0], [W, bt - 90], [0, bt + 20]]); x.fill(); psDots(x, 0, 0, W, bt, 0.22);
+    if (I.logo) x.drawImage(I.logo, 54, 40 * k, 110, 110);
+    x.save(); x.translate(cx + 70, 110 * k); x.rotate(-0.045); psLs(x, 6); x.font = '800 54px ' + PS_NUM; var tg = psTxt(x, o.tag || '', 600, 54); var tw = x.measureText(tg).width + 70; x.fillStyle = '#fff'; x.fillRect(-tw / 2, -50, tw, 74); x.fillStyle = '#0A0A0C'; x.textAlign = 'center'; x.fillText(tg, 3, 4); psLs(x, 0); x.restore();
+    x.save(); x.translate(cx, 420 * k); x.rotate(-0.06); x.textAlign = 'center'; var ms = fitFont(x, o.mid, W - 260, 360, 800, PS_NUM); x.lineJoin = 'round'; x.lineWidth = 16; x.strokeStyle = '#0A0A0C'; x.strokeText(o.mid, 0, 0); x.fillStyle = '#fff'; x.fillText(o.mid, 0, 0); x.restore();
+    var y0 = 590 * k, y1 = y0 + (story ? 960 : 520);
+    function pan(poly, bx, bw, im, col, name, left, win, dim) {
+      x.save(); pPoly(x, poly); x.clip(); var g = x.createLinearGradient(bx, y0, bx + bw, y1); g.addColorStop(0, col); g.addColorStop(1, '#14100c'); x.fillStyle = g; x.fillRect(bx, y0, bw, y1 - y0); psDots(x, bx, y0, bw, y1 - y0, 0.12);
+      if (im) psIm(x, im, bx, y0, bw, y1 - y0, o.fit); else { x.fillStyle = 'rgba(255,255,255,0.25)'; x.font = '800 360px ' + PS_BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(name || 'S'), bx + bw / 2, (y0 + y1) / 2); x.textBaseline = 'alphabetic'; }
+      var bd = x.createLinearGradient(0, y1 - 260, 0, y1); bd.addColorStop(0, 'rgba(10,10,12,0)'); bd.addColorStop(1, 'rgba(10,10,12,0.92)'); x.fillStyle = bd; x.fillRect(bx, y1 - 260, bw, 260);
+      if (dim) { x.fillStyle = 'rgba(10,10,12,0.55)'; x.fillRect(bx, y0, bw, y1 - y0); } x.restore();
+      x.fillStyle = '#fff'; x.textAlign = left ? 'left' : 'right'; x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 18; var nn = psTxt(x, name || '', 400, 100); x.fillText(nn, left ? 84 : W - 84, y1 - 30); x.restore();
+      if (win) { rr(x, left ? 84 : W - 84 - 190, y1 - 150, 190, 44, 6); x.fillStyle = '#fff'; x.fill(); x.fillStyle = '#0A0A0C'; x.font = '800 26px ' + PS_NUM; x.textAlign = 'center'; psLs(x, 6); x.fillText('WINNER', (left ? 84 : W - 84 - 190) + 98, y1 - 118); psLs(x, 0); }
+    }
+    var gp = 14;
+    pan([[50 + sk, y0], [cx - gp, y0], [cx - gp - sk, y1], [50, y1]], 50, cx - 64, I.ia, AC, o.a.name, true, o.win === 'a', o.win === 'b');
+    pan([[cx + gp + sk, y0], [W - 50, y0], [W - 50 - sk, y1], [cx + gp, y1]], cx + gp, W - 64 - cx, I.ib, '#FFFFFF', o.b.name, false, o.win === 'b', o.win === 'a');
+    x.fillStyle = '#fff'; pPoly(x, [[cx - 6 + sk, y0 - 30], [cx + 6 + sk, y0 - 30], [cx + 6 - sk, y1 + 30], [cx - 6 - sk, y1 + 30]]); x.fill();
+    psDetails(x, o, W, y1 + 100, 74, AC, false);
+    return psBlob(cv);
+  }
+
+  /* profile: gold frame */
+  async function psSpotGold(o, W, H) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), dy = story ? 570 : 0, cx = W / 2;
+    var im = await psLoad(o.photo), logo = await psLoad(LOGO);
+    var bg = x.createRadialGradient(cx, 560 + dy / 2, 40, cx, 560 + dy / 2, 1100); bg.addColorStop(0, psMix(AC, '#000000', 0.5)); bg.addColorStop(0.6, psMix(AC, '#000000', 0.85)); bg.addColorStop(1, '#030406'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    psGoldFrame(x, W, H);
+    if (logo) { x.save(); x.beginPath(); x.arc(cx, 112, 54, 0, 7); x.fillStyle = '#0A1319'; x.fill(); x.lineWidth = 5; x.strokeStyle = psFoil(x, 58, 166); x.stroke(); x.restore(); x.drawImage(logo, cx - 45, 67, 90, 90); }
+    x.textAlign = 'center'; x.fillStyle = 'rgba(255,255,255,0.75)'; x.font = '700 28px ' + PS_NUM; psLs(x, 12); if (o.l1) x.fillText(String(o.l1).toUpperCase(), cx + 6, 218); psLs(x, 0);
+    psLs(x, 6); var l2 = psTxt(x, o.l2 || ' ', W - 200, 110); x.fillStyle = psFoil(x, 230, 320); x.fillText(l2, cx + 3, 312); psLs(x, 0);
+    var px = 110, py = 350, pw = W - 220, ph = 590 + dy;
+    x.save(); x.shadowColor = AC; x.shadowBlur = 50; x.fillStyle = '#10131a'; x.fillRect(px, py, pw, ph); x.restore();
+    x.save(); x.beginPath(); x.rect(px, py, pw, ph); x.clip(); var g = x.createLinearGradient(px, py, px + pw, py + ph); g.addColorStop(0, psMix(AC, '#000000', 0.2)); g.addColorStop(1, '#0d1016'); x.fillStyle = g; x.fillRect(px, py, pw, ph);
+    if (im) psIm(x, im, px, py, pw, ph, o.fit); else { x.fillStyle = 'rgba(255,255,255,0.3)'; x.font = '800 460px ' + PS_BN; x.textBaseline = 'middle'; x.fillText(initial(o.name || 'S'), cx, py + ph / 2); x.textBaseline = 'alphabetic'; }
+    var bd = x.createLinearGradient(0, py + ph - 200, 0, py + ph); bd.addColorStop(0, 'rgba(5,6,7,0)'); bd.addColorStop(1, 'rgba(5,6,7,0.7)'); x.fillStyle = bd; x.fillRect(px, py + ph - 200, pw, 200); x.restore();
+    x.lineWidth = 6; x.strokeStyle = psFoil(x, py, py + ph); x.strokeRect(px, py, pw, ph); x.lineWidth = 1.5; x.strokeStyle = 'rgba(242,210,122,0.5)'; x.strokeRect(px + 14, py + 14, pw - 28, ph - 28);
+    if (o.num) { var sx = px + pw - 20, sy = py + 20, sr = 70; x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 24; x.beginPath(); x.arc(sx, sy, sr, 0, 7); x.fillStyle = psFoil(x, sy - sr, sy + sr); x.fill(); x.restore(); x.lineWidth = 2; x.strokeStyle = 'rgba(70,40,0,0.55)'; x.beginPath(); x.arc(sx, sy, sr - 9, 0, 7); x.stroke(); x.fillStyle = '#2A1B00'; x.font = '800 62px ' + PS_NUM; x.textAlign = 'center'; x.fillText('#' + o.num, sx, sy + 14); x.font = '800 20px ' + PS_NUM; psLs(x, 5); x.fillText('SNB', sx + 2, sy + 42); psLs(x, 0); }
+    if (o.tag) { x.font = '800 40px ' + PS_NUM; psLs(x, 5); var tt = psTxt(x, o.tag, 360, 40), tw = x.measureText(tt).width + 50; x.fillStyle = '#fff'; x.fillRect(px + 14, py + ph - 14 - 66, tw, 66); x.fillStyle = '#0a0b0c'; x.textAlign = 'left'; x.fillText(tt, px + 14 + 28, py + ph - 14 - 20); psLs(x, 0); }
+    var ny = py + ph + 124; x.textAlign = 'center';
+    if (o.pill) { x.fillStyle = AC; x.font = '800 28px ' + PS_NUM; psLs(x, 10); x.fillText(String(o.pill).toUpperCase(), cx + 5, py + ph + 46); psLs(x, 0); }
+    x.save(); x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 24; var nm = psTxt(x, o.name || '', W - 160, 130); x.fillStyle = '#fff'; x.fillText(nm, cx, ny + 26); x.restore();
+    var ly = ny + 52, lg = x.createLinearGradient(W * 0.2, 0, W * 0.8, 0); lg.addColorStop(0, 'rgba(242,210,122,0)'); lg.addColorStop(0.5, 'rgba(242,210,122,1)'); lg.addColorStop(1, 'rgba(242,210,122,0)'); x.fillStyle = lg; x.fillRect(W * 0.2, ly, W * 0.6, 3); sparkle(x, cx - 330, ly + 1, 13, 0.9, '#F7DE95'); sparkle(x, cx + 330, ly + 1, 13, 0.9, '#F7DE95');
+    var items = []; if (o.bigVal !== '' && o.bigVal != null) items.push([o.bigLab || '', o.bigVal]); (o.stats || []).forEach(function (r) { items.push(r); }); items = items.slice(0, 5);
+    var cw = (W - 160) / Math.max(items.length, 1), sy0 = ly + 100;
+    items.forEach(function (r, i) { var c = 80 + cw * i + cw / 2; x.textAlign = 'center'; x.font = '800 92px ' + PS_NUM; x.fillStyle = psFoil(x, sy0 - 80, sy0); x.fillText(String(r[1]), c, sy0); x.fillStyle = 'rgba(255,255,255,0.75)'; x.font = '700 24px ' + PS_NUM; psLs(x, 5); x.fillText(String(r[0]).toUpperCase(), c + 2, sy0 + 36); psLs(x, 0); if (i) { x.fillStyle = 'rgba(242,210,122,0.28)'; x.fillRect(80 + cw * i, sy0 - 74, 2, 110); } });
+    psFoot(x, W, H + 14, 'rgba(255,255,255,0.45)');
+    return psBlob(cv);
+  }
+
+  /* profile: neon */
+  async function psSpotNeon(o, W, H) {
+    var story = H > 1500, AC = o.AC, C2 = psAlt(AC), cv = psCanvas(W, H), x = cv.getContext('2d'), dy = story ? 570 : 0, k = H / 1350;
+    var im = await psLoad(o.photo), logo = await psLoad(LOGO);
+    var bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, psMix(AC, '#000000', 0.9)); bg.addColorStop(1, psMix(C2, '#000000', 0.88)); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    psHexGrid(x, W, H, AC, 0.09);
+    x.fillStyle = psA(AC, 0.16); pPoly(x, [[W * 0.5, 0], [W, 0], [W, 640 * k], [W * 0.18, 1000 * k]]); x.fill(); x.fillStyle = psA(C2, 0.15); pPoly(x, [[W * 0.7, 0], [W, 0], [W, 380 * k], [W * 0.42, 760 * k]]); x.fill();
+    if (logo) x.drawImage(logo, W - 150, 40, 100, 100);
+    x.textAlign = 'left'; x.fillStyle = AC; x.font = '700 30px ' + PS_NUM; psLs(x, 10); x.fillText(String(o.l1 || '').toUpperCase(), 70, 120); psLs(x, 0);
+    psLs(x, 5); var l2 = psTxt(x, o.l2 || ' ', W - 260, 120); [[-4, C2], [4, AC], [0, '#fff']].forEach(function (p) { x.fillStyle = p[1]; x.fillText(l2, 70 + p[0], 236); }); psLs(x, 0);
+    x.fillStyle = C2; x.fillRect(70, 262, 150, 6); x.fillStyle = AC; x.fillRect(228, 262, 40, 6);
+    var y0 = 300, y1 = 900 + dy, sk = 60, poly = [[110, y0], [W - 50, y0], [W - 110, y1], [50, y1]];
+    x.save(); pPoly(x, poly); x.clip(); var g = x.createLinearGradient(0, y0, W, y1); g.addColorStop(0, psMix(AC, '#000000', 0.35)); g.addColorStop(1, '#07080f'); x.fillStyle = g; x.fillRect(0, y0, W, y1 - y0);
+    if (im) psIm(x, im, 50, y0, W - 100, y1 - y0, o.fit); else { x.fillStyle = 'rgba(255,255,255,0.22)'; x.font = '800 460px ' + PS_BN; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(initial(o.name || 'S'), W / 2, (y0 + y1) / 2); x.textBaseline = 'alphabetic'; }
+    var bd = x.createLinearGradient(0, y1 - 240, 0, y1); bd.addColorStop(0, 'rgba(5,6,12,0)'); bd.addColorStop(1, 'rgba(5,6,12,0.8)'); x.fillStyle = bd; x.fillRect(0, y1 - 240, W, 240); x.restore();
+    x.save(); x.shadowColor = AC; x.shadowBlur = 34; x.lineWidth = 4; x.strokeStyle = AC; pPoly(x, poly); x.stroke(); x.restore();
+    if (o.tag) { x.font = '800 30px ' + PS_NUM; psLs(x, 6); var tt = psTxt(x, o.tag, 300, 30), tw = x.measureText(tt).width + 44; x.fillStyle = C2; x.fillRect(100, y0 + 24, tw, 52); x.fillStyle = '#05060c'; x.textAlign = 'left'; x.fillText(tt, 122, y0 + 61); psLs(x, 0); }
+    var by = y1 + 28, bh = 120, bp = [[60 + 20, by], [W - 40, by], [W - 60, by + bh], [40, by + bh]];
+    pPoly(x, bp); x.fillStyle = 'rgba(5,6,12,0.92)'; x.fill(); x.lineWidth = 4; x.strokeStyle = AC; x.stroke();
+    x.textAlign = 'left'; x.fillStyle = '#fff'; var nm = psTxt(x, o.name || '', W - 360, 100); x.fillText(nm, 100, by + 90);
+    if (o.num) { x.textAlign = 'right'; x.fillStyle = C2; x.font = '800 90px ' + PS_NUM; x.fillText('#' + o.num, W - 100, by + 92); }
+    var items = []; if (o.bigVal !== '' && o.bigVal != null) items.push([o.bigLab || '', o.bigVal]); (o.stats || []).forEach(function (r) { items.push(r); }); items = items.slice(0, 4);
+    var n = Math.max(items.length, 1), cw = (W - 80 - 14 * (n - 1)) / n, cy2 = by + bh + 34;
+    items.forEach(function (r, i) { var bx = 40 + i * (cw + 14); pPoly(x, [[bx + 22, cy2], [bx + cw, cy2], [bx + cw - 22, cy2 + 160], [bx, cy2 + 160]]); x.fillStyle = psA(AC, 0.13); x.fill(); x.lineWidth = 2; x.strokeStyle = AC; x.stroke(); x.textAlign = 'center'; x.fillStyle = '#fff'; x.font = '800 84px ' + PS_NUM; x.fillText(String(r[1]), bx + cw / 2, cy2 + 96); x.fillStyle = AC; x.font = '700 24px ' + PS_NUM; psLs(x, 5); x.fillText(String(r[0]).toUpperCase(), bx + cw / 2 + 2, cy2 + 136); psLs(x, 0); });
+    psFoot(x, W, H + 14, 'rgba(255,255,255,0.45)');
+    return psBlob(cv);
+  }
+
+  /* announcement: gold classic */
+  async function psAnnGold(o, W, H) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), cx = W / 2, sh = story ? 250 : 0, k = H / 1350;
+    var im = await psLoad(o.photo), logo = await psLoad(LOGO);
+    var bg = x.createRadialGradient(cx, 520 + sh, 40, cx, 520 + sh, 1100); bg.addColorStop(0, psMix(AC, '#000000', 0.5)); bg.addColorStop(0.6, psMix(AC, '#000000', 0.85)); bg.addColorStop(1, '#030406'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
+    psGoldFrame(x, W, H);
+    if (logo) { x.save(); x.beginPath(); x.arc(cx, 112, 54, 0, 7); x.fillStyle = '#0A1319'; x.fill(); x.lineWidth = 5; x.strokeStyle = psFoil(x, 58, 166); x.stroke(); x.restore(); x.drawImage(logo, cx - 45, 67, 90, 90); }
+    x.textAlign = 'center'; psLs(x, 10); x.font = '800 32px ' + PS_NUM; var tg = psTxt(x, o.tag || '', 500, 32); var tw = x.measureText(tg).width; x.fillStyle = AC; x.fillText(tg, cx + 5, 236); psLs(x, 0);
+    x.fillStyle = 'rgba(242,210,122,0.6)'; x.fillRect(cx - tw / 2 - 130, 226, 90, 2); x.fillRect(cx + tw / 2 + 40, 226, 90, 2);
+    var my = 450 + sh * 0.6, R = story ? 190 : 150;
+    x.save(); x.shadowColor = AC; x.shadowBlur = 50; x.beginPath(); x.arc(cx, my, R, 0, 7); x.fillStyle = '#10131a'; x.fill(); x.restore();
+    x.save(); x.beginPath(); x.arc(cx, my, R, 0, 7); x.clip(); if (im) psIm(x, im, cx - R, my - R, 2 * R, 2 * R, o.fit, 0.1); else if (logo) { x.globalAlpha = 0.9; x.drawImage(logo, cx - R * 0.8, my - R * 0.8, R * 1.6, R * 1.6); } x.restore();
+    x.lineWidth = 8; x.strokeStyle = psFoil(x, my - R, my + R); x.beginPath(); x.arc(cx, my, R + 2, 0, 7); x.stroke(); x.lineWidth = 2; x.setLineDash([3, 13]); x.strokeStyle = 'rgba(242,210,122,0.8)'; x.beginPath(); x.arc(cx, my, R + 22, 0, 7); x.stroke(); x.setLineDash([]);
+    var tl = (o.title || []).filter(Boolean), ty = my + R + 110, ls = tl.length > 2 ? 98 : 112, ts = tl.length > 2 ? 100 : 120;
+    tl.forEach(function (t, i) { psLs(x, 4); var s = psTxt(x, t, W - 200, ts); x.save(); x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 22; x.fillStyle = psFoil(x, ty + i * ls - ts, ty + i * ls + 10); x.fillText(s, cx + 2, ty + i * ls); x.restore(); psLs(x, 0); });
+    var cy = ty + (tl.length ? (tl.length - 1) * ls : 0) + 20;
+    if (o.sub) { cy += 52; x.fillStyle = '#fff'; psLs(x, 3); var ss = psTxt(x, o.sub, W - 200, 44, 700); x.fillText(ss, cx + 1, cy); psLs(x, 0); }
+    (o.body || []).filter(Boolean).forEach(function (b) { cy += 48; var bs = psTxt(x, b, W - 280, 36, 600); var bw = x.measureText(bs).width; x.fillStyle = 'rgba(255,255,255,0.85)'; x.fillText(bs, cx + 14, cy); x.save(); x.fillStyle = AC; x.translate(cx - bw / 2 - 12, cy - 12); x.rotate(Math.PI / 4); x.fillRect(-7, -7, 14, 14); x.restore(); });
+    var chips = [['DATE', o.date], ['TIME', o.time], ['VENUE', o.venue]].filter(function (c) { return c[1]; });
+    if (chips.length) { var chH = 92, chY = H - 110 * k - chH - 16, gap = 14, wts = chips.map(function (c) { return Math.max(String(c[1]).length, 7); }), ws = wts.reduce(function (p, q) { return p + q; }, 0), ac = 80, tot = W - 160 - gap * (chips.length - 1);
+      chips.forEach(function (c, i) { var cw = tot * wts[i] / ws, bx = ac; ac += cw + gap; x.fillStyle = 'rgba(5,6,10,0.7)'; x.fillRect(bx, chY, cw, chH); x.lineWidth = 2; x.strokeStyle = psFoil(x, chY, chY + chH); x.strokeRect(bx, chY, cw, chH); x.textAlign = 'center'; x.fillStyle = AC; x.font = '700 20px ' + PS_NUM; psLs(x, 5); x.fillText(c[0], bx + cw / 2 + 2, chY + 30); psLs(x, 0); x.fillStyle = '#fff'; var v = psTxt(x, c[1], cw - 40, 40); x.fillText(v, bx + cw / 2, chY + 74); }); }
+    psFoot(x, W, H + 14, 'rgba(255,255,255,0.45)');
+    return psBlob(cv);
+  }
+
+  /* announcement: bold */
+  async function psAnnBold(o, W, H) {
+    var story = H > 1500, AC = o.AC, cv = psCanvas(W, H), x = cv.getContext('2d'), k = H / 1350;
+    var im = await psLoad(o.photo), logo = await psLoad(LOGO);
+    x.fillStyle = '#0A0A0C'; x.fillRect(0, 0, W, H);
+    var top = [[0, 0], [W, 0], [W, 520 * k], [0, 700 * k]];
+    x.save(); pPoly(x, top); x.clip(); var g = x.createLinearGradient(0, 0, W, 700 * k); g.addColorStop(0, psMix(AC, '#000000', 0.35)); g.addColorStop(1, '#101016'); x.fillStyle = g; x.fillRect(0, 0, W, 760 * k);
+    if (im) psIm(x, im, 0, 0, W, 760 * k, o.fit, 0.05); else if (logo) { x.globalAlpha = 0.5; x.drawImage(logo, W / 2 - 260, 90 * k, 520, 520); x.globalAlpha = 1; } x.restore();
+    var bt = 540 * k; var bg = x.createLinearGradient(0, bt, W, H); bg.addColorStop(0, AC); bg.addColorStop(1, psMix(AC, '#000000', 0.55)); x.fillStyle = bg; pPoly(x, [[0, bt + 100 * k], [W, bt - 90 * k], [W, H], [0, H]]); x.fill(); psDots(x, 0, bt - 90 * k, W, H - bt + 90 * k, 0.16);
+    x.fillStyle = '#fff'; pPoly(x, [[0, bt + 80 * k], [W, bt - 110 * k], [W, bt - 90 * k], [0, bt + 100 * k]]); x.fill();
+    if (logo) x.drawImage(logo, 50, 40, 110, 110);
+    x.fillStyle = '#fff'; x.font = '700 26px ' + PS_NUM; x.textAlign = 'right'; psLs(x, 8); x.fillText('SYLHET NET BREAKERS', W - 56, 90); psLs(x, 0);
+    var y = bt + 120 * k; x.textAlign = 'left';
+    if (o.tag) { psLs(x, 6); x.font = '800 36px ' + PS_NUM; var tt = psTxt(x, o.tag, 560, 36), tw = x.measureText(tt).width + 56; x.fillStyle = '#0A0A0C'; x.fillRect(60, y, tw, 62); x.fillStyle = '#fff'; x.textBaseline = 'middle'; x.fillText(tt, 88, y + 33); x.textBaseline = 'alphabetic'; psLs(x, 0); }
+    var tl = (o.title || []).filter(Boolean), ts = tl.length > 2 ? 100 : 120, ls = tl.length > 2 ? 92 : 110, ty = y + 62 + ts + 10;
+    tl.forEach(function (t, i) { x.save(); x.shadowColor = 'rgba(0,0,0,0.5)'; x.shadowBlur = 20; x.fillStyle = '#fff'; var s = psTxt(x, t, W - 130, ts); x.fillText(s, 60, ty + i * ls); x.restore(); });
+    var cy = ty + (tl.length ? (tl.length - 1) * ls : 0);
+    if (o.sub) { cy += 58; x.fillStyle = '#0A0A0C'; psLs(x, 3); var ss = psTxt(x, o.sub, W - 130, 46, 800); x.fillText(ss, 60, cy); psLs(x, 0); }
+    var bl = (o.body || []).filter(Boolean); if (bl.length) { cy += 52; x.fillStyle = 'rgba(10,10,12,0.85)'; var bs = psTxt(x, bl.join('   •   '), W - 130, 34, 700); x.fillText(bs, 60, cy); }
+    var chips = [['DATE', o.date], ['TIME', o.time], ['VENUE', o.venue]].filter(function (c) { return c[1]; });
+    if (chips.length) { var chH = 92, chY = H - 90 * k - chH, gap = 14, wts = chips.map(function (c) { return Math.max(String(c[1]).length, 7); }), ws = wts.reduce(function (p, q) { return p + q; }, 0), ac = 60, tot = W - 120 - gap * (chips.length - 1);
+      chips.forEach(function (c, i) { var cw = tot * wts[i] / ws, bx = ac; ac += cw + gap; x.fillStyle = '#0A0A0C'; x.fillRect(bx, chY, cw, chH); x.fillStyle = AC; x.fillRect(bx, chY, 8, chH); x.textAlign = 'left'; x.fillStyle = AC; x.font = '700 20px ' + PS_NUM; psLs(x, 4); x.fillText(c[0], bx + 28, chY + 32); psLs(x, 0); x.fillStyle = '#fff'; var v = psTxt(x, c[1], cw - 50, 40); x.fillText(v, bx + 28, chY + 76); }); }
+    return psBlob(cv);
+  }
+
   /* --- state + templates --- */
+  var PS_STY = { vs: [['split', 'স্প্লিট'], ['royal', 'রয়্যাল'], ['neon', 'নিয়ন'], ['fire', 'ফায়ার']], result: [['split', 'স্প্লিট'], ['royal', 'রয়্যাল'], ['neon', 'নিয়ন'], ['fire', 'ফায়ার']], spot: [['card', 'কার্ড'], ['gold', 'গোল্ড'], ['neon', 'নিয়ন']], ann: [['panel', 'প্যানেল'], ['gold', 'গোল্ড'], ['bold', 'বোল্ড']] };
   var PS_TPL = [
     ['vs', 'ম্যাচ ডে', [['tag', 'হেডলাইন', 'FINAL'], ['aName', 'বাম পক্ষ', 'TEAM A'], ['bName', 'ডান পক্ষ', 'TEAM B'], ['date', 'তারিখ', '28 NOV 2026'], ['time', 'সময়', '9:00 PM'], ['venue', 'ভেন্যু / লাইন', 'eFootball Mobile'], ['note', 'নিচের ছোট লাইন', 'SYLHET NET BREAKERS LEAGUE']], [['a', 'বাম পক্ষের ছবি'], ['b', 'ডান পক্ষের ছবি']]],
     ['result', 'রেজাল্ট', [['tag', 'হেডলাইন', 'FULL TIME'], ['aName', 'বাম পক্ষ', 'TEAM A'], ['bName', 'ডান পক্ষ', 'TEAM B'], ['aScore', 'বাম স্কোর', '3'], ['bScore', 'ডান স্কোর', '1'], ['l1', 'বড় লাইন', 'CHAMPIONS'], ['l2', 'দ্বিতীয় লাইন', 'SNB CUP 2026'], ['note', 'নিচের ছোট লাইন', '28 NOV 2026']], [['a', 'বাম পক্ষের ছবি'], ['b', 'ডান পক্ষের ছবি']]],
@@ -4148,19 +4360,19 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   ];
   function psState() {
     if (!S.ps) {
-      S.ps = { tpl: 'vs', fmt: 'post', acc: 0, fit: 'cover', f: {}, src: {}, url: null, blob: null, tick: 0, busy: false, err: false };
+      S.ps = { tpl: 'vs', st: { vs: 0, result: 0, spot: 0, ann: 0 }, fmt: 'post', acc: 0, fit: 'cover', f: {}, src: {}, url: null, blob: null, tick: 0, busy: false, err: false };
       PS_TPL.forEach(function (t) { S.ps.f[t[0]] = {}; t[2].forEach(function (f) { S.ps.f[t[0]][f[0]] = f[2]; }); });
     }
     return S.ps;
   }
   async function psRender(P) {
-    var W = 1080, H = P.fmt === 'story' ? 1920 : 1350, f = P.f[P.tpl], AC = PS_ACC[P.acc][1], my = ++P.tick;
+    var W = 1080, H = P.fmt === 'story' ? 1920 : 1350, f = P.f[P.tpl], AC = PS_ACC[P.acc][1], my = ++P.tick, sty = PS_STY[P.tpl][P.st[P.tpl]][0];
     await ensureFonts();
     var blob;
-    if (P.tpl === 'vs') blob = await psVS({ AC: AC, fit: P.fit, tag: f.tag, a: { name: f.aName, src: P.src.a }, b: { name: f.bName, src: P.src.b }, mid: 'VS', win: null, l1: [f.date, f.time].filter(Boolean).join('  ·  '), l2: f.venue, l3: f.note }, W, H);
-    else if (P.tpl === 'result') { var as = parseInt(f.aScore, 10), bs = parseInt(f.bScore, 10), win = (isNaN(as) || isNaN(bs) || as === bs) ? null : (as > bs ? 'a' : 'b'); blob = await psVS({ AC: AC, fit: P.fit, tag: f.tag, a: { name: f.aName, src: P.src.a }, b: { name: f.bName, src: P.src.b }, mid: (f.aScore || '0') + ' - ' + (f.bScore || '0'), win: win, l1: f.l1, l2: f.l2, l3: f.note }, W, H); }
-    else if (P.tpl === 'spot') blob = await psSpot({ AC: AC, fit: P.fit, photo: P.src.m, l1: f.h1, l2: f.h2, name: f.name, num: f.num, bigVal: f.bigVal, bigLab: f.bigLab, pill: f.pill, tag: f.tag, tagLab: f.tagLab, stats: [[f.s1l, f.s1v], [f.s2l, f.s2v], [f.s3l, f.s3v], [f.s4l, f.s4v]].filter(function (r) { return r[1] !== '' && r[1] != null; }) }, W, H);
-    else blob = await psAnn({ AC: AC, fit: P.fit, photo: P.src.m, tag: f.tag, title: [f.t1, f.t2, f.t3], sub: f.sub, body: [f.b1, f.b2, f.b3], date: f.date, time: f.time, venue: f.venue }, W, H);
+    if (P.tpl === 'vs') blob = await psVS({ AC: AC, fit: P.fit, style: sty, tag: f.tag, a: { name: f.aName, src: P.src.a }, b: { name: f.bName, src: P.src.b }, mid: 'VS', win: null, l1: [f.date, f.time].filter(Boolean).join('  ·  '), l2: f.venue, l3: f.note }, W, H);
+    else if (P.tpl === 'result') { var as = parseInt(f.aScore, 10), bs = parseInt(f.bScore, 10), win = (isNaN(as) || isNaN(bs) || as === bs) ? null : (as > bs ? 'a' : 'b'); blob = await psVS({ AC: AC, fit: P.fit, style: sty, tag: f.tag, a: { name: f.aName, src: P.src.a }, b: { name: f.bName, src: P.src.b }, mid: (f.aScore || '0') + ' - ' + (f.bScore || '0'), win: win, l1: f.l1, l2: f.l2, l3: f.note }, W, H); }
+    else if (P.tpl === 'spot') blob = await psSpot({ AC: AC, fit: P.fit, style: sty, photo: P.src.m, l1: f.h1, l2: f.h2, name: f.name, num: f.num, bigVal: f.bigVal, bigLab: f.bigLab, pill: f.pill, tag: f.tag, tagLab: f.tagLab, stats: [[f.s1l, f.s1v], [f.s2l, f.s2v], [f.s3l, f.s3v], [f.s4l, f.s4v]].filter(function (r) { return r[1] !== '' && r[1] != null; }) }, W, H);
+    else blob = await psAnn({ AC: AC, fit: P.fit, style: sty, photo: P.src.m, tag: f.tag, title: [f.t1, f.t2, f.t3], sub: f.sub, body: [f.b1, f.b2, f.b3], date: f.date, time: f.time, venue: f.venue }, W, H);
     if (my !== P.tick) return null;
     if (P.url) { try { URL.revokeObjectURL(P.url); } catch (e) { /* ignore */ } }
     P.blob = blob; P.url = URL.createObjectURL(blob); return P.url;
@@ -4170,6 +4382,12 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     P.t = setTimeout(function () {
       psRender(P).then(function (u) { if (u) { P.busy = false; P.err = false; img.src = u; img.hidden = false; st.textContent = ''; } }).catch(function (e) { console.error(e); P.busy = false; P.err = true; st.textContent = 'পোস্টার বানানো যায়নি, আবার চেষ্টা করুন।'; });
     }, delay == null ? 350 : delay);
+  }
+  function psSaved() { try { return JSON.parse(localStorage.getItem('nb-ps-saved') || '[]'); } catch (e) { return []; } }
+  function psSave(name, photo) {
+    name = String(name || '').trim(); if (!name) { toast('আগে নাম লিখুন'); return; }
+    var l = psSaved().filter(function (r) { return r.name !== name; }); l.unshift({ name: name, photo: photo || null }); l = l.slice(0, 12);
+    try { localStorage.setItem('nb-ps-saved', JSON.stringify(l)); toast('সেভ হয়েছে ✅'); } catch (e) { toast('সেভ করা গেল না (জায়গা নেই)'); }
   }
   function psPick(file, cb) {
     var fr = new FileReader();
@@ -4189,22 +4407,28 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     function again() { psSchedule(img, st); }
     var tpls = h('div', { class: 'seg pstpl', role: 'group', 'aria-label': 'টেমপ্লেট' });
     PS_TPL.forEach(function (t) { tpls.append(h('button', { 'aria-pressed': P.tpl === t[0] ? 'true' : 'false', onclick: function () { P.tpl = t[0]; renderView(); } }, t[1])); });
+    var styl = h('div', { class: 'seg pstpl', role: 'group', 'aria-label': 'ডিজাইন' });
+    PS_STY[P.tpl].forEach(function (d, i) { styl.append(h('button', { 'aria-pressed': P.st[P.tpl] === i ? 'true' : 'false', onclick: function () { P.st[P.tpl] = i; renderView(); } }, d[1])); });
+    var nameKeys = T[3].map(function (sl) { return sl[0] === 'a' ? 'aName' : sl[0] === 'b' ? 'bName' : P.tpl === 'spot' ? 'name' : null; });
     var grid = h('div', { class: 'psgrid' });
     T[2].forEach(function (fd) {
+      if (nameKeys.indexOf(fd[0]) >= 0) return;
       var inp = h('input', { type: 'text', value: f[fd[0]] || '', placeholder: fd[2] || '', 'aria-label': fd[1], oninput: function (e) { f[fd[0]] = e.target.value; again(); } });
       grid.append(h('label', { class: 'field' }, fd[1], inp));
     });
     var slots = h('div', { class: 'psslots' });
     T[3].forEach(function (sl) {
-      var nameKey = sl[0] === 'a' ? 'aName' : sl[0] === 'b' ? 'bName' : 'name';
+      var nameKey = sl[0] === 'a' ? 'aName' : sl[0] === 'b' ? 'bName' : P.tpl === 'spot' ? 'name' : null, saved = psSaved();
       var sel = h('select', { 'aria-label': 'প্লেয়ার থেকে ছবি নিন', onchange: function (e) {
-        var p = S.players.get(e.target.value); if (!p) return; P.src[sl[0]] = p.photo || null; if (nameKey in f) f[nameKey] = p.name; if (P.tpl === 'spot' && p.number) f.num = String(p.number); renderView();
-      } }, h('option', { value: '' }, 'প্লেয়ার থেকে নিন…'));
-      sortedPlayers().forEach(function (e) { sel.append(h('option', { value: e[0] }, e[1].name)); });
+        var v = e.target.value, p = v.indexOf('s:') === 0 ? psSaved()[+v.slice(2)] : S.players.get(v); if (!p) return; P.src[sl[0]] = p.photo || null; if (nameKey) f[nameKey] = p.name; if (P.tpl === 'spot' && p.number) f.num = String(p.number); renderView();
+      } }, h('option', { value: '' }, 'ক্লাবের প্লেয়ার / সেভ করা থেকে নিন…'));
+      if (saved.length) { var og = h('optgroup', { label: 'সেভ করা' }); saved.forEach(function (sv, i) { og.append(h('option', { value: 's:' + i }, sv.name)); }); sel.append(og); }
+      var og2 = h('optgroup', { label: 'ক্লাব প্লেয়ার' }); sortedPlayers().forEach(function (e) { og2.append(h('option', { value: e[0] }, e[1].name)); }); sel.append(og2);
+      var nin = nameKey ? h('input', { type: 'text', value: f[nameKey] || '', placeholder: 'নাম লিখুন (যে কেউ হতে পারে)', 'aria-label': 'নাম', oninput: function (e) { f[nameKey] = e.target.value; again(); } }) : null;
       var file = h('input', { type: 'file', accept: 'image/*', hidden: true, onchange: function (e) { var fl = e.target.files && e.target.files[0]; if (!fl) return; psPick(fl, function (d) { P.src[sl[0]] = d; renderView(); }); } });
       var th = h('div', { class: 'psth' }); if (P.src[sl[0]]) th.style.backgroundImage = 'url("' + P.src[sl[0]] + '")';
-      slots.append(h('div', { class: 'psslot' }, th, h('div', { class: 'psslotc' }, h('strong', null, sl[1]), sel,
-        h('div', { class: 'row' }, h('button', { class: 'btn ghost', type: 'button', onclick: function () { file.click(); } }, '📷 গ্যালারি থেকে'), P.src[sl[0]] ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[sl[0]] = null; renderView(); } }, 'মুছুন') : null), file)));
+      slots.append(h('div', { class: 'psslot' }, th, h('div', { class: 'psslotc' }, h('strong', null, sl[1]), nin, sel,
+        h('div', { class: 'row' }, h('button', { class: 'btn ghost', type: 'button', onclick: function () { file.click(); } }, '📷 গ্যালারি থেকে'), P.src[sl[0]] ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { P.src[sl[0]] = null; renderView(); } }, 'মুছুন') : null, nameKey ? h('button', { class: 'btn ghost', type: 'button', onclick: function () { psSave(f[nameKey], P.src[sl[0]]); renderView(); } }, '💾 সেভ রাখুন') : null), file)));
     });
     var sw = h('div', { class: 'psacc', role: 'group', 'aria-label': 'রঙ' });
     PS_ACC.forEach(function (a, i) { sw.append(h('button', { type: 'button', class: 'psdot', 'aria-label': a[0], 'aria-pressed': P.acc === i ? 'true' : 'false', style: 'background:' + a[1], onclick: function () { P.acc = i; renderView(); } })); });
@@ -4221,7 +4445,8 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     psSchedule(img, st, 30);
     return h('div', { class: 'stack psroot' },
       h('section', { class: 'card panel' }, h('h2', null, 'পোস্টার স্টুডিও'), h('p', { class: 'muted small' }, 'টেমপ্লেট বেছে লিখে দিন, নিচে সাথে সাথে পোস্টার দেখা যাবে।'), tpls),
-      h('section', { class: 'card panel' }, h('h3', null, 'ছবি'), slots),
+      h('section', { class: 'card panel' }, h('h3', null, 'ডিজাইন'), styl),
+      h('section', { class: 'card panel' }, h('h3', null, 'ছবি ও নাম'), slots),
       h('section', { class: 'card panel psform' }, h('h3', null, 'লেখা'), grid),
       h('section', { class: 'card panel' }, h('h3', null, 'স্টাইল'), sw, h('div', { class: 'psrow' }, fmt, fit)),
       h('section', { class: 'card panel' }, h('h3', null, 'প্রিভিউ'), h('div', { class: 'preview' }, img), st, acts));
