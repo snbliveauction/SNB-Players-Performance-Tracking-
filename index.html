@@ -6991,23 +6991,21 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 </script>
 <!-- SNB background music -->
 <style>
-#snbMusic{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:40;width:44px;height:44px;border-radius:50%;border:1px solid rgba(231,194,106,.45);background:rgba(12,18,26,.82);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--gold,#E7C26A);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 6px 20px rgba(0,0,0,.45);transition:transform .15s ease,background .2s ease}
-#snbMusic:hover{transform:scale(1.07)}
+#snbMusic{position:fixed;left:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:40;width:44px;height:44px;border-radius:50%;border:1px solid rgba(231,194,106,.5);background:rgba(12,18,26,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--gold,#E7C26A);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 6px 20px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent}
+@media(min-width:681px){#snbMusic{bottom:20px;left:20px}}
 #snbMusic:focus-visible{outline:2px solid var(--aqua,#7CC8CF);outline-offset:2px}
 #snbMusic svg{width:22px;height:22px;display:block}
-#snbMusic .eq{display:none}
-#snbMusic[data-on="1"] .eq{display:block}
-#snbMusic[data-on="1"] .mute{display:none}
-#snbMusic[data-on="0"] .eq{display:none}
+#snbMusic[data-on="1"] .mute,#snbMusic[data-on="0"] .eq{display:none}
 #snbMusic .eq rect{transform-box:fill-box;transform-origin:bottom;animation:snbEq 1s ease-in-out infinite}
 #snbMusic .eq rect:nth-child(2){animation-delay:.2s}
 #snbMusic .eq rect:nth-child(3){animation-delay:.4s}
 #snbMusic .eq rect:nth-child(4){animation-delay:.6s}
 @keyframes snbEq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
-#snbMusicHint{position:fixed;top:calc(62px + env(safe-area-inset-top,0px));right:12px;z-index:40;max-width:230px;padding:8px 12px;border-radius:12px;background:rgba(12,18,26,.92);border:1px solid rgba(231,194,106,.35);color:var(--ink,#ECE8D3);font:500 13px/1.4 var(--f-body,system-ui);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#snbMusicHint{position:fixed;left:12px;bottom:calc(144px + env(safe-area-inset-bottom,0px));z-index:40;max-width:230px;padding:8px 12px;border-radius:12px;background:rgba(12,18,26,.94);border:1px solid rgba(231,194,106,.35);color:var(--ink,#ECE8D3);font:500 13px/1.4 var(--f-body,system-ui);box-shadow:0 8px 24px rgba(0,0,0,.45)}
+@media(min-width:681px){#snbMusicHint{bottom:74px;left:20px}}
 @media (prefers-reduced-motion:reduce){#snbMusic .eq rect{animation:none}}
 </style>
-<button id="snbMusic" type="button" data-on="0" aria-label="ব্যাকগ্রাউন্ড মিউজিক চালু/বন্ধ করুন" aria-pressed="false" title="Music">
+<button id="snbMusic" type="button" data-on="0" aria-label="ব্যাকগ্রাউন্ড মিউজিক চালু/বন্ধ করুন" aria-pressed="false">
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
     <g class="eq"><rect x="3" y="4" width="3" height="16" rx="1.5"/><rect x="8" y="4" width="3" height="16" rx="1.5"/><rect x="13" y="4" width="3" height="16" rx="1.5"/><rect x="18" y="4" width="3" height="16" rx="1.5"/></g>
     <g class="mute"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6m0-6l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></g>
@@ -7015,53 +7013,39 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 </button>
 <script>
 (function(){
-  var SRC='snb-theme.mp3', KEY='snb_music', VOL=0.45;
-  var btn=document.getElementById('snbMusic'); if(!btn) return;
-  var a=new Audio(); a.src=SRC; a.loop=true; a.preload='auto'; a.volume=0;
-  var want=true, hint=null, fadeT=null;
+  var KEY='snb_music', btn=document.getElementById('snbMusic'); if(!btn) return;
+  var a=new Audio('snb-theme.mp3'); a.loop=true; a.preload='auto'; try{a.volume=0.5;}catch(e){}
+  var want=true, hint=null;
   try{ if(localStorage.getItem(KEY)==='off') want=false; }catch(e){}
   function save(v){ try{ localStorage.setItem(KEY,v?'on':'off'); }catch(e){} }
-  function ui(on){ btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); }
-  function fade(to,done){
-    clearInterval(fadeT);
-    fadeT=setInterval(function(){
-      var d=to-a.volume;
-      if(Math.abs(d)<0.03){ a.volume=to; clearInterval(fadeT); if(done) done(); }
-      else a.volume=Math.max(0,Math.min(1,a.volume+(d>0?0.03:-0.03)));
-    },60);
-  }
-  function hideHint(){ if(hint){ hint.remove(); hint=null; } }
+  function ui(){ var on=!a.paused; btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); if(on&&hint){hint.remove();hint=null;} }
+  a.addEventListener('playing',ui); a.addEventListener('pause',ui); a.addEventListener('play',ui);
   function showHint(){
     if(hint||!want) return;
     hint=document.createElement('div'); hint.id='snbMusicHint';
-    hint.textContent='🎵 মিউজিক শুরু করতে স্ক্রিনে যেকোনো জায়গায় ট্যাপ করুন';
+    hint.textContent='🎵 গান শুরু করতে স্ক্রিনে একবার ট্যাপ করুন';
     document.body.appendChild(hint);
   }
-  function start(){
-    if(!want) return Promise.resolve();
-    var p=a.play();
-    if(p&&p.then){
-      return p.then(function(){ ui(true); hideHint(); fade(VOL); unlock(false); })
-              .catch(function(){ ui(false); showHint(); unlock(true); });
-    }
-    ui(true); fade(VOL); return Promise.resolve();
+  function tryPlay(){
+    var p; try{ p=a.play(); }catch(e){ showHint(); return; }
+    if(p&&p.catch) p.catch(function(){ showHint(); });
   }
-  var evs=['pointerdown','touchend','keydown','click'];
-  function onGesture(){ if(want) start(); }
-  function unlock(on){
-    evs.forEach(function(e){ document.removeEventListener(e,onGesture,true); if(on) document.addEventListener(e,onGesture,true); });
+  // First touch/click/key anywhere on the page starts the music (browsers require a user gesture for sound)
+  function onGesture(e){
+    if(btn.contains(e.target)) return;
+    if(want && a.paused && !document.hidden) tryPlay();
   }
-  function stop(){ fade(0,function(){ a.pause(); }); ui(false); }
-  btn.addEventListener('click',function(ev){
-    ev.stopPropagation(); hideHint();
-    if(!a.paused && a.volume>0 && want){ want=false; save(false); stop(); }
-    else { want=true; save(true); start(); }
+  ['pointerup','touchend','click','keydown'].forEach(function(ev){ document.addEventListener(ev,onGesture,true); });
+  btn.addEventListener('click',function(){
+    if(a.paused){ want=true; save(true); tryPlay(); }
+    else { want=false; save(false); a.pause(); }
   });
   document.addEventListener('visibilitychange',function(){
     if(document.hidden){ if(!a.paused) a.pause(); }
-    else if(want){ a.play().then(function(){ ui(true); fade(VOL); }).catch(function(){}); }
+    else if(want) tryPlay();
   });
-  if(want){ start(); unlock(true); } else ui(false);
+  ui();
+  if(want) tryPlay();
 })();
 </script>
 </body>
