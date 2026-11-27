@@ -6989,74 +6989,143 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   init();
 })();
 </script>
-<!-- SNB background music -->
+<!-- SNB UI sound effects (synthesized with Web Audio: no audio files, no copyright issues) -->
 <style>
-#snbMusic{position:fixed;left:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:40;width:44px;height:44px;border-radius:50%;border:1px solid rgba(231,194,106,.5);background:rgba(12,18,26,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--gold,#E7C26A);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 6px 20px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent}
-@media(min-width:681px){#snbMusic{bottom:20px;left:20px}}
-#snbMusic:focus-visible{outline:2px solid var(--aqua,#7CC8CF);outline-offset:2px}
-#snbMusic svg{width:22px;height:22px;display:block}
-#snbMusic[data-on="1"] .mute,#snbMusic[data-on="0"] .eq{display:none}
-#snbMusic .eq rect{transform-box:fill-box;transform-origin:bottom;animation:snbEq 1s ease-in-out infinite}
-#snbMusic .eq rect:nth-child(2){animation-delay:.2s}
-#snbMusic .eq rect:nth-child(3){animation-delay:.4s}
-#snbMusic .eq rect:nth-child(4){animation-delay:.6s}
-@keyframes snbEq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
-#snbMusicHint{position:fixed;left:12px;bottom:calc(144px + env(safe-area-inset-bottom,0px));z-index:40;max-width:230px;padding:8px 12px;border-radius:12px;background:rgba(12,18,26,.94);border:1px solid rgba(231,194,106,.35);color:var(--ink,#ECE8D3);font:500 13px/1.4 var(--f-body,system-ui);box-shadow:0 8px 24px rgba(0,0,0,.45)}
-@media(min-width:681px){#snbMusicHint{bottom:74px;left:20px}}
-@media (prefers-reduced-motion:reduce){#snbMusic .eq rect{animation:none}}
+#snbSfx{position:fixed;left:12px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:40;width:40px;height:40px;border-radius:50%;border:1px solid rgba(231,194,106,.45);background:rgba(12,18,26,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--gold,#E7C26A);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;box-shadow:0 6px 20px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent;opacity:.85}
+@media(min-width:681px){#snbSfx{bottom:20px;left:20px}}
+#snbSfx:hover{opacity:1}
+#snbSfx:focus-visible{outline:2px solid var(--aqua,#7CC8CF);outline-offset:2px}
+#snbSfx svg{width:20px;height:20px;display:block}
+#snbSfx[data-on="1"] .off,#snbSfx[data-on="0"] .on{display:none}
 </style>
-<button id="snbMusic" type="button" data-on="0" aria-label="ব্যাকগ্রাউন্ড মিউজিক চালু/বন্ধ করুন" aria-pressed="false">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <g class="eq"><rect x="3" y="4" width="3" height="16" rx="1.5"/><rect x="8" y="4" width="3" height="16" rx="1.5"/><rect x="13" y="4" width="3" height="16" rx="1.5"/><rect x="18" y="4" width="3" height="16" rx="1.5"/></g>
-    <g class="mute"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l5 6m0-6l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></g>
+<button id="snbSfx" type="button" data-on="1" aria-pressed="true" aria-label="সাউন্ড ইফেক্ট চালু/বন্ধ করুন">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" stroke="none"/>
+    <g class="on"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></g>
+    <g class="off"><path d="M16 9l5 6m0-6l-5 6"/></g>
   </svg>
 </button>
 <script>
 (function(){
-  var SRC='snb-theme.mp3', KEY='snb_music', btn=document.getElementById('snbMusic'); if(!btn) return;
-  var a=new Audio(); a.loop=true; a.preload='auto'; a.setAttribute('playsinline','');
-  var want=true, hint=null, ready=false, failed=false;
-  try{ if(localStorage.getItem(KEY)==='off') want=false; }catch(e){}
-  function save(v){ try{ localStorage.setItem(KEY,v?'on':'off'); }catch(e){} }
-  function ui(){ var on=!a.paused&&ready&&!failed; btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); if(on) clearHint(); }
-  function clearHint(){ if(hint){ hint.remove(); hint=null; } }
-  function showHint(t){
-    if(!want&&!failed) return;
-    if(!hint){ hint=document.createElement('div'); hint.id='snbMusicHint'; document.body.appendChild(hint); }
-    hint.textContent=t;
+  var KEY='snb_sfx', AC=window.AudioContext||window.webkitAudioContext, btn=document.getElementById('snbSfx');
+  if(!AC||!btn) { if(btn) btn.hidden=true; return; }
+
+  /* ---------- sound engine ---------- */
+  function make(ctx){
+    var out=ctx.createGain(); out.gain.value=6;
+    var comp=ctx.createDynamicsCompressor(); comp.threshold.value=-10; comp.ratio.value=6; comp.attack.value=0.003; comp.release.value=0.2;
+    out.connect(comp); comp.connect(ctx.destination);
+    // soft echo "air" for chimes
+    var dl=ctx.createDelay(1); dl.delayTime.value=0.13;
+    var fb=ctx.createGain(); fb.gain.value=0.32;
+    var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
+    var wet=ctx.createGain(); wet.gain.value=0.55;
+    dl.connect(lp); lp.connect(fb); fb.connect(dl); lp.connect(wet); wet.connect(out);
+    var nbuf=null;
+    function noiseBuf(){
+      if(nbuf) return nbuf;
+      nbuf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
+      var d=nbuf.getChannelData(0); for(var i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+      return nbuf;
+    }
+    function tone(f,o){
+      o=o||{}; var t=ctx.currentTime+(o.t||0), d=o.d||0.12, v=o.v||0.06, a=o.a||0.005;
+      var os=ctx.createOscillator(), g=ctx.createGain();
+      os.type=o.type||'sine'; os.frequency.setValueAtTime(f,t);
+      if(o.to) os.frequency.exponentialRampToValueAtTime(o.to,t+d);
+      g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(v,t+a);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+      os.connect(g); g.connect(out); if(o.send){ var s=ctx.createGain(); s.gain.value=o.send; g.connect(s); s.connect(dl); }
+      os.start(t); os.stop(t+d+0.05);
+    }
+    function bell(f,o){ // glassy bell: fundamental + soft inharmonic partial
+      o=o||{}; tone(f,{t:o.t,d:o.d||0.6,v:o.v||0.06,send:o.send==null?0.6:o.send});
+      tone(f*2.76,{t:o.t,d:(o.d||0.6)*0.5,v:(o.v||0.06)*0.25,send:0.3});
+    }
+    function whoosh(d,f0,f1,v,q,o){
+      o=o||{}; var t=ctx.currentTime+(o.t||0);
+      var s=ctx.createBufferSource(); s.buffer=noiseBuf(); s.loop=true;
+      var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=q||1;
+      bp.frequency.setValueAtTime(f0,t); bp.frequency.exponentialRampToValueAtTime(f1,t+d);
+      var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t);
+      g.gain.exponentialRampToValueAtTime(v,t+d*0.45); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+      s.connect(bp); bp.connect(g); g.connect(out); s.start(t); s.stop(t+d+0.05);
+    }
+    var S={
+      tap:function(){ tone(1900,{d:0.04,v:0.06,to:1150}); whoosh(0.03,3500,3500,0.012,1); },
+      confirm:function(){ tone(880,{d:0.08,v:0.06,type:'triangle'}); tone(1320,{t:0.05,d:0.16,v:0.05,send:0.45}); },
+      soft:function(){ tone(560,{d:0.07,v:0.045,to:420}); },
+      nav:function(){ whoosh(0.22,500,2600,0.045,1.2); tone(660,{d:0.11,v:0.045,to:880,type:'triangle'}); tone(1046,{t:0.06,d:0.2,v:0.035,send:0.5}); },
+      open:function(){ whoosh(0.3,300,1900,0.04,1); tone(523,{d:0.3,v:0.045,type:'triangle',send:0.5}); tone(784,{t:0.07,d:0.34,v:0.04,send:0.5}); tone(1046,{t:0.14,d:0.4,v:0.03,send:0.6}); },
+      close:function(){ tone(784,{d:0.13,v:0.04,to:523,type:'triangle'}); whoosh(0.18,1900,320,0.03,1); },
+      toast:function(){ bell(988,{d:0.55,v:0.06}); bell(1480,{t:0.09,d:0.65,v:0.045}); },
+      hover:function(){ tone(2400,{d:0.024,v:0.03}); },
+      welcome:function(){
+        whoosh(0.8,180,3800,0.05,0.9);
+        [523,659,784,1046].forEach(function(f,i){ tone(f,{t:0.22+i*0.09,d:0.5,v:0.045,type:'triangle',send:0.55}); });
+        bell(1568,{t:0.62,d:1.0,v:0.04});
+      }
+    };
+    return S;
   }
-  a.addEventListener('playing',ui); a.addEventListener('pause',ui);
-  a.addEventListener('error',function(){ failed=true; ui(); showHint('⚠️ গানের ফাইল চালানো যায়নি'); });
-  // Load the file as a blob: avoids service-worker / Range-request problems (esp. iPhone Safari)
-  fetch(SRC,{cache:'force-cache'}).then(function(r){
-    var ct=(r.headers.get('content-type')||'').toLowerCase();
-    if(!r.ok||ct.indexOf('text/html')>-1) throw new Error('missing');
-    return r.blob();
-  }).then(function(b){
-    a.src=URL.createObjectURL(new Blob([b],{type:'audio/mpeg'}));
-    ready=true; a.load();
-    if(want&&a.paused&&!document.hidden) tryPlay();
-  }).catch(function(){ failed=true; ui(); showHint('⚠️ snb-theme.mp3 ফাইলটা সাইটে পাওয়া যায়নি — index.html-এর পাশে upload করুন'); });
-  function tryPlay(){
-    if(!ready) return;
-    var p; try{ p=a.play(); }catch(e){ showHint('🎵 গান শুরু করতে স্ক্রিনে একবার ট্যাপ করুন'); return; }
-    if(p&&p.catch) p.catch(function(){ showHint('🎵 গান শুরু করতে স্ক্রিনে একবার ট্যাপ করুন'); });
-  }
-  function onGesture(e){
-    if(btn.contains(e.target)) return;
-    if(want&&a.paused&&!document.hidden) tryPlay();
-  }
-  ['pointerup','touchend','click','keydown'].forEach(function(ev){ document.addEventListener(ev,onGesture,true); });
-  btn.addEventListener('click',function(){
-    if(failed){ showHint('⚠️ snb-theme.mp3 ফাইলটা সাইটে পাওয়া যায়নি — index.html-এর পাশে upload করুন'); return; }
-    if(a.paused){ want=true; save(true); tryPlay(); }
-    else { want=false; save(false); a.pause(); }
-  });
-  document.addEventListener('visibilitychange',function(){
-    if(document.hidden){ if(!a.paused) a.pause(); }
-    else if(want) tryPlay();
-  });
+  window.snbSfx={make:make};
+
+  /* ---------- runtime ---------- */
+  var on=true, ctx=null, S=null, last={}, welcomed=false;
+  try{ if(localStorage.getItem(KEY)==='off') on=false; }catch(e){}
+  function ui(){ btn.setAttribute('data-on',on?'1':'0'); btn.setAttribute('aria-pressed',on?'true':'false'); }
   ui();
+  function init(){
+    if(!ctx){ try{ ctx=new AC(); S=make(ctx); }catch(e){ ctx=null; return false; } }
+    if(ctx.state==='suspended'){ try{ ctx.resume(); }catch(e){} }
+    return true;
+  }
+  function play(name,gap){
+    if(!on||document.hidden||!init()||!S[name]) return;
+    var n=Date.now(); if(last[name]&&n-last[name]<(gap||45)) return; last[name]=n;
+    try{ S[name](); }catch(e){}
+  }
+
+  btn.addEventListener('click',function(ev){
+    ev.stopPropagation();
+    on=!on; ui(); try{ localStorage.setItem(KEY,on?'on':'off'); }catch(e){}
+    if(on){ init(); play('confirm'); }
+  });
+
+  var CLICKABLE='button,a[href],[role="tab"],[role="button"],[role="menuitem"],.btn,.tab,.chip,summary,label,select';
+  document.addEventListener('click',function(e){
+    if(!on) return;
+    if(!welcomed){ welcomed=true; if(init()){ play('welcome'); return; } }
+    var t=e.target&&e.target.closest?e.target.closest(CLICKABLE):null;
+    if(!t||t===btn||btn.contains(t)) return;
+    if(t.disabled||t.getAttribute('aria-disabled')==='true') return;
+    if(t.closest('.bnav,.bmore,.tabs')||t.getAttribute('role')==='tab') return play('nav',90);
+    if(t.classList.contains('ghost')||/বাতিল|cancel|close|বন্ধ/i.test(t.textContent||'')) return play('soft');
+    if(t.classList.contains('btn')&&!t.classList.contains('ghost')) return play('confirm');
+    play('tap');
+  },true);
+  // unlock audio on very first touch (iOS needs this inside a gesture)
+  ['touchend','keydown'].forEach(function(ev){ document.addEventListener(ev,function(){ if(on) init(); },{capture:true,once:true,passive:true}); });
+
+  // desktop hover tick
+  if(window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches){
+    var lastEl=null;
+    document.addEventListener('mouseover',function(e){
+      if(!on||!ctx||ctx.state!=='running') return;
+      var t=e.target.closest&&e.target.closest('.btn,.tab,.bnav button');
+      if(t&&t!==lastEl&&t!==btn){ lastEl=t; play('hover',70); } else if(!t){ lastEl=null; }
+    },true);
+  }
+
+  // sheet open/close + toast, observed from the DOM (independent of site code)
+  function watch(id,fn){
+    var el=document.getElementById(id); if(!el) return;
+    var was=!el.hidden;
+    new MutationObserver(function(){ var now=!el.hidden; fn(now,was,el); was=now; }).observe(el,{attributes:true,attributeFilter:['hidden'],childList:id==='toast',characterData:id==='toast',subtree:id==='toast'});
+  }
+  watch('scrim',function(now,was){ if(now&&!was) play('open',200); else if(!now&&was) play('close',200); });
+  watch('toast',function(now){ if(now) play('toast',250); });
 })();
 </script>
 </body>
