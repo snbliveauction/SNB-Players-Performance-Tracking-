@@ -7012,7 +7012,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 
   /* ---------- sound engine ---------- */
   function make(ctx){
-    var out=ctx.createGain(); out.gain.value=6;
+    var out=ctx.createGain(); out.gain.value=3.8;
     var comp=ctx.createDynamicsCompressor(); comp.threshold.value=-10; comp.ratio.value=6; comp.attack.value=0.003; comp.release.value=0.2;
     out.connect(comp); comp.connect(ctx.destination);
     // soft echo "air" for chimes
