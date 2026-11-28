@@ -1710,7 +1710,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     tab: 'home', period: 'week', offset: 0, signings: [], signingErr: false, signingLoaded: false,
     players: new Map(), wins: [],
     db: null, auth: null, user: null, noDb: false, setup: false, canWrite: false, loaded: { p: false, w: false },
-    funTab: 'hide', roast: { cur: null }, game: { mode: null, res: null }, mm: null, sh: null, hl: null, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 1, ga: 0, date: dateStr(new Date()), busy: false,
+    funTab: 'spin', roast: { cur: null }, game: { mode: null, res: null }, mm: null, sh: null, hl: null, scores: [], scoreErr: false, quiz: null, pz: null, guess: { state: 'idle', rounds: [], i: 0, score: 0, target: null, opts: [], picked: null, run: false, img: null, prog: 0, pts: 0 }, preds: [], predErr: false, pname: '', pickP: '', predBusy: false, mom: { list: [], reacts: [], err: false, cap: '', img: null, busy: false, open: false },  spin: { mode: 'mystery', pick: 0, cur: null, rot: 0, busy: false, winner: null }, cmp: { a: '', b: '' }, votes: [], voteErr: false, votesOk: false, voteBusy: false, qVote: '', pick: null, kind: 'win', goals: 1, ga: 0, date: dateStr(new Date()), busy: false,
     sheet: null, confirm: null, card: null, hallPer: 'week', hallMore: false, qAdd: '', qPl: '', chipScroll: 0, lg: { email: '', pw: '', busy: false, show: false, err: '' },
     draft: { name: '', number: '', photo: null, busy: false },
     site: { d: null, on: false, edit: null, err: false }
@@ -3380,7 +3380,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 
   function funSeg() {
     var seg = h('div', { class: 'seg funseg', role: 'group', 'aria-label': 'মজা' });
-    [['hide', '🙈 লুকোচুরি'], ['pred', '🎯 প্রেডিক্ট'], ['guess', '🎮 গেম'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
+    [['spin', '🎡 স্পিন'], ['pred', '🎯 প্রেডিক্ট'], ['guess', '🎮 গেম'], ['card', '🃏 কার্ড'], ['roast', '🔥 রোস্ট'], ['cmp', '⚔️ তুলনা']].forEach(function (x) {
       seg.append(h('button', { 'aria-pressed': S.funTab === x[0] ? 'true' : 'false', onclick: function () { if (S.spin.busy) return; S.guess.run = false; S.funTab = x[0]; renderView(); } }, x[1]));
     });
     return h('div', { class: 'periodbar' }, seg);
@@ -3394,140 +3394,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     else if (S.funTab === 'pred') root.append(viewPredict());
     else if (S.funTab === 'guess') root.append(viewGuess());
     else if (S.funTab === 'card') root.append(viewCards());
-    else root.append(viewHide());
-    return root;
-  }
-  /* ---------- fun: hide & seek (লুকোচুরি) ---------- */
-  var HS_SPOTS = [['🥅', 'গোলপোস্ট'], ['🪑', 'বেঞ্চ'], ['🌳', 'বড় গাছ'], ['🚪', 'ড্রেসিংরুম'], ['🎒', 'কিটব্যাগ'], ['🚌', 'টিম বাস'], ['🏟️', 'গ্যালারি'], ['⛺', 'তাঁবু'], ['🛢️', 'পানির ড্রাম'], ['🏆', 'ট্রফি কেস'], ['📦', 'বলের বাক্স'], ['🚧', 'বেড়া']];
-  function hsS() { if (!S.hide) S.hide = { screen: 'menu', n: 3, sel: [], seeker: '' }; return S.hide; }
-  function hsMenu() { S.hide = { screen: 'menu', n: 3, sel: [], seeker: '' }; renderView(); }
-  function hsSnd(n) { try { if (window.snbPlay) window.snbPlay(n); } catch (e) { /* ignore */ } }
-  function hsName(id) { var p = S.players.get(id); return p ? p.name : '?'; }
-  function hsFirst(id) { return String(hsName(id)).split(' ')[0]; }
-  function hsNear(i, j) { return i !== j && Math.abs(((i / 4) | 0) - ((j / 4) | 0)) <= 1 && Math.abs((i % 4) - (j % 4)) <= 1; }
-  function hsTime(ms) { var s = Math.round(ms / 1000); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
-  function hsBest() { try { return JSON.parse(localStorage.getItem('snb-hide-best') || 'null'); } catch (e) { return null; } }
-  function hsSaveBest(stars, ms) {
-    var b = hsBest();
-    if (!b || stars > b.stars || (stars === b.stars && ms < b.ms)) { try { localStorage.setItem('snb-hide-best', JSON.stringify({ stars: stars, ms: ms })); } catch (e) { /* ignore */ } }
-  }
-  function hsStars(n) { return '⭐⭐⭐'.slice(0, n) || '—'; }
-  function hsBegin(mode, hiders) {
-    var H = hsS(), n = hiders.length;
-    H.screen = 'play'; H.mode = mode; H.hiders = hiders; H.opened = {}; H.msg = '';
-    H.maxTries = mode === 'solo' ? n + 5 : Math.min(11, n * 2 + 2);
-    H.tries = H.maxTries; H.t0 = Date.now(); H.done = false; H.win = false; H.ms = 0; H.stars = 0;
-    renderView();
-  }
-  function hsSolo() {
-    var H = hsS(), ids = shuffle(Array.from(S.players.keys())).slice(0, Math.min(H.n, S.players.size)), sp = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-    hsBegin('solo', ids.map(function (id, i) { return { id: id, spot: sp[i] }; }));
-  }
-  function hsOpen(i) {
-    var H = hsS(); if (H.done || H.opened[i] != null) return;
-    var here = H.hiders.filter(function (x) { return x.spot === i; });
-    H.tries--;
-    if (here.length) {
-      H.opened[i] = 'hit'; H.msg = '🎉 ' + here.map(function (x) { return hsFirst(x.id); }).join(', ') + ' ধরা পড়েছে!'; hsSnd('toast');
-    } else {
-      var warm = H.mode === 'solo' && H.hiders.some(function (x) { return H.opened[x.spot] !== 'hit' && hsNear(i, x.spot); });
-      H.opened[i] = warm ? 'warm' : 'miss';
-      H.msg = warm ? '🔥 গরম! কাছাকাছি কেউ লুকিয়ে আছে' : (H.mode === 'solo' ? '❄️ ঠান্ডা, আশেপাশে কেউ নেই' : '😶 এখানে কেউ নেই'); hsSnd('soft');
-    }
-    var left = H.hiders.filter(function (x) { return H.opened[x.spot] !== 'hit'; });
-    if (!left.length || H.tries <= 0) {
-      H.done = true; H.win = !left.length; H.ms = Date.now() - H.t0;
-      if (H.win) {
-        var r = H.tries / H.maxTries; H.stars = r >= 0.4 ? 3 : r >= 0.15 ? 2 : 1;
-        if (H.mode === 'solo') hsSaveBest(H.stars, H.ms);
-        hsSnd('welcome');
-      }
-    }
-    renderView();
-  }
-  function hsSpotBtn(i, cls, faces, onclick, disabled) {
-    var b = h('button', { type: 'button', class: 'hs-spot ' + (cls || ''), disabled: !!disabled, 'aria-label': HS_SPOTS[i][1], onclick: onclick },
-      h('span', { class: 'e' }, HS_SPOTS[i][0]), h('span', { class: 'l' }, HS_SPOTS[i][1]));
-    if (faces && faces.length) {
-      var f = h('span', { class: 'faces' });
-      faces.slice(0, 4).forEach(function (id) { var p = S.players.get(id); if (p) f.append(avatar(p, 30)); });
-      b.append(f, h('span', { class: 'l nm' }, faces.map(hsFirst).join(', ')));
-    }
-    return b;
-  }
-  function viewHide() {
-    var H = hsS(), root = h('div', { class: 'stack' }), sec = h('section', { class: 'card panel hs' });
-    root.append(sec);
-    if (H.screen === 'menu') {
-      sec.append(h('h2', null, '🙈 লুকোচুরি'), h('p', { class: 'muted small' }, 'খেলোয়াড়রা লুকায়, একজন খুঁজে বের করে। ১২টা জায়গার কোনটায় কে লুকিয়ে আছে?'));
-      var modes = h('div', { class: 'gmodes' });
-      modes.append(
-        h('button', { class: 'gm', onclick: function () { H.screen = 'solo'; renderView(); } }, h('span', { class: 'gme' }, '🤖'), h('span', { class: 'gmt' }, 'একা খেলি'), h('span', { class: 'gmd' }, 'কম্পিউটার স্কোয়াডের কয়েকজনকে লুকাবে, আপনি খুঁজবেন। গরম/ঠান্ডা ইঙ্গিত পাবেন।')),
-        h('button', { class: 'gm', disabled: S.players.size < 3, onclick: function () { H.screen = 'fsetup'; renderView(); } }, h('span', { class: 'gme' }, '👥'), h('span', { class: 'gmt' }, 'বন্ধুদের সাথে'), h('span', { class: 'gmd' }, 'এক ফোনে হাত বদলে: প্রত্যেকে গোপনে লুকাবে, তারপর একজন খুঁজবে।')));
-      sec.append(modes);
-      var b = hsBest(); if (b) sec.append(h('p', { class: 'muted small' }, '🏅 একা খেলায় সেরা: ' + hsStars(b.stars) + ' · ' + hsTime(b.ms)));
-    } else if (H.screen === 'solo') {
-      var mx = Math.min(5, S.players.size), seg = h('div', { class: 'seg', role: 'group', 'aria-label': 'কতজন লুকাবে' });
-      [3, 4, 5].filter(function (k) { return k <= mx; }).forEach(function (k) { seg.append(h('button', { 'aria-pressed': H.n === k ? 'true' : 'false', onclick: function () { H.n = k; renderView(); } }, k + ' জন')); });
-      sec.append(h('h2', null, '🤖 একা খেলি'), h('p', { class: 'muted small' }, 'কতজন লুকাবে? খোঁজার সুযোগ পাবেন (লুকানো জন + ৫) বার।'), seg,
-        h('div', { class: 'row-actions' }, h('button', { class: 'btn', onclick: hsSolo }, '▶ শুরু করুন'), h('button', { class: 'btn ghost', onclick: hsMenu }, 'ফিরে যাই')));
-    } else if (H.screen === 'fsetup') {
-      var chips = h('div', { class: 'chips scroll' });
-      sortedPlayers().forEach(function (e) {
-        var id = e[0], p = e[1], on = H.sel.indexOf(id) >= 0, isSk = H.seeker === id;
-        chips.append(h('button', { type: 'button', class: 'chip', 'aria-pressed': on ? 'true' : 'false', disabled: isSk, onclick: function () {
-          if (on) H.sel = H.sel.filter(function (x) { return x !== id; });
-          else if (H.sel.length < 6) H.sel = H.sel.concat([id]); else toast('সর্বোচ্চ ৬ জন লুকাতে পারবে');
-          renderView();
-        } }, avatar(p, 34), h('span', null, p.name)));
-      });
-      var sk = h('select', { class: 'sel', 'aria-label': 'কে খুঁজবে', onchange: function (e) { H.seeker = e.target.value; H.sel = H.sel.filter(function (x) { return x !== H.seeker; }); renderView(); } }, h('option', { value: '' }, '— কে খুঁজবে? —'));
-      sortedPlayers().forEach(function (e) { sk.append(h('option', { value: e[0], selected: H.seeker === e[0] }, e[1].name)); });
-      var ok = !!H.seeker && H.sel.length >= 2;
-      sec.append(h('h2', null, '👥 বন্ধুদের সাথে'), h('p', { class: 'muted small' }, '১) যে খুঁজবে তাকে বাছুন  ২) যারা লুকাবে (২-৬ জন) তাদের বাছুন।'), sk,
-        h('p', { class: 'muted small' }, 'লুকাবে: ' + H.sel.length + ' জন'), chips,
-        h('div', { class: 'row-actions' }, h('button', { class: 'btn', disabled: !ok, onclick: function () { H.queue = H.sel.slice(); H.qi = 0; H.hid = []; H.screen = 'fhand'; renderView(); } }, 'শুরু করুন'), h('button', { class: 'btn ghost', onclick: hsMenu }, 'ফিরে যাই')));
-    } else if (H.screen === 'fhand') {
-      var cur = H.queue[H.qi], pc = S.players.get(cur);
-      sec.append(h('div', { class: 'hs-hand' }, h('div', { class: 'big' }, '📱'), pc ? avatar(pc, 84) : null,
-        h('h2', null, hsName(cur)), h('p', { class: 'muted' }, 'ফোনটা এই খেলোয়াড়কে দিন। অন্যরা স্ক্রিন দেখবেন না! (' + (H.qi + 1) + '/' + H.queue.length + ')'),
-        h('button', { class: 'btn', onclick: function () { H.screen = 'fpick'; H.pickSpot = null; renderView(); } }, 'আমি ' + hsFirst(cur) + ', লুকাব 🙈')));
-    } else if (H.screen === 'fpick') {
-      var cur2 = H.queue[H.qi], grid = h('div', { class: 'hs-grid' });
-      HS_SPOTS.forEach(function (s, i) { grid.append(hsSpotBtn(i, H.pickSpot === i ? 'sel' : '', null, function () { H.pickSpot = i; renderView(); })); });
-      sec.append(h('h2', null, '🙈 ' + hsFirst(cur2) + ', কোথায় লুকাবে?'), h('p', { class: 'muted small' }, 'একটা জায়গা বাছুন, তারপর নিশ্চিত করুন।'), grid,
-        h('div', { class: 'row-actions' }, h('button', { class: 'btn', disabled: H.pickSpot == null, onclick: function () {
-          H.hid.push({ id: cur2, spot: H.pickSpot }); H.pickSpot = null; H.qi++;
-          H.screen = H.qi < H.queue.length ? 'fhand' : 'fseekhand'; hsSnd('toast'); renderView();
-        } }, 'এখানেই লুকাব ✅')));
-    } else if (H.screen === 'fseekhand') {
-      var ps = S.players.get(H.seeker);
-      sec.append(h('div', { class: 'hs-hand' }, h('div', { class: 'big' }, '🔍'), ps ? avatar(ps, 84) : null,
-        h('h2', null, hsName(H.seeker)), h('p', { class: 'muted' }, 'সবাই লুকিয়ে গেছে! ফোনটা সিকারকে দিন। ' + H.hid.length + ' জন লুকিয়ে আছে, ' + Math.min(11, H.hid.length * 2 + 2) + ' বার খোঁজার সুযোগ।'),
-        h('button', { class: 'btn', onclick: function () { hsBegin('friends', H.hid); } }, 'খোঁজা শুরু 🔍')));
-    } else {
-      var found = H.hiders.filter(function (x) { return H.opened[x.spot] === 'hit'; }).length, g = h('div', { class: 'hs-grid' });
-      HS_SPOTS.forEach(function (s, i) {
-        var here = H.hiders.filter(function (x) { return x.spot === i; }).map(function (x) { return x.id; }), st = H.opened[i];
-        if (st === 'hit') g.append(hsSpotBtn(i, 'hit', here, function () {}, true));
-        else if (st) g.append(hsSpotBtn(i, st, null, function () {}, true));
-        else if (H.done && !H.win && here.length) g.append(hsSpotBtn(i, 'reveal', here, function () {}, true));
-        else g.append(hsSpotBtn(i, '', null, function () { hsOpen(i); }, H.done));
-      });
-      var top = h('div', { class: 'hs-bar' }, h('span', { class: 'hs-pill' }, '🔍 সুযোগ: ' + H.tries + '/' + H.maxTries), h('span', { class: 'hs-pill' }, '🙈 পাওয়া: ' + found + '/' + H.hiders.length));
-      if (H.mode === 'friends' && S.players.get(H.seeker)) top.append(h('span', { class: 'hs-pill' }, '🕵️ ' + hsFirst(H.seeker)));
-      sec.append(h('h2', null, H.mode === 'solo' ? '🙈 খুঁজে বের করুন!' : '🕵️ ' + hsFirst(H.seeker) + ' খুঁজছে'), top,
-        h('p', { class: 'hs-msg', 'aria-live': 'polite' }, H.msg || 'একটা জায়গায় ট্যাপ করুন।'), g);
-      if (H.done) {
-        var res = h('div', { class: 'hs-res ' + (H.win ? 'win' : 'lose') });
-        res.append(h('h3', null, H.win ? '🏆 সবাইকে ধরেছেন!' : '😅 সময় শেষ, ' + (H.hiders.length - found) + ' জন বেঁচে গেছে'),
-          h('p', { class: 'muted' }, (H.win ? hsStars(H.stars) + ' · ' : '') + '⏱ ' + hsTime(H.ms) + ' · পাওয়া ' + found + '/' + H.hiders.length));
-        var acts = h('div', { class: 'row-actions' },
-          h('button', { class: 'btn', onclick: function () { if (H.mode === 'solo') hsSolo(); else { H.screen = 'fsetup'; renderView(); } } }, '🔁 আবার খেলি'),
-          h('button', { class: 'btn ghost', onclick: hsMenu }, 'মেনু'));
-        res.append(acts); sec.append(res);
-      }
-    }
+    else root.append(viewSpin());
     return root;
   }
   function viewSpin() {
@@ -6665,6 +6532,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   function bdWho() { return (S.user && S.user.email) || 'admin'; }
 
   async function bdAddEntries(cat, note, pts, ids) {
+    if (!bdGuard()) return;
     if (!S.canWrite) { toast('শুধু অ্যাডমিন'); return false; }
     if (!ids.length) { toast('কমপক্ষে একজন প্লেয়ার বাছুন'); return false; }
     if (!(pts > 0 || (cat === 'custom' && pts !== 0))) { toast('পয়েন্ট লিখুন'); return false; }
@@ -6674,11 +6542,13 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
       await batch.commit(); toast(ids.length + ' জনকে ' + pts + ' পয়েন্ট যোগ হয়েছে ✅'); return true;
     } catch (e) { writeFail(e); return false; }
   }
-  async function bdDelEntry(id) { try { await S.db.doc('ballonEntries/' + id).delete(); toast('মুছে ফেলা হয়েছে'); } catch (e) { writeFail(e); } }
+  async function bdDelEntry(id) { if (!bdGuard()) return; try { await S.db.doc('ballonEntries/' + id).delete(); toast('মুছে ফেলা হয়েছে'); } catch (e) { writeFail(e); } }
   async function bdSaveCfg(season, pts, top10) {
+    if (!bdGuard()) return;
     try { await S.db.doc('ballonCfg/main').set({ season: String(season), pts: pts, top10: top10 }, { merge: true }); toast('সেটিংস সেভ হয়েছে ✅'); } catch (e) { writeFail(e); }
   }
   async function bdApplyTop10() {
+    if (!bdGuard()) return;
     var season = bdSeason(), r = bdSeasonRange(season), rows = ranking(r.start, r.end).filter(function (x) { return x.wins > 0; }).slice(0, 10), pts = bdTop10();
     if (!rows.length) { toast('এই মৌসুমে ক্লাব র‍্যাংকিংয়ে কোনো ম্যাচ নেই'); return; }
     if (!window.confirm('ক্লাব র‍্যাংকিংয়ের Top ' + rows.length + ' প্লেয়ারকে বোনাস পয়েন্ট দেওয়া হবে। আবার চাপলে আগেরগুলো বদলে যাবে (দ্বিগুণ হবে না)। এগিয়ে যাবেন?')) return;
@@ -6689,6 +6559,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     } catch (e) { writeFail(e); }
   }
   async function bdRevealNext() {
+    if (!bdGuard()) return;
     if (!S.canWrite) return;
     var season = bdSeason(), st = bdState(season) || {}, revealed = st.revealed || 0, snapRef = S.db.doc('ballonSnap/' + season), snap;
     try {
@@ -6710,6 +6581,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     } catch (e) { writeFail(e); }
   }
   async function bdResetReveal() {
+    if (!bdGuard()) return;
     var season = bdSeason();
     if (!window.confirm('ঘোষণা পুরো রিসেট হবে (সবাই আবার লুকানো দেখবে)। নিশ্চিত?')) return;
     try { var batch = S.db.batch(); for (var r = 1; r <= 10; r++) batch.delete(S.db.doc('ballonReveal/' + season + '_' + r)); batch.delete(S.db.doc('ballonState/' + season)); batch.delete(S.db.doc('ballonSnap/' + season)); await batch.commit(); toast('রিসেট হয়েছে'); } catch (e) { writeFail(e); }
@@ -6796,7 +6668,7 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
   }
   function bdAdmin() {
     var b = bdInit(), season = bdSeason(), wrap = h('section', { class: 'bd-admin' });
-    wrap.append(h('div', { class: 'bd-ah' }, h('strong', null, '🔒 Admin Control'), h('span', { class: 'ns-small' }, 'শুধু আপনি এটা দেখছেন')));
+    wrap.append(h('div', { class: 'bd-ah' }, h('strong', null, '🔒 Admin Control'), h('span', { class: 'ns-small' }, 'শুধু আপনি এটা দেখছেন'), h('button', { type: 'button', class: 'btn ghost', onclick: bdLock }, '🔒 লক করুন')));
     var seasons = h('select', { 'aria-label': 'মৌসুম' }), ys = {}; ys[season] = 1; b.entries.forEach(function (e) { ys[e.season] = 1; }); ys[String(new Date().getFullYear())] = 1;
     Object.keys(ys).sort().reverse().forEach(function (y) { seasons.append(h('option', { value: y, selected: y === String(season) }, 'মৌসুম ' + y)); });
     seasons.onchange = function () { b.sel = seasons.value; b.pick = {}; renderView(); };
@@ -6854,11 +6726,43 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
     }
     return wrap;
   }
+  /* ---------- Ballon d’Or: owner-only lock ---------- */
+  var BD_PW = { salt: 'cd2f89c01d4e623915665755b3ad8177', iter: 150000, hash: '25f2ec01e1c643aeaa335656a4ee62df785f780d180ffbd5390a51667e87cfc8' };
+  var bdMemOk = false, bdFails = 0, bdLockUntil = 0;
+  function bdOwnerOk() { try { return sessionStorage.getItem('snb-bd-ok') === '1' || bdMemOk; } catch (e) { return bdMemOk; } }
+  function bdLock() { bdMemOk = false; try { sessionStorage.removeItem('snb-bd-ok'); } catch (e) { /* ignore */ } renderView(); }
+  function bdHex(buf) { return Array.from(new Uint8Array(buf)).map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+  async function bdCheckPw(pw) {
+    if (!(window.crypto && crypto.subtle)) return false;
+    var norm = String(pw || '').trim().toUpperCase().replace(/[\s-]/g, '');
+    if (!norm) return false;
+    var salt = new Uint8Array(BD_PW.salt.match(/../g).map(function (x) { return parseInt(x, 16); }));
+    var key = await crypto.subtle.importKey('raw', new TextEncoder().encode(norm), 'PBKDF2', false, ['deriveBits']);
+    var bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: salt, iterations: BD_PW.iter }, key, 256);
+    return bdHex(bits) === BD_PW.hash;
+  }
+  function bdGuard() { if (bdOwnerOk()) return true; toast('শুধু ওনার এটা করতে পারবেন'); return false; }
+  function bdLockBox() {
+    var inp = h('input', { type: 'password', class: 'bd-pw', placeholder: 'ওনার পাসওয়ার্ড', autocomplete: 'off', autocapitalize: 'characters', 'aria-label': 'ওনার পাসওয়ার্ড' });
+    var msg = h('p', { class: 'muted small', 'aria-live': 'polite' }, '');
+    async function go() {
+      if (Date.now() < bdLockUntil) { msg.textContent = 'অনেকবার ভুল হয়েছে। একটু পরে আবার চেষ্টা করুন।'; return; }
+      var ok = false; try { ok = await bdCheckPw(inp.value); } catch (e) { ok = false; }
+      if (ok) { bdFails = 0; bdMemOk = true; try { sessionStorage.setItem('snb-bd-ok', '1'); } catch (e) { /* ignore */ } renderView(); return; }
+      bdFails++; inp.value = '';
+      if (bdFails >= 5) { bdLockUntil = Date.now() + 60000; bdFails = 0; msg.textContent = 'অনেকবার ভুল হয়েছে। ১ মিনিট পরে চেষ্টা করুন।'; }
+      else msg.textContent = 'ভুল পাসওয়ার্ড';
+    }
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+    return h('section', { class: 'card panel bd-lock' }, h('strong', null, '🔐 ওনার অ্যাক্সেস'), h('p', { class: 'muted small' }, 'Ballon d’Or কন্ট্রোল শুধু ওনারের জন্য।'),
+      h('div', { class: 'bd-lockrow' }, inp, h('button', { type: 'button', class: 'btn', onclick: go }, 'খুলুন')), msg);
+  }
   function bdView() {
-    var b = bdInit(); bdListenPublic(); bdListenReveal(); if (S.canWrite) bdListenAdmin();
+    var b = bdInit(); bdListenPublic(); bdListenReveal(); if (S.canWrite && bdOwnerOk()) bdListenAdmin();
     var root = h('div', { class: 'ns-wrap' });
-    if (S.canWrite) root.append(bdAdmin());
+    if (S.canWrite && bdOwnerOk()) root.append(bdAdmin());
     root.append(bdPublic());
+    if (S.canWrite && !bdOwnerOk()) root.append(bdLockBox());
     return root;
   }
   function bdHomeBanner() {
@@ -7123,39 +7027,10 @@ html[data-theme="light"] .hx-ph0{opacity:.5}
 })();
 </script>
 <style>
-.hs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.hs-spot{position:relative;height:96px;overflow:hidden;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(160deg,rgba(124,200,207,.14),rgba(0,0,0,.3));color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 3px;font-family:var(--f-display);cursor:pointer;transition:transform .15s,background .2s,opacity .2s;min-width:0;-webkit-tap-highlight-color:transparent}
-.hs-spot .e{font-size:30px;line-height:1}
-.hs-spot .l{font-size:11px;color:var(--muted);text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-.hs-spot .l.nm{color:var(--ink);font-weight:700}
-.hs-spot:not(:disabled):active{transform:scale(.94)}
-.hs-spot:disabled{cursor:default}
-.hs-spot.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(231,194,106,.5);background:linear-gradient(160deg,rgba(231,194,106,.25),rgba(0,0,0,.3))}
-.hs-spot.miss{opacity:.45;background:rgba(0,0,0,.4)}
-.hs-spot.warm{background:linear-gradient(160deg,rgba(255,143,133,.3),rgba(0,0,0,.3));border-color:#FF8F85}
-.hs-spot.hit{background:linear-gradient(160deg,rgba(168,203,69,.38),rgba(0,0,0,.3));border-color:var(--lime);animation:hsPop .45s}
-.hs-spot.reveal{border-style:dashed;border-color:var(--gold);background:rgba(231,194,106,.1)}
-.hs-spot.hit .e,.hs-spot.reveal .e{font-size:18px}
-.hs-spot.hit .l:not(.nm),.hs-spot.reveal .l:not(.nm){display:none}
-.hs-spot .faces{display:flex;justify-content:center}
-.hs-spot .faces .av{margin-left:-9px;border:2px solid #121a24}
-.hs-spot .faces .av:first-child{margin-left:0}
-@keyframes hsPop{0%{transform:scale(.8)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
-.hs-bar{display:flex;gap:8px;flex-wrap:wrap}
-.hs-pill{padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line);font:700 14px var(--f-display)}
-.hs-msg{min-height:24px;margin:0;font-weight:700}
-.hs-hand{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 6px}
-.hs-hand .big{font-size:54px;line-height:1}
-.hs-hand h2{margin:0}
-.hs-res{border-radius:14px;padding:14px;text-align:center;border:1px solid var(--line-2);background:rgba(255,255,255,.04);display:flex;flex-direction:column;gap:8px;align-items:center}
-.hs-res.win{border-color:var(--lime);background:rgba(168,203,69,.1)}
-.hs-res h3{margin:0;font-size:20px}
-.hs-res p{margin:0}
-.row-actions{display:flex;gap:10px;flex-wrap:wrap}
-.chips button.chip[aria-pressed="true"]{border-color:var(--gold);background:rgba(231,194,106,.16)}
-.chips button.chip:disabled{opacity:.35}
-@media(max-width:360px){.hs-spot .e{font-size:26px}.hs-spot{height:88px}}
-@media (prefers-reduced-motion:reduce){.hs-spot.hit{animation:none}}
+.bd-lock{margin-top:14px;gap:10px}
+.bd-lockrow{display:flex;gap:8px}
+.bd-pw{flex:1;min-width:0;min-height:44px;padding:8px 12px;border-radius:12px;border:1px solid var(--line-2);background:rgba(0,0,0,.3);color:var(--ink);font:600 16px var(--f-body);letter-spacing:.08em}
+.bd-pw:focus{outline:2px solid var(--aqua);outline-offset:1px}
 </style>
 <!-- SNB UI sound effects (synthesized with Web Audio: no audio files, no copyright issues) -->
 <style>
